@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider, SignedIn, SignedOut, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { ConvexClerkProvider } from "@/components/providers/convexProvider";
 import { Analytics } from "@vercel/analytics/react";
+import { WalletInfo } from "@/components/header/wallet";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default function RootLayout({
           <header className="flex items-center justify-between px-6 py-3 border-b">
             <div className="font-bold">ConstellAI</div>
             <div className="flex items-center gap-3">
+              <WalletInfo />
               <SignedOut>
                 <SignInButton />
                 <SignUpButton />

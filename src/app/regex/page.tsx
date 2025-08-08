@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 interface TestResult {
   isMatch: boolean;
@@ -13,6 +15,8 @@ export default function RegexGeneratorPage() {
   const [pattern, setPattern] = useState("");
   const [sample, setSample] = useState("");
   const [result, setResult] = useState<TestResult | null>(null);
+  const createRegexSession = useMutation(api.index.createRegexSession);
+  const sessions = useQuery(api.index.listMyRegexSessions) ?? [];
 
   async function generate() {
     const res = await fetch("/api/regex", {
@@ -22,6 +26,9 @@ export default function RegexGeneratorPage() {
     });
     const data = (await res.json()) as { pattern: string };
     setPattern(data.pattern);
+    try {
+      await createRegexSession({ prompt, dialect: dialect as any, pattern: data.pattern });
+    } catch {}
   }
 
   function testRegex() {
@@ -35,9 +42,9 @@ export default function RegexGeneratorPage() {
   }
 
   return (
-    <main className="max-w-5xl mx-auto p-6 space-y-4">
+    <main className="max-w-6xl mx-auto p-6 space-y-4">
       <h2 className="text-xl font-semibold">Regex Generator</h2>
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-[1fr_320px] gap-4">
         <div className="space-y-2">
           <label className="block text-sm">Description</label>
           <textarea className="w-full border rounded p-2" rows={5} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
@@ -70,6 +77,15 @@ export default function RegexGeneratorPage() {
               ) : null}
             </div>
           ) : null}
+          <div className="border rounded p-2 h-[60vh] overflow-auto">
+            <div className="text-sm text-zinc-600 mb-2">Recent sessions</div>
+            {sessions.map((s: { _id: string; dialect: string; pattern: string }) => (
+              <div key={s._id} className="border rounded p-2 mb-2">
+                <div className="text-xs text-zinc-500">{s.dialect}</div>
+                <div className="font-mono text-sm break-all">{s.pattern}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </main>

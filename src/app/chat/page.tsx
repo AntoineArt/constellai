@@ -6,6 +6,8 @@ import { useQueryState } from "nuqs";
 import { MarkdownMessage } from "@/components/chat/markdown";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { ModelPicker } from "./modelPicker";
+import { ChatUploader } from "@/components/chat/uploader";
 
 interface SendState {
   isSending: boolean;
@@ -27,17 +29,35 @@ export default function ChatPage() {
   const createMyConversation = useMutation(api.index.createMyConversation);
   const sendMyMessage = useMutation(api.index.sendMyMessage);
   const writeAssistantMessagePublic = useMutation(api.index.writeAssistantMessagePublic);
+  const renameConversation = useMutation(api.index.renameConversation);
+  const deleteConversation = useMutation(api.index.deleteConversation);
+  const deleteMessageIfOwner = useMutation(api.index.deleteMessageIfOwner);
 
   const [input, setInput] = useState("");
   const [sendState, setSendState] = useState<SendState>({ isSending: false });
+  const [modelId, setModelId] = useState<string>("gpt-4o-mini");
+  const [attachments, setAttachments] = useState<Array<{ url: string; name?: string | null; kind: string }>>([]);
+  const [search, setSearch] = useState<string>("");
+  const [resendDraft, setResendDraft] = useState<string>("");
 
   useEffect(() => {
     if (!conversationId && conversations.length > 0) setConversationId(conversations[0]._id);
   }, [conversationId, conversations, setConversationId]);
 
   async function handleCreateConversation() {
-    const id = await createMyConversation({ modelId: "gpt-4o-mini" });
+    const id = await createMyConversation({ modelId });
     await setConversationId(id as unknown as string);
+  }
+
+  async function handleRename(conversationIdToRename: Id<"conversations">) {
+    const next = prompt("New title");
+    if (next && next.trim()) await renameConversation({ conversationId: conversationIdToRename, title: next.trim() });
+  }
+
+  async function handleDelete(conversationIdToDelete: Id<"conversations">) {
+    if (!confirm("Delete conversation permanently?")) return;
+    await deleteConversation({ conversationId: conversationIdToDelete });
+    if (conversationIdToDelete === selectedConversationId) await setConversationId("");
   }
 
   async function handleSend(e: React.FormEvent) {
@@ -49,10 +69,22 @@ export default function ChatPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: input.trim() }),
+        body: JSON.stringify({ input: input.trim(), attachments }),
       });
-      const text = await res.text();
-      await writeAssistantMessagePublic({ conversationId: selectedConversationId as Id<"conversations">, content: text });
+      const data = (await res.json()) as { text: string; modelId: string; usage?: { inputTokens?: number; outputTokens?: number } };
+      await writeAssistantMessagePublic({ conversationId: selectedConversationId as Id<"conversations">, content: data.text });
+      if (data.usage && (data.usage.inputTokens || data.usage.outputTokens)) {
+        await fetch("/api/chat/usage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            conversationId: selectedConversationId,
+            modelId: data.modelId,
+            promptTokens: data.usage.inputTokens ?? 0,
+            completionTokens: data.usage.outputTokens ?? 0,
+          }),
+        });
+      }
       setInput("");
       setSendState({ isSending: false });
     } catch (err) {
@@ -65,16 +97,37 @@ export default function ChatPage() {
       <h2 className="text-xl font-semibold mb-4">Chat</h2>
       <div className="grid md:grid-cols-[300px_1fr] gap-6">
         <aside className="border rounded p-3 h-[70vh] overflow-auto space-y-2">
-          <button className="w-full border rounded px-3 py-2" onClick={handleCreateConversation}>Nouvelle conversation</button>
+          <button className="w-full border rounded px-3 py-2" onClick={handleCreateConversation}>New conversation</button>
+          <div className="text-xs mt-2">Model</div>
+          <ModelPicker current={modelId} onSelect={setModelId} />
+          <div className="mt-2">
+            <ChatUploader onUploaded={(files) => setAttachments(files.slice(0, 3))} />
+          </div>
+          <div className="mt-2">
+            <input
+              className="w-full border rounded px-2 py-1 text-sm"
+              placeholder="Search conversations"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
           <div className="text-sm text-zinc-600">Conversations</div>
           <div className="space-y-1">
-            {conversations.map((c) => (
+            {conversations
+              .filter((c) => (c.title ?? "Untitled").toLowerCase().includes(search.toLowerCase()))
+              .map((c) => (
               <button
                 key={c._id}
                 onClick={() => setConversationId(c._id)}
                 className={`block w-full text-left px-2 py-1 rounded ${c._id === selectedConversationId ? "bg-zinc-100" : "hover:bg-zinc-50"}`}
               >
-                {c.title ?? "Sans titre"}
+                <div className="flex items-center justify-between gap-2">
+                  <span>{c.title ?? "Untitled"}</span>
+                  <span className="shrink-0 flex gap-1 opacity-70">
+                    <a className="underline text-xs" onClick={(e) => { e.preventDefault(); handleRename(c._id); }}>Rename</a>
+                    <a className="underline text-xs" onClick={(e) => { e.preventDefault(); handleDelete(c._id); }}>Delete</a>
+                  </span>
+                </div>
               </button>
             ))}
           </div>
@@ -82,24 +135,41 @@ export default function ChatPage() {
         <div>
           <div className="border rounded p-4 h-[60vh] overflow-auto mb-4 space-y-3">
             {messages?.map((m) => (
-              <div key={m._id} className={m.role === "user" ? "text-right" : "text-left"}>
-                <div className={`inline-block max-w-[80%] rounded px-3 py-2 ${m.role === "user" ? "bg-zinc-100" : "bg-white"}`}>
+              <div key={m._id} className={`group ${m.role === "user" ? "text-right" : "text-left"}`}>
+                <div className={`inline-block max-w-[80%] rounded px-3 py-2 align-top ${m.role === "user" ? "bg-zinc-100" : "bg-white"}`}>
                   {m.role === "assistant" ? <MarkdownMessage content={m.content} /> : <span>{m.content}</span>}
                 </div>
+                {m.role === "user" ? (
+                  <span className="inline-flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity align-top ml-2 text-xs text-zinc-500">
+                    <button
+                      className="underline"
+                      onClick={async () => {
+                        setResendDraft(m.content);
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+                      }}
+                    >
+                      Edit & resend
+                    </button>
+                    <button className="underline" onClick={async () => deleteMessageIfOwner({ messageId: m._id as Id<"messages"> })}>
+                      Delete
+                    </button>
+                  </span>
+                ) : null}
               </div>
             ))}
           </div>
           <form onSubmit={handleSend} className="flex gap-2">
             <input
               className="flex-1 border rounded px-3 py-2"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Écrire un message..."
+              value={resendDraft || input}
+              onChange={(e) => { if (resendDraft) setResendDraft(e.target.value); else setInput(e.target.value); }}
+              placeholder="Write a message..."
             />
             <button className="border rounded px-3 py-2" type="submit" disabled={sendState.isSending}>
-              {sendState.isSending ? "Envoi..." : "Envoyer"}
+              {sendState.isSending ? "Sending..." : "Send"}
             </button>
           </form>
+          {resendDraft ? <div className="text-xs text-zinc-500 mt-1">Editing previous message (sends as new)</div> : null}
           {sendState.error ? <div className="text-sm text-red-600 mt-2">{sendState.error}</div> : null}
         </div>
       </div>

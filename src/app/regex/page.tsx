@@ -14,10 +14,14 @@ export default function RegexGeneratorPage() {
   const [sample, setSample] = useState("");
   const [result, setResult] = useState<TestResult | null>(null);
 
-  function generate() {
-    // v0: simple client-side placeholder; will be replaced by server call
-    const p = ".+";
-    setPattern(p);
+  async function generate() {
+    const res = await fetch("/api/regex", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description: prompt, dialect }),
+    });
+    const data = (await res.json()) as { pattern: string };
+    setPattern(data.pattern);
   }
 
   function testRegex() {

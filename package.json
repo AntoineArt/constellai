@@ -24,6 +24,7 @@
     "zod": "^4.0.15"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.1.2",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -32,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "ultracite": "5.1.2"
   }
 }

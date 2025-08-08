@@ -3,7 +3,10 @@
 import { useCompletion } from "@ai-sdk/react";
 
 export default function ChatPage() {
-  const { completion, input, handleInputChange, handleSubmit, isLoading, stop } = useCompletion({ api: "/api/chat" });
+  const { completion, input, handleInputChange, handleSubmit, isLoading, stop } = useCompletion({
+    api: "/api/chat",
+    body: { prompt: "" },
+  });
   return (
     <main className="max-w-3xl mx-auto p-6">
       <h2 className="text-xl font-semibold mb-4">Chat</h2>

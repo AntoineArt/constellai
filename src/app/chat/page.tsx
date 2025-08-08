@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useQueryState } from "nuqs";
-import { MarkdownMessage } from "@/components/chat/markdown";
+import { ChatMessage } from "@/components/chat/message";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { ModelPicker } from "./modelPicker";
@@ -16,6 +16,7 @@ interface SendState {
 
 export default function ChatPage() {
   const [conversationId, setConversationId] = useQueryState("c");
+  const [search, setSearch] = useState<string>("");
   const conversations = useQuery(api.index.listMyConversations) ?? [];
   const searched = useQuery(api.index.searchMyConversations, search ? { q: search } : "skip");
   const allowedModels = useQuery(api.index.listAllowedModels) ?? [];
@@ -39,7 +40,6 @@ export default function ChatPage() {
   const [sendState, setSendState] = useState<SendState>({ isSending: false });
   const [modelId, setModelId] = useState<string>("gpt-4o-mini");
   const [attachments, setAttachments] = useState<Array<{ url: string; name?: string | null; kind: string }>>([]);
-  const [search, setSearch] = useState<string>("");
   const [resendDraft, setResendDraft] = useState<string>("");
 
   useEffect(() => {
@@ -145,27 +145,14 @@ export default function ChatPage() {
         <div>
           <div className="border rounded p-4 h-[60vh] overflow-auto mb-4 space-y-3">
             {messages?.map((m) => (
-              <div key={m._id} className={`group ${m.role === "user" ? "text-right" : "text-left"}`}>
-                <div className={`inline-block max-w-[80%] rounded px-3 py-2 align-top ${m.role === "user" ? "bg-zinc-100" : "bg-white"}`}>
-                  {m.role === "assistant" ? <MarkdownMessage content={m.content} /> : <span>{m.content}</span>}
-                </div>
-                {m.role === "user" ? (
-                  <span className="inline-flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity align-top ml-2 text-xs text-zinc-500">
-                    <button
-                      className="underline"
-                      onClick={async () => {
-                        setResendDraft(m.content);
-                        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-                      }}
-                    >
-                      Edit & resend
-                    </button>
-                    <button className="underline" onClick={async () => deleteMessageIfOwner({ messageId: m._id as Id<"messages"> })}>
-                      Delete
-                    </button>
-                  </span>
-                ) : null}
-              </div>
+              <ChatMessage
+                key={m._id}
+                role={m.role as any}
+                content={m.content}
+                attachments={m.attachments as any}
+                onEdit={m.role === "user" ? () => { setResendDraft(m.content); window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); } : undefined}
+                onDelete={m.role === "user" ? () => deleteMessageIfOwner({ messageId: m._id as Id<"messages"> }) : undefined}
+              />
             ))}
           </div>
           {attachments.length ? (

@@ -302,6 +302,17 @@ export const listMessages = query({
 			conversationId: v.id("conversations"),
 			role: v.union(v.literal("user"), v.literal("assistant"), v.literal("system")),
 			content: v.string(),
+			attachments: v.optional(
+				v.array(
+					v.object({
+						kind: v.string(),
+						url: v.string(),
+						name: v.optional(v.string()),
+						size: v.optional(v.number()),
+						contentType: v.optional(v.string()),
+					}),
+				),
+			),
 		}),
 	),
 	handler: async (ctx, args) => {
@@ -878,6 +889,123 @@ export const upsertModelRate = internalMutation({
 			isActive: true,
 		});
 		return null;
+	},
+});
+
+// Postpaid cycle settlement: compute outstanding usage and create a due cycle
+export const closePostpaidCycles = action({
+	args: {},
+	returns: v.null(),
+	handler: async (ctx) => {
+		// Find recent usage events and settle per user
+		// Note: This is a simple heuristic pass; for scale, shard by user ids
+		const now = Date.now();
+		const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+		const since = now - thirtyDaysMs;
+
+		// Read distinct userIds from recent usage events via helper
+		const userIds: Array<Id<"users">> = await ctx.runQuery(internal.index._recentUsageUserIds as any, {
+			since,
+			limit: 200,
+		});
+
+		for (const userId of userIds) {
+
+			// Determine last cycle end
+			const lastCycle = await ctx.runQuery(internal.index._getLastPostpaidCycleForUser as any, { userId });
+			const windowStart = lastCycle?.windowEnd ?? since;
+
+			// Sum usage since windowStart
+			const total = await ctx.runQuery(internal.index._sumUsageSince as any, { userId, since: windowStart });
+			if (total <= 0n) continue;
+
+			// Avoid duplicate cycles: if we already created a cycle in last 24h, skip
+			const dup = await ctx.runQuery(internal.index._hasRecentCycle as any, { userId, cutoffMs: now - 24 * 60 * 60 * 1000 });
+			if (dup) continue;
+
+			await ctx.runMutation(internal.index._insertPostpaidCycle as any, {
+				userId,
+				windowStart,
+				windowEnd: now,
+				usdMicroCharges: total,
+				status: "due",
+			});
+		}
+		return null;
+	},
+});
+
+export const _getLastPostpaidCycleForUser = internalQuery({
+	args: { userId: v.id("users") },
+	returns: v.union(
+		v.null(),
+		v.object({ windowEnd: v.number() }),
+	),
+	handler: async (ctx, args) => {
+		const cycles = await ctx.db
+			.query("postpaidCycles")
+			.withIndex("by_user", (q) => q.eq("userId", args.userId))
+			.order("desc")
+			.take(1);
+		if (cycles.length === 0) return null;
+		return { windowEnd: cycles[0].windowEnd };
+	},
+});
+
+export const _sumUsageSince = internalQuery({
+	args: { userId: v.id("users"), since: v.number() },
+	returns: v.int64(),
+	handler: async (ctx, args) => {
+		let total: bigint = 0n;
+		for await (const u of ctx.db.query("usageEvents").withIndex("by_user", (q) => q.eq("userId", args.userId)) as any) {
+			// @ts-ignore
+			if (u._creationTime < args.since) continue;
+			total += u.usdMicroCost + u.usdMicroMargin;
+		}
+		return total;
+	},
+});
+
+export const _hasRecentCycle = internalQuery({
+	args: { userId: v.id("users"), cutoffMs: v.number() },
+	returns: v.boolean(),
+	handler: async (ctx, args) => {
+		const cycles = await ctx.db
+			.query("postpaidCycles")
+			.withIndex("by_user", (q) => q.eq("userId", args.userId))
+			.order("desc")
+			.take(1);
+		if (cycles.length === 0) return false;
+		return cycles[0].windowEnd >= args.cutoffMs;
+	},
+});
+
+export const _insertPostpaidCycle = internalMutation({
+	args: { userId: v.id("users"), windowStart: v.number(), windowEnd: v.number(), usdMicroCharges: v.int64(), status: v.string() },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		await ctx.db.insert("postpaidCycles", args);
+		return null;
+	},
+});
+
+export const _recentUsageUserIds = internalQuery({
+	args: { since: v.number(), limit: v.number() },
+	returns: v.array(v.id("users")),
+	handler: async (ctx, args) => {
+		const unique: Array<Id<"users">> = [];
+		const seen: Set<string> = new Set();
+		const recent = await ctx.db.query("usageEvents").order("desc").take(500);
+		for (const u of recent) {
+			if (u._creationTime < args.since) break;
+			const key = u.userId as unknown as string;
+			if (!seen.has(key)) {
+				seen.add(key);
+				unique.push(u.userId);
+				if (unique.length >= args.limit) break;
+			}
+		}
+		return unique;
 	},
 });
 

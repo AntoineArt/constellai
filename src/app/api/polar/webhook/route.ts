@@ -1,10 +1,25 @@
-import { headers } from "next/headers";
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
+import { createHmac, timingSafeEqual } from "crypto";
+
+function verifySignature(raw: string, signature: string | null, secret: string | undefined): boolean {
+	if (!secret || !signature) return false;
+	const hmac = createHmac("sha256", secret);
+	hmac.update(raw, "utf8");
+	const digest = hmac.digest("hex");
+	try {
+		return timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+	} catch {
+		return false;
+	}
+}
 
 export async function POST(req: Request) {
-	// TODO: verify Polar signature here (left as exercise; depends on your key)
-	const body = await req.json();
+	const raw = await req.text();
+	const signature = req.headers.get("x-polar-signature");
+	const ok = verifySignature(raw, signature, process.env.POLAR_WEBHOOK_SECRET);
+	if (!ok) return new Response("invalid signature", { status: 401 });
+	const body = JSON.parse(raw);
 	const eventType = body?.type ?? "unknown";
 	const clerkUserId: string | undefined = body?.data?.metadata?.clerkUserId;
 	const amountUsdMicro: bigint = BigInt(Math.round((body?.data?.amount ?? 0) * 1_000_000));

@@ -13,11 +13,17 @@ function formatUsdMicro(micro: bigint): string {
 export function WalletInfo() {
   const summary = useQuery(api.index.getWalletSummary);
   const limits = useQuery(api.index.getLimitsSummary);
+  const credit = useQuery(api.index.getCreditProgress);
   const limitedExhausted = !!limits && limits.isLimited && limits.usedTodayUsdMicro >= limits.dailyQuotaUsdMicro;
   return (
     <div className="flex items-center gap-3">
       {summary ? (
         <span className="text-sm text-zinc-700">{formatUsdMicro(summary.balanceUsdMicro as unknown as bigint)}</span>
+      ) : null}
+      {credit ? (
+        <span className="text-xs text-zinc-600">
+          Used since last payment: {formatUsdMicro(credit.usedSinceLastPaymentUsdMicro as unknown as bigint)}{credit.lastPaymentAt ? ` · last at ${new Date(credit.lastPaymentAt).toLocaleDateString()}` : ""}
+        </span>
       ) : null}
       {limitedExhausted ? (
         <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-800">Limited mode exhausted</span>

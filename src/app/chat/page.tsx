@@ -17,6 +17,8 @@ interface SendState {
 export default function ChatPage() {
   const [conversationId, setConversationId] = useQueryState("c");
   const conversations = useQuery(api.index.listMyConversations) ?? [];
+  const searched = useQuery(api.index.searchMyConversations, search ? { q: search } : "skip");
+  const allowedModels = useQuery(api.index.listAllowedModels) ?? [];
   const selectedConversationId: Id<"conversations"> | undefined = useMemo(
     () => (conversationId as unknown as Id<"conversations">) ?? conversations[0]?._id,
     [conversationId, conversations],
@@ -62,14 +64,21 @@ export default function ChatPage() {
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!selectedConversationId || !input.trim()) return;
+    if (!selectedConversationId || !(resendDraft || input).trim()) return;
     setSendState({ isSending: true });
     try {
-      await sendMyMessage({ conversationId: selectedConversationId as Id<"conversations">, content: input.trim() });
+      const content = (resendDraft || input).trim();
+      await sendMyMessage({ conversationId: selectedConversationId as Id<"conversations">, content });
+      if (!conversations.find((c) => c._id === selectedConversationId)?.title) {
+        try {
+          const t = await fetch("/api/chat/title", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content }) }).then((r) => r.json());
+          if (t?.title) await renameConversation({ conversationId: selectedConversationId as Id<"conversations">, title: t.title });
+        } catch {}
+      }
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: input.trim(), attachments }),
+        body: JSON.stringify({ input: content, attachments }),
       });
       const data = (await res.json()) as { text: string; modelId: string; usage?: { inputTokens?: number; outputTokens?: number } };
       await writeAssistantMessagePublic({ conversationId: selectedConversationId as Id<"conversations">, content: data.text });
@@ -86,6 +95,7 @@ export default function ChatPage() {
         });
       }
       setInput("");
+      setResendDraft("");
       setSendState({ isSending: false });
     } catch (err) {
       setSendState({ isSending: false, error: err instanceof Error ? err.message : "Erreur" });
@@ -113,7 +123,7 @@ export default function ChatPage() {
           </div>
           <div className="text-sm text-zinc-600">Conversations</div>
           <div className="space-y-1">
-            {conversations
+            {(searched ?? conversations)
               .filter((c) => (c.title ?? "Untitled").toLowerCase().includes(search.toLowerCase()))
               .map((c) => (
               <button
@@ -158,6 +168,16 @@ export default function ChatPage() {
               </div>
             ))}
           </div>
+          {attachments.length ? (
+            <div className="mb-3 flex flex-wrap gap-2 text-xs">
+              {attachments.map((f, i) => (
+                <span key={i} className="inline-flex items-center gap-2 border rounded px-2 py-1">
+                  <a className="underline" href={f.url} target="_blank" rel="noreferrer">{f.name ?? f.url}</a>
+                  <button className="text-zinc-500" onClick={() => setAttachments(attachments.filter((_, idx) => idx !== i))}>✕</button>
+                </span>
+              ))}
+            </div>
+          ) : null}
           <form onSubmit={handleSend} className="flex gap-2">
             <input
               className="flex-1 border rounded px-3 py-2"
@@ -165,10 +185,13 @@ export default function ChatPage() {
               onChange={(e) => { if (resendDraft) setResendDraft(e.target.value); else setInput(e.target.value); }}
               placeholder="Write a message..."
             />
-            <button className="border rounded px-3 py-2" type="submit" disabled={sendState.isSending}>
+            <button className="border rounded px-3 py-2" type="submit" disabled={sendState.isSending || (allowedModels.length > 0 && !allowedModels.includes(modelId))}>
               {sendState.isSending ? "Sending..." : "Send"}
             </button>
           </form>
+          {allowedModels.length > 0 && !allowedModels.includes(modelId) ? (
+            <div className="text-xs text-yellow-700 mt-1">Selected model not allowed in your current mode.</div>
+          ) : null}
           {resendDraft ? <div className="text-xs text-zinc-500 mt-1">Editing previous message (sends as new)</div> : null}
           {sendState.error ? <div className="text-sm text-red-600 mt-2">{sendState.error}</div> : null}
         </div>

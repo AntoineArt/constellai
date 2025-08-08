@@ -4,6 +4,7 @@ import { ClerkProvider, SignedIn, SignedOut, UserButton, SignInButton, SignUpBut
 import { ConvexClerkProvider } from "@/components/providers/convexProvider";
 import { Analytics } from "@vercel/analytics/react";
 import { WalletInfo } from "@/components/header/wallet";
+import { UserBootstrap } from "@/components/providers/userBootstrap";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,6 +45,7 @@ export default function RootLayout({
               </SignedIn>
             </div>
           </header>
+          <UserBootstrap />
           {children}
           <Analytics />
           </ConvexClerkProvider>

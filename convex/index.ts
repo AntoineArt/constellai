@@ -1,7 +1,7 @@
 import { query, mutation, internalAction, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
-import { internal } from "./_generated/api";
+import { internal, api } from "./_generated/api";
 import { action } from "./_generated/server";
 
 export const getOrCreateUser = mutation({
@@ -115,6 +115,50 @@ export const listMyConversations = query({
 			.withIndex("by_user_and_last_activity", (q) => q.eq("userId", user._id))
 			.order("desc")
 			.take(100);
+	},
+});
+
+export const searchMyConversations = query({
+	args: { q: v.string() },
+	returns: v.array(
+		v.object({
+			_id: v.id("conversations"),
+			_creationTime: v.number(),
+			userId: v.id("users"),
+			title: v.optional(v.string()),
+			modelId: v.string(),
+			lastActivityTime: v.number(),
+		}),
+	),
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) return [];
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
+			.unique();
+		if (!user) return [];
+		const all = await ctx.db
+			.query("conversations")
+			.withIndex("by_user_and_last_activity", (q) => q.eq("userId", user._id))
+			.order("desc")
+			.take(200);
+		const q = args.q.toLowerCase();
+		const results: typeof all = [];
+		for (const c of all) {
+			const title = (c.title ?? "").toLowerCase();
+			if (title.includes(q)) {
+				results.push(c);
+				continue;
+			}
+			const msgs = await ctx.db
+				.query("messages")
+				.withIndex("by_conversation", (x) => x.eq("conversationId", c._id))
+				.order("desc")
+				.take(50);
+			if (msgs.some((m) => m.content.toLowerCase().includes(q))) results.push(c);
+		}
+		return results;
 	},
 });
 
@@ -406,6 +450,35 @@ export const reportUsageForConversation = mutation({
 			rateVersion: rate ? rate.version : 0,
 			status: "ok",
 		});
+
+		// Update limited-mode usage if wallet is empty
+		const wallet = await ctx.db
+			.query("wallets")
+			.withIndex("by_user", (q) => q.eq("userId", user._id))
+			.unique();
+		if (!wallet || wallet.usdMicroBalance <= 0n) {
+			const total = base + margin;
+			let limits = await ctx.db
+				.query("limits")
+				.withIndex("by_user", (q) => q.eq("userId", user._id))
+				.unique();
+			if (!limits) {
+				await ctx.db.insert("limits", {
+					userId: user._id,
+					freeModeDailyUsdMicroQuota: 500_000n,
+					freeModeUsedTodayUsdMicro: total,
+					rollupDateEpochDay: Math.floor(Date.now() / 86400000),
+				});
+			} else {
+				const epochDay = Math.floor(Date.now() / 86400000);
+				const usedToday = limits.rollupDateEpochDay === epochDay ? limits.freeModeUsedTodayUsdMicro : 0n;
+				const newUsed = usedToday + total;
+				await ctx.db.patch(limits._id, {
+					freeModeUsedTodayUsdMicro: newUsed,
+					rollupDateEpochDay: epochDay,
+				});
+			}
+		}
 		return null;
 	},
 });
@@ -504,6 +577,83 @@ export const getLimitsSummary = query({
 			dailyQuotaUsdMicro: limits?.freeModeDailyUsdMicroQuota ?? 500_000n,
 			usedTodayUsdMicro: limits?.freeModeUsedTodayUsdMicro ?? 0n,
 		};
+	},
+});
+
+export const getCreditProgress = query({
+	args: {},
+	returns: v.union(
+		v.null(),
+		v.object({
+			balanceUsdMicro: v.int64(),
+			lastPaymentAt: v.union(v.number(), v.null()),
+			usedSinceLastPaymentUsdMicro: v.int64(),
+		}),
+	),
+	handler: async (ctx) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) return null;
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
+			.unique();
+		if (!user) return null;
+		const wallet = await ctx.db
+			.query("wallets")
+			.withIndex("by_user", (q) => q.eq("userId", user._id))
+			.unique();
+		const balance = wallet?.usdMicroBalance ?? 0n;
+
+		const txs = await ctx.db
+			.query("creditTransactions")
+			.withIndex("by_user", (q) => q.eq("userId", user._id))
+			.order("desc")
+			.take(200);
+		const lastPayment = txs.find((t) => t.source === "purchase" || t.source === "postpaid");
+		const lastPaymentAt = lastPayment ? lastPayment._creationTime : null;
+		let used: bigint = 0n;
+		for (const t of txs) {
+			if (lastPaymentAt !== null && t._creationTime < lastPaymentAt) break;
+			if (t.source === "usage") used += -t.amountUsdMicro; // usage stored negative
+		}
+		return {
+			balanceUsdMicro: balance,
+			lastPaymentAt,
+			usedSinceLastPaymentUsdMicro: used,
+		};
+	},
+});
+
+export const processPolarWebhook = mutation({
+	args: {
+		clerkUserId: v.optional(v.string()),
+		userId: v.optional(v.id("users")),
+		eventType: v.string(),
+		amountUsdMicro: v.int64(),
+		refId: v.optional(v.string()),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		let userId: Id<"users"> | null = args.userId ?? null;
+		if (!userId && args.clerkUserId) {
+			const user = await ctx.db
+				.query("users")
+				.withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", args.clerkUserId!))
+				.unique();
+			if (user) userId = user._id;
+		}
+		if (!userId) return null;
+
+		const purchaseEvents = new Set(["checkout.paid", "invoice.paid", "subscription.renewed"]);
+		if (purchaseEvents.has(args.eventType)) {
+			await ctx.runMutation(api.index.applyCredit as any, {
+				userId,
+				amountUsdMicro: args.amountUsdMicro,
+				source: "purchase",
+				refId: args.refId,
+			});
+		}
+		return null;
 	},
 });
 

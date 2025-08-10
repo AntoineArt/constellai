@@ -6,14 +6,14 @@ import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { Input } from '@/components/ui/input';
+} from '../ui/collapsible';
+import { Input } from '../ui/input';
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from '../ui/tooltip';
 import { cn } from '../../lib/utils';
 
 const WebPreviewContext = createContext(null);

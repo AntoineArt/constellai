@@ -1,33 +1,26 @@
-import { streamText, generateText } from "ai";
+import { streamText, UIMessage, convertToModelMessages } from "ai";
 
 export const runtime = "edge";
 
 export async function POST(request: Request) {
 	try {
-		const body = await request.json().catch(() => ({}));
-		const messages = Array.isArray(body?.messages) ? body.messages : undefined;
-		const prompt: string | undefined = typeof body?.prompt === "string" ? body.prompt : undefined;
-		const model: string = typeof body?.model === "string" && body.model.length > 0
+		const body: { messages: UIMessage[]; model?: string; webSearch?: boolean } = await request.json().catch(() => ({} as any));
+		const messages = Array.isArray(body?.messages) ? body.messages : [];
+		const requestedModel: string = typeof body?.model === "string" && body.model.length > 0
 			? body.model
 			: "anthropic/claude-3.5-sonnet";
+		const model = body?.webSearch ? "perplexity/sonar" : requestedModel;
 
-		// For reliability, generate full text (non-stream) and return as plain text
-		const { text } = await generateText({
+		const result = streamText({
 			model,
-			...(Array.isArray(messages) && messages.length > 0
-				? { messages }
-				: { prompt: prompt ?? "" }),
+			messages: convertToModelMessages(messages),
+			system: "You are a helpful assistant that can answer questions and help with tasks",
 			providerOptions: {
-				// Configure routing/fallbacks using Vercel AI Gateway
-				// See: https://vercel.com/docs/ai-gateway/provider-options
-				gateway: {
-					order: ["anthropic", "openai", "groq"],
-				},
-				...(body?.providerOptions ?? {}),
+				gateway: { order: ["anthropic", "openai", "groq"] },
 			},
 		});
 
-		return new Response(text, { headers: { "content-type": "text/plain; charset=utf-8" } });
+		return result.toUIMessageStreamResponse({ sendSources: true, sendReasoning: true });
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
 		return new Response(JSON.stringify({ error: message }), {

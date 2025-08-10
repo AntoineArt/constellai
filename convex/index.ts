@@ -16,8 +16,8 @@ export const getOrCreateUser = mutation({
 		const userId = await ctx.db.insert("users", {
 			clerkUserId: args.clerkUserId,
 			email: args.email,
-			referralCode: null as unknown as string | undefined,
-			referredByCode: null as unknown as string | undefined,
+			referralCode: undefined,
+			referredByCode: undefined,
 		});
 		await ctx.db.insert("wallets", {
 			userId,
@@ -349,7 +349,7 @@ export const getAllowedModels = internalQuery({
 	returns: v.array(v.string()),
 	handler: async (ctx) => {
 		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) return ["gpt-oss-20b"]; // anonymous => limited
+		if (!identity) return ["gpt-4o-mini"]; // anonymous => limited
 		const user = await ctx.db
 			.query("users")
 			.withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
@@ -366,11 +366,8 @@ export const getAllowedModels = internalQuery({
 			.unique();
 
 		const whitelist = [
-			"gpt-oss-120b",
-			"gpt-oss-20b",
-			"claude-4-sonnet",
-			"gemini-2.5-pro",
-			"gemini-2.5-flash",
+			"gpt-4o-mini",
+			"gpt-4o",
 		];
 
 		const balance = wallet?.usdMicroBalance ?? 0n;
@@ -378,7 +375,7 @@ export const getAllowedModels = internalQuery({
 		const usedToday = limits?.freeModeUsedTodayUsdMicro ?? 0n;
 		if (balance <= 0n) {
 			if (usedToday >= dailyQuota) return [];
-			return ["gpt-oss-20b"]; // limited mode
+			return ["gpt-4o-mini"]; // limited mode
 		}
 		return whitelist;
 	},
@@ -499,7 +496,7 @@ export const listAllowedModels = query({
 	returns: v.array(v.string()),
 	handler: async (ctx) => {
 		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) return ["gpt-oss-20b"]; // anonymous => limited
+		if (!identity) return ["gpt-4o-mini"]; // anonymous => limited
 		const user = await ctx.db
 			.query("users")
 			.withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
@@ -516,11 +513,8 @@ export const listAllowedModels = query({
 			.unique();
 
 		const whitelist = [
-			"gpt-oss-120b",
-			"gpt-oss-20b",
-			"claude-4-sonnet",
-			"gemini-2.5-pro",
-			"gemini-2.5-flash",
+			"gpt-4o-mini",
+			"gpt-4o",
 		];
 
 		const balance = wallet?.usdMicroBalance ?? 0n;
@@ -528,9 +522,80 @@ export const listAllowedModels = query({
 		const usedToday = limits?.freeModeUsedTodayUsdMicro ?? 0n;
 		if (balance <= 0n) {
 			if (usedToday >= dailyQuota) return [];
-			return ["gpt-oss-20b"]; // limited mode
+			return ["gpt-4o-mini"]; // limited mode
 		}
 		return whitelist;
+	},
+});
+
+// Referral: create or get current user's referral code
+export const generateMyReferralCode = mutation({
+	args: {},
+	returns: v.string(),
+	handler: async (ctx) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) throw new Error("Unauthenticated");
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
+			.unique();
+		if (!user) throw new Error("User missing");
+		if (user.referralCode) return user.referralCode;
+		const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+		function generateCode(): string {
+			let code = "";
+			for (let i = 0; i < 8; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+			return code;
+		}
+		let code = generateCode();
+		// naive collision avoidance
+		for (let i = 0; i < 5; i++) {
+			const existing = await ctx.db.query("referrals").withIndex("by_code", (q) => q.eq("code", code)).unique();
+			if (!existing) break;
+			code = generateCode();
+		}
+		await ctx.db.insert("referrals", { code, ownerUserId: user._id, usesCount: 0 });
+		await ctx.db.patch(user._id, { referralCode: code });
+		return code;
+	},
+});
+
+export const ownsConversation = query({
+	args: { conversationId: v.id("conversations") },
+	returns: v.boolean(),
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) return false;
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
+			.unique();
+		if (!user) return false;
+		const conv = await ctx.db.get(args.conversationId);
+		if (!conv) return false;
+		return conv.userId === user._id;
+	},
+});
+
+// Referral: apply a referral code for the current user
+export const applyReferralCodeForSelf = mutation({
+	args: { code: v.string() },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) throw new Error("Unauthenticated");
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerk_user_id", (q) => q.eq("clerkUserId", identity.subject))
+			.unique();
+		if (!user) throw new Error("User missing");
+		if (user.referredByCode) return null; // already applied
+		const ref = await ctx.db.query("referrals").withIndex("by_code", (q) => q.eq("code", args.code)).unique();
+		if (!ref) throw new Error("Invalid code");
+		if (ref.ownerUserId === user._id) throw new Error("Cannot refer yourself");
+		await ctx.db.patch(user._id, { referredByCode: args.code });
+		await ctx.db.patch(ref._id, { usesCount: ref.usesCount + 1 });
+		return null;
 	},
 });
 
@@ -663,6 +728,43 @@ export const processPolarWebhook = mutation({
 				source: "purchase",
 				refId: args.refId,
 			});
+
+			// Referral bonus: if user has a referrer and this purchase meets threshold, award $10 to both once per refId
+			const me = await ctx.db.get(userId);
+			const threshold = 20_000_000n; // $20
+			if (me && me.referredByCode && args.amountUsdMicro >= threshold) {
+				// Check duplicate for this refId on either user via existing referral creditTransactions
+				const myTx = await ctx.db
+					.query("creditTransactions")
+					.withIndex("by_user", (q) => q.eq("userId", userId))
+					.order("desc")
+					.take(50);
+				const alreadyAwarded = myTx.some((t) => t.source === "referral" && t.refId === args.refId);
+				if (!alreadyAwarded) {
+					const ref = await ctx.db
+						.query("referrals")
+						.withIndex("by_code", (q) => q.eq("code", me.referredByCode as string))
+						.unique();
+					if (ref) {
+						const ownerId = ref.ownerUserId as Id<"users">;
+						const bonus = 10_000_000n; // $10
+						await ctx.runMutation(api.index.applyCredit as any, {
+							userId,
+							amountUsdMicro: bonus,
+							source: "referral",
+							refId: args.refId,
+						});
+						await ctx.runMutation(api.index.applyCredit as any, {
+							userId: ownerId,
+							amountUsdMicro: bonus,
+							source: "referral",
+							refId: args.refId,
+						});
+						await ctx.db.insert("grants", { userId, type: "referral_friend", usdMicro: bonus });
+						await ctx.db.insert("grants", { userId: ownerId, type: "referral_self", usdMicro: bonus });
+					}
+				}
+			}
 		}
 		return null;
 	},

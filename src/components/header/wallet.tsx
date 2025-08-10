@@ -20,6 +20,7 @@ export function WalletInfo() {
       {summary ? (
         <span className="text-sm text-zinc-700">{formatUsdMicro(summary.balanceUsdMicro as unknown as bigint)}</span>
       ) : null}
+      {/* TODO: add buttons: Buy credits, Referral */}
       {credit ? (
         <span className="text-xs text-zinc-600">
           Used since last payment: {formatUsdMicro(credit.usedSinceLastPaymentUsdMicro as unknown as bigint)}{credit.lastPaymentAt ? ` · last at ${new Date(credit.lastPaymentAt).toLocaleDateString()}` : ""}

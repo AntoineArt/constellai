@@ -8,11 +8,14 @@ interface TestResult {
   isMatch: boolean;
   matches: Array<string>;
 }
+interface Snippets { js?: string; py?: string }
 
 export default function RegexGeneratorPage() {
   const [prompt, setPrompt] = useState("");
   const [dialect, setDialect] = useState("ecmascript");
   const [pattern, setPattern] = useState("");
+  const [explanation, setExplanation] = useState("");
+  const [snippets, setSnippets] = useState<Snippets>({});
   const [sample, setSample] = useState("");
   const [result, setResult] = useState<TestResult | null>(null);
   const createRegexSession = useMutation(api.index.createRegexSession);
@@ -24,8 +27,10 @@ export default function RegexGeneratorPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description: prompt, dialect }),
     });
-    const data = (await res.json()) as { pattern: string };
+    const data = (await res.json()) as { pattern: string; explanation?: string; snippets?: Snippets };
     setPattern(data.pattern);
+    setExplanation(data.explanation ?? "");
+    setSnippets(data.snippets ?? {});
     try {
       await createRegexSession({ prompt, dialect: dialect as any, pattern: data.pattern });
     } catch {}
@@ -60,6 +65,28 @@ export default function RegexGeneratorPage() {
             <label className="block text-sm mt-2">Pattern</label>
             <input className="w-full border rounded p-2" value={pattern} onChange={(e) => setPattern(e.target.value)} />
           </div>
+          {explanation ? (
+            <div className="text-sm text-zinc-700">
+              <div className="font-medium mt-2">Explanation</div>
+              <p>{explanation}</p>
+            </div>
+          ) : null}
+          {(snippets.js || snippets.py) ? (
+            <div className="text-sm mt-2 space-y-2">
+              {snippets.js ? (
+                <div>
+                  <div className="font-medium">JavaScript</div>
+                  <pre className="border rounded p-2 overflow-auto text-xs"><code>{snippets.js}</code></pre>
+                </div>
+              ) : null}
+              {snippets.py ? (
+                <div>
+                  <div className="font-medium">Python</div>
+                  <pre className="border rounded p-2 overflow-auto text-xs"><code>{snippets.py}</code></pre>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         <div className="space-y-2">
           <label className="block text-sm">Sample</label>

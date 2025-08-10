@@ -4,6 +4,7 @@ import { ClerkProvider, SignedIn, SignedOut, UserButton, SignInButton, SignUpBut
 import { ConvexClerkProvider } from "@/components/providers/convexProvider";
 import { Analytics } from "@vercel/analytics/react";
 import { WalletInfo } from "@/components/header/wallet";
+import { ReferralActions } from "@/components/header/referral";
 import { UserBootstrap } from "@/components/providers/userBootstrap";
 import "./globals.css";
 
@@ -36,6 +37,7 @@ export default function RootLayout({
             <div className="font-bold">ConstellAI</div>
             <div className="flex items-center gap-3">
               <WalletInfo />
+              <ReferralActions />
               <SignedOut>
                 <SignInButton />
                 <SignUpButton />

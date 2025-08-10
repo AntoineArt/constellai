@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { streamText } from "ai";
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
 import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
@@ -16,20 +16,13 @@ export async function POST(req: Request) {
 	const token = await getToken({ template: "convex" }).catch(() => null);
 	if (token) client.setAuth(token);
 	const allowed = await client.query(api.index.listAllowedModels, {});
-	if (conversationId) {
-		const owns = await client.query(api.index.ownsConversation, { conversationId: conversationId as any });
-		if (!owns) return new Response("forbidden", { status: 403 });
-	}
 	if (!allowed.includes(modelId)) return new Response("model not allowed", { status: 403 });
+
 	const attachmentNote = attachments && attachments.length
 		? `\n\nAttachments:\n${attachments.map((a) => `- [${a.kind}] ${a.name ?? a.url}: ${a.url}`).join("\n")}`
 		: "";
-	const result = await generateText({ model: openai(modelId), prompt: `${input}${attachmentNote}` });
-	return Response.json({
-		text: result.text,
-		usage: result.usage,
-		modelId,
-	});
+	const result = await streamText({ model: openai(modelId), prompt: `${input}${attachmentNote}` });
+	return result.toTextStreamResponse();
 }
 
 

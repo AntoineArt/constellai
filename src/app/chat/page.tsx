@@ -33,6 +33,7 @@ export default function ChatPage() {
   const sendMyMessage = useMutation(api.index.sendMyMessage);
   const writeAssistantMessagePublic = useMutation(api.index.writeAssistantMessagePublic);
   const renameConversation = useMutation(api.index.renameConversation);
+  const reportUsageForConversation = useMutation(api.index.reportUsageForConversation);
   const deleteConversation = useMutation(api.index.deleteConversation);
   const deleteMessageIfOwner = useMutation(api.index.deleteMessageIfOwner);
 
@@ -41,6 +42,9 @@ export default function ChatPage() {
   const [modelId, setModelId] = useState<string>("gpt-4o-mini");
   const [attachments, setAttachments] = useState<Array<{ url: string; name?: string | null; kind: string }>>([]);
   const [resendDraft, setResendDraft] = useState<string>("");
+  const [streamingText, setStreamingText] = useState<string>("");
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   useEffect(() => {
     if (!conversationId && conversations.length > 0) setConversationId(conversations[0]._id);
@@ -71,27 +75,23 @@ export default function ChatPage() {
       await sendMyMessage({ conversationId: selectedConversationId as Id<"conversations">, content });
       if (!conversations.find((c) => c._id === selectedConversationId)?.title) {
         try {
-          const t = await fetch("/api/chat/title", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content }) }).then((r) => r.json());
+          const t = await fetch("/api/chat/title", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content, modelId }) }).then((r) => r.json());
           if (t?.title) await renameConversation({ conversationId: selectedConversationId as Id<"conversations">, title: t.title });
         } catch {}
       }
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: content, attachments }),
+        body: JSON.stringify({ input: content, attachments, modelId, conversationId: selectedConversationId }),
       });
       const data = (await res.json()) as { text: string; modelId: string; usage?: { inputTokens?: number; outputTokens?: number } };
       await writeAssistantMessagePublic({ conversationId: selectedConversationId as Id<"conversations">, content: data.text });
       if (data.usage && (data.usage.inputTokens || data.usage.outputTokens)) {
-        await fetch("/api/chat/usage", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            conversationId: selectedConversationId,
-            modelId: data.modelId,
-            promptTokens: data.usage.inputTokens ?? 0,
-            completionTokens: data.usage.outputTokens ?? 0,
-          }),
+        await reportUsageForConversation({
+          conversationId: selectedConversationId as Id<"conversations">,
+          modelId: data.modelId,
+          promptTokens: data.usage.inputTokens ?? 0,
+          completionTokens: data.usage.outputTokens ?? 0,
         });
       }
       setInput("");
@@ -100,6 +100,51 @@ export default function ChatPage() {
     } catch (err) {
       setSendState({ isSending: false, error: err instanceof Error ? err.message : "Erreur" });
     }
+  }
+
+  async function handleStream() {
+    if (!selectedConversationId || !(resendDraft || input).trim()) return;
+    setStreamingText("");
+    setIsStreaming(true);
+    const controller = new AbortController();
+    setAbortController(controller);
+    try {
+      const content = (resendDraft || input).trim();
+      await sendMyMessage({ conversationId: selectedConversationId as Id<"conversations">, content });
+      const res = await fetch("/api/chat/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: content, attachments, modelId, conversationId: selectedConversationId }),
+        signal: controller.signal,
+      });
+      if (!res.ok || !res.body) throw new Error("Streaming failed");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let acc = "";
+      while (!done) {
+        const result = await reader.read();
+        done = result.done ?? false;
+        if (result.value) {
+          const chunk = decoder.decode(result.value, { stream: !done });
+          acc += chunk;
+          setStreamingText((prev) => prev + chunk);
+        }
+      }
+      if (acc.trim()) await writeAssistantMessagePublic({ conversationId: selectedConversationId as Id<"conversations">, content: acc });
+      setInput("");
+      setResendDraft("");
+    } catch (e) {
+      // Swallow aborts
+    } finally {
+      setIsStreaming(false);
+      setAbortController(null);
+      setStreamingText("");
+    }
+  }
+
+  function handleStop() {
+    if (abortController) abortController.abort();
   }
 
   return (
@@ -154,6 +199,9 @@ export default function ChatPage() {
                 onDelete={m.role === "user" ? () => deleteMessageIfOwner({ messageId: m._id as Id<"messages"> }) : undefined}
               />
             ))}
+            {isStreaming && streamingText ? (
+              <ChatMessage role={"assistant" as any} content={streamingText} />
+            ) : null}
           </div>
           {attachments.length ? (
             <div className="mb-3 flex flex-wrap gap-2 text-xs">
@@ -172,8 +220,11 @@ export default function ChatPage() {
               onChange={(e) => { if (resendDraft) setResendDraft(e.target.value); else setInput(e.target.value); }}
               placeholder="Write a message..."
             />
-            <button className="border rounded px-3 py-2" type="submit" disabled={sendState.isSending || (allowedModels.length > 0 && !allowedModels.includes(modelId))}>
+            <button className="border rounded px-3 py-2" type="submit" disabled={sendState.isSending || isStreaming || (allowedModels.length > 0 && !allowedModels.includes(modelId))}>
               {sendState.isSending ? "Sending..." : "Send"}
+            </button>
+            <button type="button" className="border rounded px-3 py-2" onClick={isStreaming ? handleStop : handleStream} disabled={sendState.isSending || (allowedModels.length > 0 && !allowedModels.includes(modelId))}>
+              {isStreaming ? "Stop" : "Stream"}
             </button>
           </form>
           {allowedModels.length > 0 && !allowedModels.includes(modelId) ? (

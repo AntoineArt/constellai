@@ -22,10 +22,11 @@ import { useApiKey } from "@/hooks/use-api-key";
 import { Key, Settings } from "lucide-react";
 
 const models = [
+	{ id: "openai/gpt-oss-20b", name: "GPT-OSS-20B" },
   { id: "openai/gpt-4o", name: "GPT-4o" },
   { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
   { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
-  { id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
+	{ id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
 ];
 
 interface TopBarProps {

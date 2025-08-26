@@ -1,269 +1,243 @@
 "use client";
 
-import { useState } from "react";
-import { Send, Mic, Paperclip, StopCircle } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import type { ChatStatus } from "ai";
 
 import { TopBar } from "@/components/top-bar";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import { Message, MessageContent } from "@/components/ai-elements/message";
+import { Response } from "@/components/ai-elements/response";
 import { useApiKey } from "@/hooks/use-api-key";
 
-interface Message {
-  id: string;
+interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-  timestamp: Date;
 }
 
-const models = [
-  { id: "openai/gpt-4o", name: "GPT-4o" },
-  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
-  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
-  { id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
-];
-
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: "Hello! I'm your AI assistant. How can I help you today?",
-      timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("openai/gpt-4o");
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [messages, setMessages] = useState<Array<ChatMessage>>([]);
+  const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
+  const [inputValue, setInputValue] = useState("");
+  const chatControllerRef = useRef<AbortController | null>(null);
   const { hasApiKey, apiKey } = useApiKey();
 
-  const handleSend = async () => {
-    if (!input.trim() || !hasApiKey) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!hasApiKey || status === "submitted" || status === "streaming") return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-      timestamp: new Date(),
-    };
+      const prompt = inputValue.trim();
+      if (!prompt) return;
 
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInput("");
-    setIsStreaming(true);
+      const newMessages: ChatMessage[] = [
+        ...messages,
+        { role: "user", content: prompt },
+      ];
+      setMessages(newMessages);
+      setInputValue("");
+      setStatus("submitted");
 
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          messages: newMessages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-          model: selectedModel,
-        }),
-      });
+      try {
+        const controller = new AbortController();
+        chatControllerRef.current = controller;
 
-      if (!response.ok) {
-        throw new Error("Failed to get response from AI");
-      }
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+          },
+          body: JSON.stringify({
+            messages: newMessages,
+            model: selectedModel,
+          }),
+          signal: controller.signal,
+        });
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response body");
-
-      let assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      const decoder = new TextDecoder();
-      let done = false;
-
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-
-        if (value) {
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("0:")) {
-              const content = line.slice(2);
-              if (content) {
-                assistantMessage.content += content;
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === assistantMessage.id
-                      ? { ...msg, content: assistantMessage.content }
-                      : msg
-                  )
-                );
-              }
-            }
-          }
+        if (!response.ok) {
+          throw new Error("Request failed");
         }
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content:
-          "Sorry, I encountered an error while processing your request. Please check your API key and try again.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsStreaming(false);
-    }
-  };
 
-  const toolActions = (
-    <div className="flex items-center gap-2">
-      <Select value={selectedModel} onValueChange={setSelectedModel}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {models.map((model) => (
-            <SelectItem key={model.id} value={model.id}>
-              {model.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {isStreaming && (
-        <Button size="sm" variant="outline">
-          <StopCircle className="h-4 w-4" />
-          Stop
-        </Button>
-      )}
-    </div>
+        if (!response.body) {
+          const text = await response.text();
+          setMessages((prev) => [...prev, { role: "assistant", content: text }]);
+          setStatus(undefined);
+          chatControllerRef.current = null;
+          return;
+        }
+
+        setStatus("streaming");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantContent = "";
+
+        // Push an empty assistant message to stream into
+        setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+        // Stream loop
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          assistantContent += decoder.decode(value, { stream: true });
+          setMessages((prev) => {
+            const next = [...prev];
+            const lastIndex = next.length - 1;
+            if (lastIndex >= 0 && next[lastIndex]?.role === "assistant") {
+              next[lastIndex] = { role: "assistant", content: assistantContent };
+            }
+            return next;
+          });
+        }
+
+        // Flush
+        assistantContent += decoder.decode();
+        setMessages((prev) => {
+          const next = [...prev];
+          const lastIndex = next.length - 1;
+          if (lastIndex >= 0 && next[lastIndex]?.role === "assistant") {
+            next[lastIndex] = { role: "assistant", content: assistantContent };
+          }
+          return next;
+        });
+        setStatus(undefined);
+      } catch (error) {
+        chatControllerRef.current = null;
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "Sorry, an error occurred while communicating with the assistant.",
+          },
+        ]);
+        setStatus("error");
+      }
+    },
+    [hasApiKey, status, inputValue, messages, apiKey, selectedModel]
   );
 
   return (
     <div className="flex h-screen flex-col">
-      <TopBar title="AI Chat" actions={toolActions} />
+      <TopBar
+        title="AI Chat"
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
+      />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Messages */}
-        <div className="flex-1 overflow-auto p-4">
-          <div className="mx-auto max-w-3xl space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <Card
-                  className={`max-w-[80%] ${message.role === "user" ? "bg-primary text-primary-foreground" : ""}`}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex items-start gap-2">
-                      <Badge
-                        variant={
-                          message.role === "user" ? "secondary" : "default"
-                        }
-                        className="text-xs"
-                      >
-                        {message.role === "user" ? "You" : "AI"}
-                      </Badge>
-                      <span className="text-xs opacity-70">
-                        {message.timestamp.toLocaleTimeString()}
-                      </span>
-                    </div>
-                    <p className="mt-2 whitespace-pre-wrap">
-                      {message.content}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
-            {isStreaming && (
-              <div className="flex justify-start">
-                <Card className="max-w-[80%]">
-                  <CardContent className="p-3">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="default" className="text-xs">
-                        AI
-                      </Badge>
-                      <div className="flex space-x-1">
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
+      {!hasApiKey ? (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <Card className="border-destructive/50 bg-destructive/10 max-w-md">
+            <CardContent className="p-6 text-center">
+              <p className="text-sm text-destructive">
+                Please set your API key in the top bar to start chatting
+              </p>
+            </CardContent>
+          </Card>
         </div>
+      ) : (
+        <div className="flex h-full flex-col flex-1">
+          {/* Conversation area - takes remaining space */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <Conversation className="h-full">
+              <ConversationContent className="flex flex-col gap-4 p-4">
+                {/* Default welcome message when no messages exist */}
+                {messages.length === 0 && (
+                  <Message from="assistant">
+                    <MessageContent>
+                      <Response>
+                        Hello! I'm your AI assistant. How can I help you today?
+                      </Response>
+                    </MessageContent>
+                  </Message>
+                )}
 
-        {/* Input */}
-        <div className="border-t p-4">
-          <div className="mx-auto max-w-3xl">
-            {!hasApiKey ? (
-              <Card className="border-destructive/50 bg-destructive/10">
-                <CardContent className="p-4 text-center">
-                  <p className="text-sm text-destructive">
-                    Please set your API key in the top bar to start chatting
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Textarea
+                {messages.map((message, index) => (
+                  <Message from={message.role} key={`${index}-${message.role}`}>
+                    <MessageContent>
+                      <Response>{message.content}</Response>
+                    </MessageContent>
+                  </Message>
+                ))}
+
+                {/* Show loading when waiting for response */}
+                {(status === "submitted" || status === "streaming") && (
+                  <Message from="assistant">
+                    <MessageContent>
+                      <div className="flex items-center space-x-2">
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+                        <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" />
+                      </div>
+                    </MessageContent>
+                  </Message>
+                )}
+              </ConversationContent>
+              <ConversationScrollButton />
+            </Conversation>
+          </div>
+
+          {/* Input area - fixed height */}
+          <div className="flex-shrink-0 border-t p-4">
+            <div className="mx-auto max-w-3xl">
+              <form
+                onSubmit={handleSubmit}
+                className="w-full divide-y overflow-hidden rounded-xl border bg-background shadow-sm"
+              >
+                <div className="p-4">
+                  <textarea
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Type your message..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    className="w-full resize-none border-0 bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
+                    rows={3}
+                    disabled={!hasApiKey || status === "streaming"}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
-                        handleSend();
+                        handleSubmit(e);
                       }
                     }}
-                    className="min-h-[44px] resize-none pr-20"
-                    disabled={isStreaming}
                   />
-                  <div className="absolute right-2 top-2 flex gap-1">
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                      <Mic className="h-4 w-4" />
-                    </Button>
+                </div>
+                <div className="flex items-center justify-between px-4 py-2">
+                  <div className="text-xs text-muted-foreground">
+                    Press Enter to send, Shift+Enter for new line
+                  </div>
+                  <div className="flex gap-2">
+                    {status === "streaming" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (chatControllerRef.current) {
+                            chatControllerRef.current.abort();
+                            chatControllerRef.current = null;
+                            setStatus(undefined);
+                          }
+                        }}
+                        className="rounded-md bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground hover:bg-secondary/80"
+                      >
+                        Stop
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={!inputValue.trim() || !hasApiKey || status === "streaming"}
+                      className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      {status === "streaming" ? "Sending..." : "Send"}
+                    </button>
                   </div>
                 </div>
-                <Button
-                  onClick={handleSend}
-                  disabled={!input.trim() || isStreaming}
-                  className="h-[44px]"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+              </form>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

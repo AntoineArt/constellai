@@ -17,10 +17,10 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { description } = await req.json();
+    const { description, model } = await req.json();
 
     const { text } = await generateText({
-      model: "openai/gpt-4o",
+      model: model || "openai/gpt-4o",
       system: `You are a regex expert. Generate regular expressions based on natural language descriptions.
       
       Always respond with a JSON object containing:

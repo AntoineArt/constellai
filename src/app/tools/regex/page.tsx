@@ -29,6 +29,7 @@ export default function RegexPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [matches, setMatches] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState("openai/gpt-4o");
   const { hasApiKey, apiKey } = useApiKey();
 
   const handleGenerate = async () => {
@@ -45,6 +46,7 @@ export default function RegexPage() {
         },
         body: JSON.stringify({
           description,
+          model: selectedModel,
         }),
       });
 
@@ -100,7 +102,11 @@ export default function RegexPage() {
 
   return (
     <div className="flex h-screen flex-col">
-      <TopBar title="Regex Generator" actions={toolActions} />
+      <TopBar
+        title="Regex Generator"
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
+      />
 
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-6">

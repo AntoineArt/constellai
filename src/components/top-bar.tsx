@@ -11,15 +11,36 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useApiKey } from "@/hooks/use-api-key";
 import { Key, Settings } from "lucide-react";
 
+const models = [
+  { id: "openai/gpt-4o", name: "GPT-4o" },
+  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
+  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
+  { id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
+];
+
 interface TopBarProps {
   title: string;
+  selectedModel?: string;
+  onModelChange?: (model: string) => void;
   actions?: React.ReactNode;
 }
 
-export function TopBar({ title, actions }: TopBarProps) {
+export function TopBar({
+  title,
+  selectedModel,
+  onModelChange,
+  actions,
+}: TopBarProps) {
   const { apiKey, setApiKey, getMaskedApiKey, hasApiKey } = useApiKey();
   const [tempApiKey, setTempApiKey] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -41,6 +62,20 @@ export function TopBar({ title, actions }: TopBarProps) {
         <h1 className="text-xl font-semibold">{title}</h1>
 
         <div className="flex items-center gap-4">
+          {selectedModel && onModelChange && (
+            <Select value={selectedModel} onValueChange={onModelChange}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {models.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           {actions}
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

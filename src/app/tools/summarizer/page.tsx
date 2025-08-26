@@ -177,7 +177,11 @@ export default function SummarizerPage() {
 
   return (
     <div className="flex h-screen flex-col">
-      <TopBar title="Text Summarizer" actions={toolActions} />
+      <TopBar
+        title="Text Summarizer"
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
+      />
 
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-6">

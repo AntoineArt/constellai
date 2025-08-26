@@ -29,28 +29,47 @@ export default function RegexPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [matches, setMatches] = useState<string[]>([]);
-  const { hasApiKey } = useApiKey();
+  const { hasApiKey, apiKey } = useApiKey();
 
   const handleGenerate = async () => {
     if (!description.trim() || !hasApiKey) return;
 
     setIsGenerating(true);
 
-    // Simulate regex generation
-    setTimeout(() => {
-      const mockRegex = {
-        javascript: "/\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b/g",
-        pcre: "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",
-        explanation: `This regex pattern matches email addresses based on the description: "${description}". It looks for typical email patterns with alphanumeric characters, dots, underscores, percent signs, plus signs, and hyphens in the local part, followed by an @ symbol, then the domain part with dots separating subdomains, and ending with a 2+ character top-level domain.`,
-      };
-      setGeneratedRegex(mockRegex);
-      setIsGenerating(false);
+    try {
+      const response = await fetch("/api/regex", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate regex");
+      }
+
+      const result = await response.json();
+      setGeneratedRegex(result);
 
       // Test against sample text if provided
-      if (testText) {
-        testRegex(mockRegex.javascript, testText);
+      if (testText && result.javascript) {
+        testRegex(result.javascript, testText);
       }
-    }, 2000);
+    } catch (error) {
+      console.error("Error generating regex:", error);
+      setGeneratedRegex({
+        javascript: "",
+        pcre: "",
+        explanation:
+          "Failed to generate regex. Please check your API key and try again.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const testRegex = (pattern: string, text: string) => {

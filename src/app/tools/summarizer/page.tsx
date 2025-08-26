@@ -48,20 +48,20 @@ const summaryTypes = [
 ];
 
 const models = [
-  { id: "gpt-4-turbo", name: "GPT-4 Turbo" },
-  { id: "claude-3-sonnet", name: "Claude 3 Sonnet" },
-  { id: "gemini-pro", name: "Gemini Pro" },
+  { id: "openai/gpt-4o", name: "GPT-4o" },
+  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
+  { id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
 ];
 
 export default function SummarizerPage() {
   const [inputText, setInputText] = useState("");
   const [summary, setSummary] = useState("");
   const [summaryType, setSummaryType] = useState("brief");
-  const [selectedModel, setSelectedModel] = useState("gpt-4-turbo");
+  const [selectedModel, setSelectedModel] = useState("openai/gpt-4o");
   const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [progress, setProgress] = useState(0);
-  const { hasApiKey } = useApiKey();
+  const { hasApiKey, apiKey } = useApiKey();
 
   const handleSummarize = async () => {
     if (!inputText.trim() || !hasApiKey) return;
@@ -81,17 +81,41 @@ export default function SummarizerPage() {
       });
     }, 200);
 
-    // Simulate summarization
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/summarize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          text: inputText,
+          summaryType,
+          model: selectedModel,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to summarize text");
+      }
+
+      const result = await response.json();
+
       clearInterval(progressInterval);
       setProgress(100);
-
-      const mockSummary = generateMockSummary(inputText, summaryType);
-      setSummary(mockSummary);
-      setIsProcessing(false);
+      setSummary(result.summary);
 
       setTimeout(() => setProgress(0), 1000);
-    }, 3000);
+    } catch (error) {
+      console.error("Error summarizing text:", error);
+      clearInterval(progressInterval);
+      setProgress(0);
+      setSummary(
+        "Failed to summarize text. Please check your API key and try again."
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const generateMockSummary = (text: string, type: string): string => {

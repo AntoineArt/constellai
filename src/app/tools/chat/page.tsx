@@ -25,10 +25,10 @@ interface Message {
 }
 
 const models = [
-  { id: "gpt-4-turbo", name: "GPT-4 Turbo" },
-  { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
-  { id: "claude-3-sonnet", name: "Claude 3 Sonnet" },
-  { id: "gemini-pro", name: "Gemini Pro" },
+  { id: "openai/gpt-4o", name: "GPT-4o" },
+  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
+  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
+  { id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
 ];
 
 export default function ChatPage() {
@@ -41,9 +41,9 @@ export default function ChatPage() {
     },
   ]);
   const [input, setInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gpt-4-turbo");
+  const [selectedModel, setSelectedModel] = useState("openai/gpt-4o");
   const [isStreaming, setIsStreaming] = useState(false);
-  const { hasApiKey } = useApiKey();
+  const { hasApiKey, apiKey } = useApiKey();
 
   const handleSend = async () => {
     if (!input.trim() || !hasApiKey) return;
@@ -55,21 +55,84 @@ export default function ChatPage() {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput("");
     setIsStreaming(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantMessage: Message = {
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          messages: newMessages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+          model: selectedModel,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get response from AI");
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response body");
+
+      let assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `This is a mock response using ${models.find((m) => m.id === selectedModel)?.name}. In a real implementation, this would be connected to your Vercel AI Gateway to process the message: "${userMessage.content}"`,
+        content: "",
         timestamp: new Date(),
       };
+
       setMessages((prev) => [...prev, assistantMessage]);
+
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+
+        if (value) {
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("0:")) {
+              const content = line.slice(2);
+              if (content) {
+                assistantMessage.content += content;
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessage.id
+                      ? { ...msg, content: assistantMessage.content }
+                      : msg
+                  )
+                );
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content:
+          "Sorry, I encountered an error while processing your request. Please check your API key and try again.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsStreaming(false);
-    }, 1500);
+    }
   };
 
   const toolActions = (

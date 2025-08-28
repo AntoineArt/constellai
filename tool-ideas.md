@@ -2,22 +2,16 @@
 
 Select the tools you want to implement by checking the boxes below.
 
-## 💻 Development & Programming (15 tools)
-- [ ] **Code Reviewer** - Analyze code for bugs, performance issues, and best practices
+## 💻 Development & Programming (16 tools)
 - [ ] **SQL Query Generator** - Natural language to SQL queries with optimization suggestions
 - [ ] **API Documentation Generator** - Generate OpenAPI/Swagger docs from code
-- [ ] **Git Commit Message Generator** - Create conventional commit messages from diffs
-- [ ] **Code Formatter/Beautifier** - Format and clean code across multiple languages
-- [ ] **Unit Test Generator** - Generate comprehensive test suites from code
 - [ ] **Database Schema Designer** - Create database schemas from requirements
-- [ ] **Dockerfile Generator** - Generate optimized Dockerfiles for applications
 - [ ] **Environment Config Generator** - Create .env templates with documentation
 - [ ] **Code Complexity Analyzer** - Analyze and suggest code simplifications
-- [ ] **Dependency Analyzer** - Check for security vulnerabilities and updates
 - [ ] **Performance Optimizer** - Suggest performance improvements for code
-- [ ] **Code Migration Tool** - Help migrate code between frameworks/versions
 - [ ] **README Generator** - Create comprehensive README files from codebases
 - [ ] **Error Message Decoder** - Explain and suggest fixes for error messages
+- [ ] **Git PR Message Writer** - Generate pull request descriptions from commit history
 
 ## 📝 Text & Content Creation (15 tools)
 - [ ] **Blog Post Generator** - Create SEO-optimized blog posts from topics

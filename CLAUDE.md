@@ -130,6 +130,7 @@ ConstellAI is designed as a bold, fast web app offering AI tools with credit-bas
 - Use `for of` loops over `forEach` where possible
 - Strings use double quotes
 - Maintain consistent error handling in API routes
+- Use `// biome-ignore` comments when dependency warnings are incorrect but necessary
 
 ### Environment Setup
 - Convex requires `NEXT_PUBLIC_CONVEX_URL` environment variable
@@ -186,6 +187,12 @@ Every tool should follow this consistent pattern:
    ```
 
 4. **Secondary sidebar**: Show tool execution history with ability to switch between executions
+
+5. **Streaming considerations**:
+   - Prevent auto-save during streaming (`status === "streaming"`) to avoid race conditions
+   - Save final conversation state after streaming completes
+   - Handle AbortError gracefully without showing error messages to users
+   - Use proper cleanup in AbortController for cancelled requests
 
 ### API Route Pattern
 ```typescript

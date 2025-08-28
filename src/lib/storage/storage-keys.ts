@@ -38,6 +38,9 @@ export const TOOL_IDS = {
   BRAND_NAME_GENERATOR: "brand-name-generator",
   DESIGN_BRIEF_GENERATOR: "design-brief-generator",
   BUSINESS_PLAN_GENERATOR: "business-plan-generator",
+  TYPOGRAPHY_PAIRER: "typography-pairer",
+  ICON_DESCRIPTION_GENERATOR: "icon-description-generator",
+  SWOT_ANALYSIS_GENERATOR: "swot-analysis-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

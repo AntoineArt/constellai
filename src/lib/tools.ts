@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2 } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -281,5 +281,29 @@ export const tools: Tool[] = [
     icon: Building2,
     category: "Business & Analytics",
     href: "/tools/business-plan-generator",
+  },
+  {
+    id: "typography-pairer",
+    name: "Typography Pairer",
+    description: "Suggest font combinations for designs with web and print alternatives.",
+    icon: TypeIcon,
+    category: "Creative & Design",
+    href: "/tools/typography-pairer",
+  },
+  {
+    id: "icon-description-generator",
+    name: "Icon Description Generator",
+    description: "Generate detailed descriptions for icon creation with technical specifications.",
+    icon: Image,
+    category: "Creative & Design",
+    href: "/tools/icon-description-generator",
+  },
+  {
+    id: "swot-analysis-generator",
+    name: "SWOT Analysis Generator",
+    description: "Generate strategic analysis frameworks with detailed insights and action plans.",
+    icon: TrendingUp,
+    category: "Business & Analytics",
+    href: "/tools/swot-analysis-generator",
   },
 ];

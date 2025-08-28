@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon, LayoutDashboard, DollarSign, Map as MapIcon } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -345,5 +345,53 @@ export const tools: Tool[] = [
     icon: BarChart3,
     category: "Business & Analytics",
     href: "/tools/financial-report-summarizer",
+  },
+  {
+    id: "kpi-dashboard-designer",
+    name: "KPI Dashboard Designer",
+    description: "Design metrics tracking frameworks with key performance indicators and visualizations.",
+    icon: LayoutDashboard,
+    category: "Business & Analytics",
+    href: "/tools/kpi-dashboard-designer",
+  },
+  {
+    id: "risk-assessment-tool",
+    name: "Risk Assessment Tool",
+    description: "Identify and analyze business risks with mitigation strategies and monitoring frameworks.",
+    icon: AlertTriangle,
+    category: "Business & Analytics",
+    href: "/tools/risk-assessment-tool",
+  },
+  {
+    id: "roi-calculator",
+    name: "ROI Calculator",
+    description: "Calculate and explain return on investment with detailed analysis and recommendations.",
+    icon: TrendingUp,
+    category: "Business & Analytics",
+    href: "/tools/roi-calculator",
+  },
+  {
+    id: "budget-planner",
+    name: "Budget Planner",
+    description: "Create detailed budget breakdowns with forecasting and financial planning guidance.",
+    icon: BarChart3,
+    category: "Business & Analytics",
+    href: "/tools/budget-planner",
+  },
+  {
+    id: "pricing-strategy-generator",
+    name: "Pricing Strategy Generator",
+    description: "Develop competitive pricing models with market analysis and optimization strategies.",
+    icon: DollarSign,
+    category: "Business & Analytics",
+    href: "/tools/pricing-strategy-generator",
+  },
+  {
+    id: "customer-journey-mapper",
+    name: "Customer Journey Mapper",
+    description: "Map customer touchpoints and experiences with optimization recommendations.",
+    icon: MapIcon,
+    category: "Business & Analytics",
+    href: "/tools/customer-journey-mapper",
   },
 ];

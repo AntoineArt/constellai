@@ -46,6 +46,12 @@ export const TOOL_IDS = {
   ART_PROMPT_GENERATOR: "art-prompt-generator",
   MARKET_RESEARCH_SYNTHESIZER: "market-research-synthesizer",
   FINANCIAL_REPORT_SUMMARIZER: "financial-report-summarizer",
+  KPI_DASHBOARD_DESIGNER: "kpi-dashboard-designer",
+  RISK_ASSESSMENT_TOOL: "risk-assessment-tool",
+  ROI_CALCULATOR: "roi-calculator",
+  BUDGET_PLANNER: "budget-planner",
+  PRICING_STRATEGY_GENERATOR: "pricing-strategy-generator",
+  CUSTOMER_JOURNEY_MAPPER: "customer-journey-mapper",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

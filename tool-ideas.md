@@ -47,14 +47,14 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **SWOT Analysis Generator** - Generate strategic analysis frameworks
 - [x] **Market Research Synthesizer** - Analyze and summarize market data
 - [x] **Financial Report Summarizer** - Explain financial statements in plain language
-- [ ] **Competitor Analysis Tool** - Compare businesses and identify opportunities
-- [ ] **Sales Pitch Generator** - Create persuasive sales presentations
-- [ ] **KPI Dashboard Designer** - Design metrics tracking frameworks
-- [ ] **Risk Assessment Tool** - Identify and analyze business risks
-- [ ] **ROI Calculator** - Calculate and explain return on investment
-- [ ] **Budget Planner** - Create detailed budget breakdowns
-- [ ] **Pricing Strategy Generator** - Develop competitive pricing models
-- [ ] **Customer Journey Mapper** - Map customer touchpoints and experiences
+- [x] **Competitor Analysis Tool** - Compare businesses and identify opportunities
+- [x] **Sales Pitch Generator** - Create persuasive sales presentations
+- [x] **KPI Dashboard Designer** - Design metrics tracking frameworks
+- [x] **Risk Assessment Tool** - Identify and analyze business risks
+- [x] **ROI Calculator** - Calculate and explain return on investment
+- [x] **Budget Planner** - Create detailed budget breakdowns
+- [x] **Pricing Strategy Generator** - Develop competitive pricing models
+- [x] **Customer Journey Mapper** - Map customer touchpoints and experiences
 
 ## 🔍 Research & Analysis (10 tools)
 - [ ] **Literature Review Generator** - Synthesize academic papers and sources

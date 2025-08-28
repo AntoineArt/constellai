@@ -3,11 +3,11 @@
 Select the tools you want to implement by checking the boxes below.
 
 ## 💻 Development & Programming (16 tools)
-- [ ] **SQL Query Generator** - Natural language to SQL queries with optimization suggestions
-- [ ] **API Documentation Generator** - Generate OpenAPI/Swagger docs from code
-- [ ] **Database Schema Designer** - Create database schemas from requirements
-- [ ] **Environment Config Generator** - Create .env templates with documentation
-- [ ] **Code Complexity Analyzer** - Analyze and suggest code simplifications
+- [x] **SQL Query Generator** - Natural language to SQL queries with optimization suggestions
+- [x] **API Documentation Generator** - Generate OpenAPI/Swagger docs from code
+- [x] **Database Schema Designer** - Create database schemas from requirements
+- [x] **Environment Config Generator** - Create .env templates with documentation
+- [x] **Code Complexity Analyzer** - Analyze and suggest code simplifications
 - [ ] **Performance Optimizer** - Suggest performance improvements for code
 - [ ] **README Generator** - Create comprehensive README files from codebases
 - [ ] **Error Message Decoder** - Explain and suggest fixes for error messages

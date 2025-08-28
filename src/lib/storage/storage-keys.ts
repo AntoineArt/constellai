@@ -11,6 +11,11 @@ export const TOOL_IDS = {
   CHAT: "chat",
   REGEX: "regex",
   SUMMARIZER: "summarizer",
+  SQL_GENERATOR: "sql-generator",
+  API_DOCS_GENERATOR: "api-docs-generator",
+  SCHEMA_DESIGNER: "schema-designer",
+  ENV_GENERATOR: "env-generator",
+  COMPLEXITY_ANALYZER: "complexity-analyzer",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

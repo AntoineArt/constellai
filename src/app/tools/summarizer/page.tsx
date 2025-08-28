@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, Sparkles, Copy, CheckCircle2 } from "lucide-react";
 
 import { TopBar } from "@/components/top-bar";
+import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { useApiKey } from "@/hooks/use-api-key";
+import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
 
 const summaryTypes = [
   {
@@ -54,14 +56,51 @@ const models = [
 ];
 
 export default function SummarizerPage() {
+  const toolHistory = useToolHistory(TOOL_IDS.SUMMARIZER);
+  const { preferences } = usePreferences();
+  const { hasApiKey, apiKey } = useApiKey();
+
   const [inputText, setInputText] = useState("");
   const [summary, setSummary] = useState("");
   const [summaryType, setSummaryType] = useState("brief");
-  const [selectedModel, setSelectedModel] = useState("openai/gpt-4o");
+  const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
   const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [progress, setProgress] = useState(0);
-  const { hasApiKey, apiKey } = useApiKey();
+
+  // Load current execution data
+  useEffect(() => {
+    if (toolHistory.isLoaded && toolHistory.currentExecution) {
+      const execution = toolHistory.currentExecution;
+      if (execution.inputs) {
+        setInputText(execution.inputs.text || "");
+        setSummaryType(execution.inputs.summaryType || "brief");
+      }
+      if (execution.outputs?.summary) {
+        setSummary(execution.outputs.summary);
+      }
+      if (execution.settings?.selectedModel) {
+        setSelectedModel(execution.settings.selectedModel);
+      }
+    }
+  }, [toolHistory.isLoaded, toolHistory.currentExecution]);
+
+  // Auto-save inputs when they change
+  useEffect(() => {
+    if (toolHistory.isLoaded && (inputText || summaryType !== "brief")) {
+      if (!toolHistory.currentExecution) {
+        toolHistory.createNewExecution(
+          { text: inputText, summaryType },
+          { selectedModel }
+        );
+      } else {
+        toolHistory.updateCurrentExecution({
+          inputs: { text: inputText, summaryType },
+          settings: { selectedModel },
+        });
+      }
+    }
+  }, [inputText, summaryType, selectedModel, toolHistory]);
 
   const handleSummarize = async () => {
     if (!inputText.trim() || !hasApiKey) return;
@@ -104,6 +143,11 @@ export default function SummarizerPage() {
       clearInterval(progressInterval);
       setProgress(100);
       setSummary(result.summary);
+
+      // Save output to storage
+      toolHistory.updateCurrentExecution({
+        outputs: { summary: result.summary },
+      });
 
       setTimeout(() => setProgress(0), 1000);
     } catch (error) {
@@ -175,13 +219,33 @@ export default function SummarizerPage() {
     </div>
   );
 
+  const clearSummarizer = () => {
+    setInputText("");
+    setSummary("");
+    setSummaryType("brief");
+    toolHistory.clearActiveExecution();
+  };
+
   return (
-    <div className="flex h-screen flex-col">
-      <TopBar
-        title="Text Summarizer"
-        selectedModel={selectedModel}
-        onModelChange={setSelectedModel}
+    <div className="h-screen overflow-hidden flex">
+      {/* Tool History Sidebar */}
+      <ToolHistorySidebar
+        executions={toolHistory.executions}
+        activeExecutionId={toolHistory.activeExecutionId}
+        onSelectExecution={toolHistory.switchToExecution}
+        onDeleteExecution={toolHistory.deleteExecution}
+        onRenameExecution={toolHistory.renameExecution}
+        toolName="Summarizer"
       />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopBar
+          title="Text Summarizer"
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+          onNew={clearSummarizer}
+        />
 
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-6">
@@ -358,6 +422,7 @@ export default function SummarizerPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useApiKey } from "@/hooks/use-api-key";
-import { Key, Settings } from "lucide-react";
+import { Key, Settings, Plus } from "lucide-react";
 
 const models = [
 	{ id: "openai/gpt-oss-20b", name: "GPT-OSS-20B" },
@@ -34,6 +34,7 @@ interface TopBarProps {
   selectedModel?: string;
   onModelChange?: (model: string) => void;
   actions?: React.ReactNode;
+  onNew?: () => void; // New button handler
 }
 
 export function TopBar({
@@ -41,6 +42,7 @@ export function TopBar({
   selectedModel,
   onModelChange,
   actions,
+  onNew,
 }: TopBarProps) {
   const { apiKey, setApiKey, getMaskedApiKey, hasApiKey } = useApiKey();
   const [tempApiKey, setTempApiKey] = useState("");
@@ -63,6 +65,17 @@ export function TopBar({
         <h1 className="text-xl font-semibold">{title}</h1>
 
         <div className="flex items-center gap-4">
+          {onNew && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onNew}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              New
+            </Button>
+          )}
           {selectedModel && onModelChange && (
             <Select value={selectedModel} onValueChange={onModelChange}>
               <SelectTrigger className="w-[200px]">

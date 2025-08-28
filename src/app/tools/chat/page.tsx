@@ -6,16 +6,18 @@ import type { ChatStatus } from "ai";
 import { TopBar } from "@/components/top-bar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
+import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
+import type { ChatMessage } from "@/lib/storage/types";
 import { Trash2, Copy, RotateCcw } from "lucide-react";
 
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
 export default function ChatPage() {
-  const [selectedModel, setSelectedModel] = useState("openai/gpt-oss-20b");
+  const toolHistory = useToolHistory(TOOL_IDS.CHAT);
+  const { preferences } = usePreferences();
+  const { hasApiKey, apiKey } = useApiKey();
+
+  const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
   const [messages, setMessages] = useState<Array<ChatMessage>>([]);
   const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
@@ -23,7 +25,38 @@ export default function ChatPage() {
   const chatControllerRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { hasApiKey, apiKey } = useApiKey();
+
+  // Load current execution data
+  useEffect(() => {
+    if (toolHistory.isLoaded && toolHistory.currentExecution) {
+      const execution = toolHistory.currentExecution;
+      if (execution.inputs?.messages) {
+        setMessages(execution.inputs.messages);
+      }
+      if (execution.settings?.selectedModel) {
+        setSelectedModel(execution.settings.selectedModel);
+      }
+    }
+  }, [toolHistory.isLoaded, toolHistory.currentExecution]);
+
+  // Auto-save messages when they change
+  useEffect(() => {
+    if (toolHistory.isLoaded && messages.length > 0) {
+      // Create new execution if none exists
+      if (!toolHistory.currentExecution) {
+        toolHistory.createNewExecution(
+          { messages },
+          { selectedModel }
+        );
+      } else {
+        // Update existing execution
+        toolHistory.updateCurrentExecution({
+          inputs: { messages },
+          settings: { selectedModel },
+        });
+      }
+    }
+  }, [messages, selectedModel, toolHistory]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -49,7 +82,8 @@ export default function ChatPage() {
   const clearChat = useCallback(() => {
     if (status === "streaming") return;
     setMessages([]);
-  }, [status]);
+    toolHistory.clearActiveExecution();
+  }, [status, toolHistory]);
 
   const copyMessage = useCallback(async (content: string, messageId: string) => {
     try {
@@ -189,13 +223,30 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="h-screen overflow-hidden">
-      {/* Top bar - fixed height */}
-      <TopBar
-        title="AI Chat"
-        selectedModel={selectedModel}
-        onModelChange={setSelectedModel}
+    <div className="h-screen overflow-hidden flex">
+      {/* Tool History Sidebar */}
+      <ToolHistorySidebar
+        executions={toolHistory.executions}
+        activeExecutionId={toolHistory.activeExecutionId}
+        onSelectExecution={toolHistory.switchToExecution}
+        onDeleteExecution={toolHistory.deleteExecution}
+        onRenameExecution={toolHistory.renameExecution}
+        toolName="Chat"
       />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top bar - fixed height */}
+        <TopBar
+          title="AI Chat"
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+          onNew={() => {
+            if (status !== "streaming") {
+              clearChat();
+            }
+          }}
+        />
 
       {/* Main content area */}
       <div className="h-[calc(100vh-64px)] overflow-hidden">
@@ -384,6 +435,7 @@ export default function ChatPage() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

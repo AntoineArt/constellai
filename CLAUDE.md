@@ -75,6 +75,36 @@ export const createUser = mutation({
 - **Client Components**: Use "use client" directive when needed for Convex hooks
 - **Sidebar Navigation**: Uses shadcn/ui sidebar with collapsible primary navigation
 - **AI Integration**: API routes handle AI model requests with API key authentication
+- **Client-Side Storage**: Unified localStorage system for all user data and tool history
+
+### Client-Side Storage Architecture
+All user data is stored client-side using localStorage with plans for future database sync:
+
+- **Storage Location**: `src/lib/storage/` - centralized storage utilities
+- **Universal Tool Pattern**: All tools (chat, regex, summarizer, etc.) follow the same storage pattern
+- **Tool Executions**: Each tool interaction is stored as a `ToolExecution` with inputs, outputs, and metadata
+- **Tool History**: Every tool has a secondary sidebar showing execution history
+- **Preferences**: User settings, default models, and tool-specific configurations
+- **Auto-Save**: Tool state is automatically saved as users interact
+
+#### Storage Structure
+```typescript
+interface ToolExecution {
+  id: string;
+  toolId: string; 
+  timestamp: number;
+  title: string; // Auto-generated or user-set
+  inputs: Record<string, any>;
+  outputs: Record<string, any>;
+  settings: Record<string, any>;
+}
+```
+
+#### Key Components
+- `useToolHistory(toolId)` - Hook for managing tool executions and history
+- `usePreferences()` - Hook for user preferences and settings  
+- Secondary sidebar component for each tool showing execution history
+- "New" button in TopBar to start fresh tool sessions
 
 ### Product Vision (from docs/concept.md)
 ConstellAI is designed as a bold, fast web app offering AI tools with credit-based usage. Key features planned:
@@ -125,7 +155,37 @@ ConstellAI is designed as a bold, fast web app offering AI tools with credit-bas
 2. Implement POST handler with proper API key validation using `getApiKeyFromHeaders`
 3. Use Vercel AI SDK for model integration
 4. Add tool page in `src/app/tools/[tool-name]/page.tsx`
-5. Follow existing patterns for error handling and streaming responses
+5. Integrate `useToolHistory(toolId)` hook for execution storage and history
+6. Add tool to `src/lib/tools.ts` registry
+7. Follow existing patterns for error handling and streaming responses
+
+### Universal Tool Implementation Pattern
+Every tool should follow this consistent pattern:
+
+1. **Use storage hooks**:
+   ```typescript
+   const toolHistory = useToolHistory("tool-name");
+   const { preferences } = usePreferences();
+   ```
+
+2. **TopBar integration**:
+   - Include "New" button to start fresh (`toolHistory.clearActiveExecution()`)
+   - Support model selection with default from preferences
+   
+3. **Auto-save inputs/outputs**:
+   ```typescript
+   // Save as user types
+   toolHistory.updateCurrentExecution({ 
+     inputs: { userInput: value } 
+   });
+   
+   // Save results after API call
+   toolHistory.updateCurrentExecution({ 
+     outputs: { result: apiResponse } 
+   });
+   ```
+
+4. **Secondary sidebar**: Show tool execution history with ability to switch between executions
 
 ### API Route Pattern
 ```typescript

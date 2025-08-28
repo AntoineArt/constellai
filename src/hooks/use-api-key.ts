@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getStoredData, setStoredData, removeStoredData } from "@/lib/storage/storage-utils";
+import { STORAGE_KEYS } from "@/lib/storage/storage-keys";
 
 export function useApiKey() {
   const [apiKey, setApiKey] = useState<string>("");
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("constellai-api-key");
+    const stored = getStoredData(STORAGE_KEYS.API_KEY, "");
     if (stored) {
       setApiKey(stored);
     }
@@ -17,9 +19,9 @@ export function useApiKey() {
   const saveApiKey = (key: string) => {
     setApiKey(key);
     if (key) {
-      localStorage.setItem("constellai-api-key", key);
+      setStoredData(STORAGE_KEYS.API_KEY, key);
     } else {
-      localStorage.removeItem("constellai-api-key");
+      removeStoredData(STORAGE_KEYS.API_KEY);
     }
   };
 

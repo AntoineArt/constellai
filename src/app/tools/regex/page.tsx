@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Zap, Copy, CheckCircle2, Play } from "lucide-react";
 
 import { TopBar } from "@/components/top-bar";
+import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -17,8 +18,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApiKey } from "@/hooks/use-api-key";
+import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
 
 export default function RegexPage() {
+  const toolHistory = useToolHistory(TOOL_IDS.REGEX);
+  const { preferences } = usePreferences();
+  const { hasApiKey, apiKey } = useApiKey();
+
   const [description, setDescription] = useState("");
   const [testText, setTestText] = useState("");
   const [generatedRegex, setGeneratedRegex] = useState({
@@ -29,8 +35,48 @@ export default function RegexPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [matches, setMatches] = useState<string[]>([]);
-  const [selectedModel, setSelectedModel] = useState("openai/gpt-4o");
-  const { hasApiKey, apiKey } = useApiKey();
+  const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
+
+  // Load current execution data
+  useEffect(() => {
+    if (toolHistory.isLoaded && toolHistory.currentExecution) {
+      const execution = toolHistory.currentExecution;
+      if (execution.inputs) {
+        setDescription(execution.inputs.description || "");
+        setTestText(execution.inputs.testText || "");
+      }
+      if (execution.outputs) {
+        setGeneratedRegex({
+          javascript: execution.outputs.javascript || "",
+          pcre: execution.outputs.pcre || "",
+          explanation: execution.outputs.explanation || "",
+        });
+        if (execution.outputs.matches) {
+          setMatches(execution.outputs.matches);
+        }
+      }
+      if (execution.settings?.selectedModel) {
+        setSelectedModel(execution.settings.selectedModel);
+      }
+    }
+  }, [toolHistory.isLoaded, toolHistory.currentExecution]);
+
+  // Auto-save inputs when they change
+  useEffect(() => {
+    if (toolHistory.isLoaded && (description || testText)) {
+      if (!toolHistory.currentExecution) {
+        toolHistory.createNewExecution(
+          { description, testText },
+          { selectedModel }
+        );
+      } else {
+        toolHistory.updateCurrentExecution({
+          inputs: { description, testText },
+          settings: { selectedModel },
+        });
+      }
+    }
+  }, [description, testText, selectedModel, toolHistory]);
 
   const handleGenerate = async () => {
     if (!description.trim() || !hasApiKey) return;
@@ -58,9 +104,20 @@ export default function RegexPage() {
       setGeneratedRegex(result);
 
       // Test against sample text if provided
+      let matchResults: string[] = [];
       if (testText && result.javascript) {
-        testRegex(result.javascript, testText);
+        matchResults = testRegex(result.javascript, testText);
       }
+
+      // Save outputs to storage
+      toolHistory.updateCurrentExecution({
+        outputs: {
+          javascript: result.javascript,
+          pcre: result.pcre,
+          explanation: result.explanation,
+          matches: matchResults,
+        },
+      });
     } catch (error) {
       console.error("Error generating regex:", error);
       setGeneratedRegex({
@@ -74,13 +131,15 @@ export default function RegexPage() {
     }
   };
 
-  const testRegex = (pattern: string, text: string) => {
+  const testRegex = (pattern: string, text: string): string[] => {
     try {
       const regex = new RegExp(pattern.slice(1, -2), pattern.slice(-2, -1));
       const foundMatches = text.match(regex) || [];
       setMatches(foundMatches);
+      return foundMatches;
     } catch (error) {
       setMatches([]);
+      return [];
     }
   };
 
@@ -100,13 +159,34 @@ export default function RegexPage() {
     </Button>
   );
 
+  const clearRegex = () => {
+    setDescription("");
+    setTestText("");
+    setGeneratedRegex({ javascript: "", pcre: "", explanation: "" });
+    setMatches([]);
+    toolHistory.clearActiveExecution();
+  };
+
   return (
-    <div className="flex h-screen flex-col">
-      <TopBar
-        title="Regex Generator"
-        selectedModel={selectedModel}
-        onModelChange={setSelectedModel}
+    <div className="h-screen overflow-hidden flex">
+      {/* Tool History Sidebar */}
+      <ToolHistorySidebar
+        executions={toolHistory.executions}
+        activeExecutionId={toolHistory.activeExecutionId}
+        onSelectExecution={toolHistory.switchToExecution}
+        onDeleteExecution={toolHistory.deleteExecution}
+        onRenameExecution={toolHistory.renameExecution}
+        toolName="Regex Generator"
       />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopBar
+          title="Regex Generator"
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+          onNew={clearRegex}
+        />
 
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-6">
@@ -306,6 +386,7 @@ export default function RegexPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

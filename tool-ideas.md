@@ -14,13 +14,13 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **Git PR Message Writer** - Generate pull request descriptions from commit history
 
 ## 📝 Text & Content Creation (15 tools)
-- [ ] **Blog Post Generator** - Create SEO-optimized blog posts from topics
+- [x] **Blog Post Generator** - Create SEO-optimized blog posts from topics
 - [x] **Email Template Creator** - Generate professional emails for different purposes
 - [x] **Social Media Post Generator** - Create platform-specific content with hashtags
-- [ ] **Press Release Writer** - Generate professional press releases
-- [ ] **Product Description Writer** - Create compelling product descriptions
-- [ ] **Resume Builder** - Generate tailored resumes from experience data
-- [ ] **Cover Letter Generator** - Create personalized cover letters
+- [x] **Press Release Writer** - Generate professional press releases
+- [x] **Product Description Writer** - Create compelling product descriptions
+- [x] **Resume Builder** - Generate tailored resumes from experience data
+- [x] **Cover Letter Generator** - Create personalized cover letters
 - [ ] **Grant Proposal Writer** - Generate funding proposals and applications
 - [ ] **Technical Documentation Writer** - Create user manuals and guides
 - [ ] **Content Calendar Planner** - Plan and generate content schedules

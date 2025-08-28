@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -45,7 +45,7 @@ export const tools: Tool[] = [
   {
     id: "api-docs-generator",
     name: "API Documentation Generator",
-    description: "Generate OpenAPI/Swagger docs from code or descriptions.",
+    description: "Generate OpenAPI/Swagger documentation from code.",
     icon: FileCode,
     category: "Development",
     href: "/tools/api-docs-generator",
@@ -61,7 +61,7 @@ export const tools: Tool[] = [
   {
     id: "env-generator",
     name: "Environment Config Generator",
-    description: "Create .env templates with documentation and validation rules.",
+    description: "Create .env templates with documentation and validation.",
     icon: Settings,
     category: "Development",
     href: "/tools/env-generator",
@@ -69,7 +69,7 @@ export const tools: Tool[] = [
   {
     id: "complexity-analyzer",
     name: "Code Complexity Analyzer",
-    description: "Analyze and suggest code simplifications with complexity metrics.",
+    description: "Analyze code complexity and suggest simplifications.",
     icon: BarChart3,
     category: "Development",
     href: "/tools/complexity-analyzer",
@@ -77,7 +77,7 @@ export const tools: Tool[] = [
   {
     id: "performance-optimizer",
     name: "Performance Optimizer",
-    description: "Suggest performance improvements for code with benchmarking guidance.",
+    description: "Suggest performance improvements for code with benchmarks.",
     icon: ZapIcon,
     category: "Development",
     href: "/tools/performance-optimizer",
@@ -85,7 +85,7 @@ export const tools: Tool[] = [
   {
     id: "readme-generator",
     name: "README Generator",
-    description: "Create comprehensive README files from codebases with customizable sections.",
+    description: "Create comprehensive README files from codebases.",
     icon: BookOpen,
     category: "Development",
     href: "/tools/readme-generator",
@@ -129,5 +129,45 @@ export const tools: Tool[] = [
     icon: User,
     category: "Productivity",
     href: "/tools/contact-card-generator",
+  },
+  {
+    id: "blog-post-generator",
+    name: "Blog Post Generator",
+    description: "Create SEO-optimized blog posts from topics with outlines and keywords.",
+    icon: PenSquare,
+    category: "Text & Content Creation",
+    href: "/tools/blog-post-generator",
+  },
+  {
+    id: "press-release-writer",
+    name: "Press Release Writer",
+    description: "Generate professional press releases for company announcements and news.",
+    icon: Newspaper,
+    category: "Text & Content Creation",
+    href: "/tools/press-release-writer",
+  },
+  {
+    id: "product-description-writer",
+    name: "Product Description Writer",
+    description: "Create compelling product descriptions with features, benefits, and SEO.",
+    icon: ShoppingBag,
+    category: "Text & Content Creation",
+    href: "/tools/product-description-writer",
+  },
+  {
+    id: "resume-builder",
+    name: "Resume Builder",
+    description: "Generate tailored resumes from experience data with ATS optimization.",
+    icon: Briefcase,
+    category: "Text & Content Creation",
+    href: "/tools/resume-builder",
+  },
+  {
+    id: "cover-letter-generator",
+    name: "Cover Letter Generator",
+    description: "Create personalized cover letters for job applications with key selling points.",
+    icon: FileTextIcon,
+    category: "Text & Content Creation",
+    href: "/tools/cover-letter-generator",
   },
 ];

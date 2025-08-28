@@ -19,6 +19,11 @@ export const TOOL_IDS = {
   EMAIL_TEMPLATE_GENERATOR: "email-template-generator",
   SOCIAL_MEDIA_POST_GENERATOR: "social-media-post-generator",
   CONTACT_CARD_GENERATOR: "contact-card-generator",
+  BLOG_POST_GENERATOR: "blog-post-generator",
+  PRESS_RELEASE_WRITER: "press-release-writer",
+  PRODUCT_DESCRIPTION_WRITER: "product-description-writer",
+  RESUME_BUILDER: "resume-builder",
+  COVER_LETTER_GENERATOR: "cover-letter-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

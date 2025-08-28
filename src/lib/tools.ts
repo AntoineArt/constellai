@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon, LayoutDashboard, DollarSign, Map as MapIcon, BookOpen as BookOpenIcon, ClipboardList, MessageCircle, BarChart, TrendingUp as TrendingUpIcon, FileText as FileTextIcon4, CheckCircle, FileText as FileTextIcon5, FileText as FileTextIcon6, Lightbulb } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon, LayoutDashboard, DollarSign, Map as MapIcon, BookOpen as BookOpenIcon, ClipboardList, MessageCircle, BarChart, TrendingUp as TrendingUpIcon, FileText as FileTextIcon4, CheckCircle, FileText as FileTextIcon5, FileText as FileTextIcon6, Lightbulb, HelpCircle, BookOpen as BookOpenIcon2, FileText as FileTextIcon7, GraduationCap, Target, FileText as FileTextIcon8, FileText as FileTextIcon9, Calendar as CalendarIcon } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -473,5 +473,69 @@ export const tools: Tool[] = [
     icon: Lightbulb,
     category: "Research & Analysis",
     href: "/tools/hypothesis-generator",
+  },
+  {
+    id: "quiz-generator",
+    name: "Quiz Generator",
+    description: "Create educational quizzes from content with various question types.",
+    icon: HelpCircle,
+    category: "Education & Learning",
+    href: "/tools/quiz-generator",
+  },
+  {
+    id: "lesson-plan-creator",
+    name: "Lesson Plan Creator",
+    description: "Generate structured lesson plans with objectives and activities.",
+    icon: BookOpenIcon2,
+    category: "Education & Learning",
+    href: "/tools/lesson-plan-creator",
+  },
+  {
+    id: "flashcard-generator",
+    name: "Flashcard Generator",
+    description: "Create study flashcards from text content for effective learning.",
+    icon: FileTextIcon7,
+    category: "Education & Learning",
+    href: "/tools/flashcard-generator",
+  },
+  {
+    id: "study-guide-generator",
+    name: "Study Guide Generator",
+    description: "Convert notes into comprehensive study guides with key concepts.",
+    icon: GraduationCap,
+    category: "Education & Learning",
+    href: "/tools/study-guide-generator",
+  },
+  {
+    id: "curriculum-designer",
+    name: "Curriculum Designer",
+    description: "Create educational curriculum outlines with learning objectives.",
+    icon: Target,
+    category: "Education & Learning",
+    href: "/tools/curriculum-designer",
+  },
+  {
+    id: "learning-objective-writer",
+    name: "Learning Objective Writer",
+    description: "Generate clear, measurable learning objectives for courses.",
+    icon: FileTextIcon8,
+    category: "Education & Learning",
+    href: "/tools/learning-objective-writer",
+  },
+  {
+    id: "assessment-rubric-creator",
+    name: "Assessment Rubric Creator",
+    description: "Create grading rubrics for assignments and assessments.",
+    icon: FileTextIcon9,
+    category: "Education & Learning",
+    href: "/tools/assessment-rubric-creator",
+  },
+  {
+    id: "syllabus-generator",
+    name: "Syllabus Generator",
+    description: "Generate course syllabi with schedules and requirements.",
+    icon: CalendarIcon,
+    category: "Education & Learning",
+    href: "/tools/syllabus-generator",
   },
 ];

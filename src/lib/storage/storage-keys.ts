@@ -62,6 +62,14 @@ export const TOOL_IDS = {
   RESEARCH_PROPOSAL_WRITER: "research-proposal-writer",
   ABSTRACT_GENERATOR: "abstract-generator",
   HYPOTHESIS_GENERATOR: "hypothesis-generator",
+  QUIZ_GENERATOR: "quiz-generator",
+  LESSON_PLAN_CREATOR: "lesson-plan-creator",
+  FLASHCARD_GENERATOR: "flashcard-generator",
+  STUDY_GUIDE_GENERATOR: "study-guide-generator",
+  CURRICULUM_DESIGNER: "curriculum-designer",
+  LEARNING_OBJECTIVE_WRITER: "learning-objective-writer",
+  ASSESSMENT_RUBRIC_CREATOR: "assessment-rubric-creator",
+  SYLLABUS_GENERATOR: "syllabus-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

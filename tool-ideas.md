@@ -69,14 +69,14 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **Hypothesis Generator** - Create testable hypotheses from research questions
 
 ## 📚 Education & Learning (8 tools)
-- [ ] **Quiz Generator** - Create educational quizzes from content
-- [ ] **Lesson Plan Creator** - Generate structured lesson plans
-- [ ] **Flashcard Generator** - Create study flashcards from text
-- [ ] **Study Guide Generator** - Convert notes into comprehensive study guides
-- [ ] **Curriculum Designer** - Create educational curriculum outlines
-- [ ] **Learning Objective Writer** - Generate clear learning objectives
-- [ ] **Assessment Rubric Creator** - Create grading rubrics for assignments
-- [ ] **Syllabus Generator** - Generate course syllabi with schedules
+- [x] **Quiz Generator** - Create educational quizzes from content
+- [x] **Lesson Plan Creator** - Generate structured lesson plans
+- [x] **Flashcard Generator** - Create study flashcards from text
+- [x] **Study Guide Generator** - Convert notes into comprehensive study guides
+- [x] **Curriculum Designer** - Create educational curriculum outlines
+- [x] **Learning Objective Writer** - Generate clear learning objectives
+- [x] **Assessment Rubric Creator** - Create grading rubrics for assignments
+- [x] **Syllabus Generator** - Generate course syllabi with schedules
 
 ## 🛠️ Productivity & Organization (10 tools)
 - [ ] **Meeting Minutes Generator** - Convert recordings/notes to structured minutes

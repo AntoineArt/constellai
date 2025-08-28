@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2 } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -249,5 +249,37 @@ export const tools: Tool[] = [
     icon: Palette,
     category: "Creative & Design",
     href: "/tools/color-palette-generator",
+  },
+  {
+    id: "ui-ux-copy-generator",
+    name: "UI/UX Copy Generator",
+    description: "Generate microcopy for interfaces with user-friendly messaging.",
+    icon: Monitor,
+    category: "Creative & Design",
+    href: "/tools/ui-ux-copy-generator",
+  },
+  {
+    id: "brand-name-generator",
+    name: "Brand Name Generator",
+    description: "Create unique brand and product names with domain and trademark considerations.",
+    icon: Sparkles,
+    category: "Creative & Design",
+    href: "/tools/brand-name-generator",
+  },
+  {
+    id: "design-brief-generator",
+    name: "Design Brief Generator",
+    description: "Create comprehensive design briefs with technical specifications and timelines.",
+    icon: FileTextIcon,
+    category: "Creative & Design",
+    href: "/tools/design-brief-generator",
+  },
+  {
+    id: "business-plan-generator",
+    name: "Business Plan Generator",
+    description: "Create comprehensive business plans with financial projections and market analysis.",
+    icon: Building2,
+    category: "Business & Analytics",
+    href: "/tools/business-plan-generator",
   },
 ];

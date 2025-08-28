@@ -34,6 +34,10 @@ export const TOOL_IDS = {
   STORY_GENERATOR: "story-generator",
   LOGO_CONCEPT_GENERATOR: "logo-concept-generator",
   COLOR_PALETTE_GENERATOR: "color-palette-generator",
+  UI_UX_COPY_GENERATOR: "ui-ux-copy-generator",
+  BRAND_NAME_GENERATOR: "brand-name-generator",
+  DESIGN_BRIEF_GENERATOR: "design-brief-generator",
+  BUSINESS_PLAN_GENERATOR: "business-plan-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

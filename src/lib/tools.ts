@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -209,5 +209,45 @@ export const tools: Tool[] = [
     icon: Search,
     category: "Text & Content Creation",
     href: "/tools/meta-description-generator",
+  },
+  {
+    id: "newsletter-creator",
+    name: "Newsletter Creator",
+    description: "Generate engaging newsletter content with call-to-action and social links.",
+    icon: Mail,
+    category: "Text & Content Creation",
+    href: "/tools/newsletter-creator",
+  },
+  {
+    id: "script-writer",
+    name: "Script Writer",
+    description: "Create professional scripts for videos, presentations, and podcasts.",
+    icon: FileTextIcon,
+    category: "Text & Content Creation",
+    href: "/tools/script-writer",
+  },
+  {
+    id: "story-generator",
+    name: "Story Generator",
+    description: "Generate compelling stories with character development and dialogue.",
+    icon: PenSquare,
+    category: "Text & Content Creation",
+    href: "/tools/story-generator",
+  },
+  {
+    id: "logo-concept-generator",
+    name: "Logo Concept Generator",
+    description: "Generate logo concept ideas with typography and color suggestions.",
+    icon: Sparkles,
+    category: "Creative & Design",
+    href: "/tools/logo-concept-generator",
+  },
+  {
+    id: "color-palette-generator",
+    name: "Color Palette Generator",
+    description: "Create harmonious color palettes with accessibility and theory explanations.",
+    icon: Palette,
+    category: "Creative & Design",
+    href: "/tools/color-palette-generator",
   },
 ];

@@ -29,6 +29,11 @@ export const TOOL_IDS = {
   CONTENT_CALENDAR_PLANNER: "content-calendar-planner",
   HEADLINE_GENERATOR: "headline-generator",
   META_DESCRIPTION_GENERATOR: "meta-description-generator",
+  NEWSLETTER_CREATOR: "newsletter-creator",
+  SCRIPT_WRITER: "script-writer",
+  STORY_GENERATOR: "story-generator",
+  LOGO_CONCEPT_GENERATOR: "logo-concept-generator",
+  COLOR_PALETTE_GENERATOR: "color-palette-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

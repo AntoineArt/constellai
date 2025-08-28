@@ -38,15 +38,15 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **Design Brief Generator** - Create comprehensive design briefs
 - [x] **Typography Pairer** - Suggest font combinations for designs
 - [x] **Icon Description Generator** - Generate detailed descriptions for icon creation
-- [ ] **Style Guide Generator** - Create brand style guide documentation
-- [ ] **Creative Brief Writer** - Generate creative campaign briefs
-- [ ] **Art Prompt Generator** - Create detailed prompts for AI art generation
+- [x] **Style Guide Generator** - Create brand style guide documentation
+- [x] **Creative Brief Writer** - Generate creative campaign briefs
+- [x] **Art Prompt Generator** - Create detailed prompts for AI art generation
 
 ## 📊 Business & Analytics (12 tools)
 - [x] **Business Plan Generator** - Create comprehensive business plans
 - [x] **SWOT Analysis Generator** - Generate strategic analysis frameworks
-- [ ] **Market Research Synthesizer** - Analyze and summarize market data
-- [ ] **Financial Report Summarizer** - Explain financial statements in plain language
+- [x] **Market Research Synthesizer** - Analyze and summarize market data
+- [x] **Financial Report Summarizer** - Explain financial statements in plain language
 - [ ] **Competitor Analysis Tool** - Compare businesses and identify opportunities
 - [ ] **Sales Pitch Generator** - Create persuasive sales presentations
 - [ ] **KPI Dashboard Designer** - Design metrics tracking frameworks

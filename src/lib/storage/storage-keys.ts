@@ -41,6 +41,11 @@ export const TOOL_IDS = {
   TYPOGRAPHY_PAIRER: "typography-pairer",
   ICON_DESCRIPTION_GENERATOR: "icon-description-generator",
   SWOT_ANALYSIS_GENERATOR: "swot-analysis-generator",
+  STYLE_GUIDE_GENERATOR: "style-guide-generator",
+  CREATIVE_BRIEF_WRITER: "creative-brief-writer",
+  ART_PROMPT_GENERATOR: "art-prompt-generator",
+  MARKET_RESEARCH_SYNTHESIZER: "market-research-synthesizer",
+  FINANCIAL_REPORT_SUMMARIZER: "financial-report-summarizer",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -305,5 +305,45 @@ export const tools: Tool[] = [
     icon: TrendingUp,
     category: "Business & Analytics",
     href: "/tools/swot-analysis-generator",
+  },
+  {
+    id: "style-guide-generator",
+    name: "Style Guide Generator",
+    description: "Create comprehensive brand style guides with design standards and guidelines.",
+    icon: FileTextIcon3,
+    category: "Creative & Design",
+    href: "/tools/style-guide-generator",
+  },
+  {
+    id: "creative-brief-writer",
+    name: "Creative Brief Writer",
+    description: "Generate comprehensive creative campaign briefs with strategic direction.",
+    icon: FileTextIcon2,
+    category: "Creative & Design",
+    href: "/tools/creative-brief-writer",
+  },
+  {
+    id: "art-prompt-generator",
+    name: "Art Prompt Generator",
+    description: "Create detailed art prompts with visual descriptions and technical specifications.",
+    icon: PaletteIcon,
+    category: "Creative & Design",
+    href: "/tools/art-prompt-generator",
+  },
+  {
+    id: "market-research-synthesizer",
+    name: "Market Research Synthesizer",
+    description: "Analyze and synthesize market data with competitive analysis and insights.",
+    icon: BarChart3Icon,
+    category: "Business & Analytics",
+    href: "/tools/market-research-synthesizer",
+  },
+  {
+    id: "financial-report-summarizer",
+    name: "Financial Report Summarizer",
+    description: "Summarize financial statements with key insights and strategic recommendations.",
+    icon: BarChart3,
+    category: "Business & Analytics",
+    href: "/tools/financial-report-summarizer",
   },
 ];

@@ -27,9 +27,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Tailwind CSS v4** for styling
 - **Biome** for linting and formatting
 - **TypeScript** with strict configuration
+- **Vercel AI SDK** with Gateway for AI model access
+- **shadcn/ui** with Radix UI primitives for components
+- **AI Elements** for chat UI components
 
 ### Project Structure
 - `src/app/` - Next.js App Router pages and layouts
+  - `api/` - API routes for AI services (chat, regex, summarize)
+  - `tools/` - Tool-specific pages (chat, regex, summarizer)
+- `src/components/` - React components
+  - `ai-elements/` - AI-specific components (conversation, message, etc.)
+  - `ui/` - shadcn/ui component library
+- `src/hooks/` - Custom React hooks
+- `src/lib/` - Utility functions and configurations
 - `convex/` - Convex backend functions and schema
 - `docs/` - Product specifications and concepts
 - Root contains config files (biome.json, tsconfig.json, etc.)
@@ -60,9 +70,11 @@ export const createUser = mutation({
 
 ### Frontend Architecture
 - **Providers**: Convex client wrapped in `src/app/providers.tsx`
-- **Layout**: Root layout includes font loading and provider wrapping
+- **Layout**: Root layout includes font loading and provider wrapping with sidebar
 - **Styling**: Tailwind utilities with Geist fonts (sans and mono variants)
 - **Client Components**: Use "use client" directive when needed for Convex hooks
+- **Sidebar Navigation**: Uses shadcn/ui sidebar with collapsible primary navigation
+- **AI Integration**: API routes handle AI model requests with API key authentication
 
 ### Product Vision (from docs/concept.md)
 ConstellAI is designed as a bold, fast web app offering AI tools with credit-based usage. Key features planned:
@@ -85,6 +97,9 @@ ConstellAI is designed as a bold, fast web app offering AI tools with credit-bas
 - Use `import type` for type-only imports
 - Prefer server components over client components when possible
 - Never use `any` type (explicitly disabled in Biome config)
+- Use `for of` loops over `forEach` where possible
+- Strings use double quotes
+- Maintain consistent error handling in API routes
 
 ### Environment Setup
 - Convex requires `NEXT_PUBLIC_CONVEX_URL` environment variable
@@ -104,3 +119,35 @@ ConstellAI is designed as a bold, fast web app offering AI tools with credit-bas
 2. Use TypeScript and proper metadata exports
 3. Wrap client-side Convex usage in "use client" components
 4. Follow existing layout and styling patterns
+
+### Adding New AI Tools
+1. Create API route in `src/app/api/[tool-name]/route.ts`
+2. Implement POST handler with proper API key validation using `getApiKeyFromHeaders`
+3. Use Vercel AI SDK for model integration
+4. Add tool page in `src/app/tools/[tool-name]/page.tsx`
+5. Follow existing patterns for error handling and streaming responses
+
+### API Route Pattern
+```typescript
+import { streamText } from "ai";
+import { getApiKeyFromHeaders } from "@/lib/ai-config";
+
+export const maxDuration = 30;
+
+export async function POST(req: Request) {
+  try {
+    const apiKey = getApiKeyFromHeaders(new Headers(req.headers));
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: "API key is required" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    
+    process.env.AI_GATEWAY_API_KEY = apiKey;
+    // Handle request logic here
+  } catch (error) {
+    // Consistent error handling
+  }
+}
+```

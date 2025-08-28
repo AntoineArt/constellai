@@ -10,13 +10,13 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **Code Complexity Analyzer** - Analyze and suggest code simplifications
 - [x] **Performance Optimizer** - Suggest performance improvements for code
 - [x] **README Generator** - Create comprehensive README files from codebases
-- [ ] **Error Message Decoder** - Explain and suggest fixes for error messages
-- [ ] **Git PR Message Writer** - Generate pull request descriptions from commit history
+- [x] **Error Message Decoder** - Explain and suggest fixes for error messages
+- [x] **Git PR Message Writer** - Generate pull request descriptions from commit history
 
 ## 📝 Text & Content Creation (15 tools)
 - [ ] **Blog Post Generator** - Create SEO-optimized blog posts from topics
-- [ ] **Email Template Creator** - Generate professional emails for different purposes
-- [ ] **Social Media Post Generator** - Create platform-specific content with hashtags
+- [x] **Email Template Creator** - Generate professional emails for different purposes
+- [x] **Social Media Post Generator** - Create platform-specific content with hashtags
 - [ ] **Press Release Writer** - Generate professional press releases
 - [ ] **Product Description Writer** - Create compelling product descriptions
 - [ ] **Resume Builder** - Generate tailored resumes from experience data
@@ -165,7 +165,7 @@ Select the tools you want to implement by checking the boxes below.
 - [ ] **Email to Task List Converter** - Extract action items from emails
 - [ ] **Receipt to Expense Report** - Convert receipt text to expense entries
 - [ ] **Resume Format Converter** - Convert resumes between different formats/styles
-- [ ] **Contact Card Generator** - Convert contact info to vCard format
+- [x] **Contact Card Generator** - Convert contact info to vCard format
 - [ ] **Calendar Event to Email** - Convert calendar invites to email descriptions
 - [ ] **Shopping List Organizer** - Convert random lists to organized shopping lists
 - [ ] **Notes to Outline Converter** - Convert messy notes to structured outlines

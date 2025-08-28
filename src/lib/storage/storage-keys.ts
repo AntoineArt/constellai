@@ -1,10 +1,6 @@
 export const STORAGE_KEYS = {
-  API_KEY: "constellai-api-key",
-  USER_DATA: "constellai-user-data",
-  PREFERENCES: "constellai-preferences",
-  TOOL_EXECUTIONS: "constellai-tool-executions",
-  ACTIVE_EXECUTIONS: "constellai-active-executions",
-  PINNED_TOOLS: "constellai-pinned-tools",
+  API_KEY: "api-key",
+  PREFERENCES: "preferences",
 } as const;
 
 export const TOOL_IDS = {
@@ -18,6 +14,11 @@ export const TOOL_IDS = {
   COMPLEXITY_ANALYZER: "complexity-analyzer",
   PERFORMANCE_OPTIMIZER: "performance-optimizer",
   README_GENERATOR: "readme-generator",
+  ERROR_DECODER: "error-decoder",
+  PR_MESSAGE_WRITER: "pr-message-writer",
+  EMAIL_TEMPLATE_GENERATOR: "email-template-generator",
+  SOCIAL_MEDIA_POST_GENERATOR: "social-media-post-generator",
+  CONTACT_CARD_GENERATOR: "contact-card-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

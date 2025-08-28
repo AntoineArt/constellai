@@ -1,10 +1,10 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User } from "lucide-react";
 
 export interface Tool {
   id: string;
   name: string;
   description: string;
-  icon: typeof MessageSquare;
+  icon: React.ComponentType<{ className?: string }>;
   category: string;
   href: string;
 }
@@ -13,17 +13,15 @@ export const tools: Tool[] = [
   {
     id: "chat",
     name: "AI Chat",
-    description:
-      "Have conversations with AI models. Support for attachments and streaming responses.",
+    description: "Chat with AI models for general assistance and conversation.",
     icon: MessageSquare,
-    category: "Conversation",
+    category: "General",
     href: "/tools/chat",
   },
   {
     id: "regex",
     name: "Regex Generator",
-    description:
-      "Generate regular expressions from natural language with live testing and explanations.",
+    description: "Generate and test regular expressions with explanations.",
     icon: Zap,
     category: "Development",
     href: "/tools/regex",
@@ -31,7 +29,7 @@ export const tools: Tool[] = [
   {
     id: "summarizer",
     name: "Text Summarizer",
-    description: "Summarize long texts and documents using advanced AI models.",
+    description: "Summarize long text content with customizable length and style.",
     icon: FileText,
     category: "Text Processing",
     href: "/tools/summarizer",
@@ -91,5 +89,45 @@ export const tools: Tool[] = [
     icon: BookOpen,
     category: "Development",
     href: "/tools/readme-generator",
+  },
+  {
+    id: "error-decoder",
+    name: "Error Message Decoder",
+    description: "Explain and suggest fixes for error messages with code examples.",
+    icon: AlertTriangle,
+    category: "Development",
+    href: "/tools/error-decoder",
+  },
+  {
+    id: "pr-message-writer",
+    name: "Git PR Message Writer",
+    description: "Generate pull request descriptions from commit history with testing notes.",
+    icon: GitBranch,
+    category: "Development",
+    href: "/tools/pr-message-writer",
+  },
+  {
+    id: "email-template-generator",
+    name: "Email Template Generator",
+    description: "Create professional email templates with customizable tone and format.",
+    icon: Mail,
+    category: "Communication",
+    href: "/tools/email-template-generator",
+  },
+  {
+    id: "social-media-post-generator",
+    name: "Social Media Post Generator",
+    description: "Create engaging social media content with platform-specific optimizations.",
+    icon: Share2,
+    category: "Marketing",
+    href: "/tools/social-media-post-generator",
+  },
+  {
+    id: "contact-card-generator",
+    name: "Contact Card Generator",
+    description: "Convert contact info to vCard format with QR codes and import instructions.",
+    icon: User,
+    category: "Productivity",
+    href: "/tools/contact-card-generator",
   },
 ];

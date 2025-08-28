@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon, LayoutDashboard, DollarSign, Map as MapIcon, BookOpen as BookOpenIcon, ClipboardList, MessageCircle, BarChart, TrendingUp as TrendingUpIcon, FileText as FileTextIcon4, CheckCircle, FileText as FileTextIcon5, FileText as FileTextIcon6, Lightbulb, HelpCircle, BookOpen as BookOpenIcon2, FileText as FileTextIcon7, GraduationCap, Target, FileText as FileTextIcon8, FileText as FileTextIcon9, Calendar as CalendarIcon } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon, LayoutDashboard, DollarSign, Map as MapIcon, BookOpen as BookOpenIcon, ClipboardList, MessageCircle, BarChart, TrendingUp as TrendingUpIcon, FileText as FileTextIcon4, CheckCircle, FileText as FileTextIcon5, FileText as FileTextIcon6, Lightbulb, HelpCircle, BookOpen as BookOpenIcon2, FileText as FileTextIcon7, GraduationCap, Target, FileText as FileTextIcon8, FileText as FileTextIcon9, Calendar as CalendarIcon, Clock, CheckSquare, Calendar as CalendarIcon2, Target as TargetIcon, Calendar as CalendarIcon3, Clock as ClockIcon, Table as TableIcon, FileText as FileTextIcon10, FileText as FileTextIcon11, Workflow } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -537,5 +537,85 @@ export const tools: Tool[] = [
     icon: CalendarIcon,
     category: "Education & Learning",
     href: "/tools/syllabus-generator",
+  },
+  {
+    id: "meeting-minutes-generator",
+    name: "Meeting Minutes Generator",
+    description: "Convert recordings/notes to structured meeting minutes.",
+    icon: Clock,
+    category: "Productivity & Organization",
+    href: "/tools/meeting-minutes-generator",
+  },
+  {
+    id: "task-prioritizer",
+    name: "Task Prioritizer",
+    description: "Organize and prioritize to-do lists with smart ranking.",
+    icon: CheckSquare,
+    category: "Productivity & Organization",
+    href: "/tools/task-prioritizer",
+  },
+  {
+    id: "project-timeline-creator",
+    name: "Project Timeline Creator",
+    description: "Generate Gantt chart descriptions and project timelines.",
+    icon: CalendarIcon2,
+    category: "Productivity & Organization",
+    href: "/tools/project-timeline-creator",
+  },
+  {
+    id: "goal-setting-assistant",
+    name: "Goal Setting Assistant",
+    description: "Create SMART goals with detailed action plans.",
+    icon: TargetIcon,
+    category: "Productivity & Organization",
+    href: "/tools/goal-setting-assistant",
+  },
+  {
+    id: "habit-tracker-designer",
+    name: "Habit Tracker Designer",
+    description: "Create personalized habit tracking systems.",
+    icon: CalendarIcon3,
+    category: "Productivity & Organization",
+    href: "/tools/habit-tracker-designer",
+  },
+  {
+    id: "daily-schedule-optimizer",
+    name: "Daily Schedule Optimizer",
+    description: "Optimize daily schedules for maximum productivity.",
+    icon: ClockIcon,
+    category: "Productivity & Organization",
+    href: "/tools/daily-schedule-optimizer",
+  },
+  {
+    id: "decision-matrix-creator",
+    name: "Decision Matrix Creator",
+    description: "Generate decision-making frameworks and analysis tools.",
+    icon: TableIcon,
+    category: "Productivity & Organization",
+    href: "/tools/decision-matrix-creator",
+  },
+  {
+    id: "process-documenter",
+    name: "Process Documenter",
+    description: "Create step-by-step process documentation.",
+    icon: FileTextIcon10,
+    category: "Productivity & Organization",
+    href: "/tools/process-documenter",
+  },
+  {
+    id: "sop-generator",
+    name: "SOP Generator",
+    description: "Generate standard operating procedures.",
+    icon: FileTextIcon11,
+    category: "Productivity & Organization",
+    href: "/tools/sop-generator",
+  },
+  {
+    id: "workflow-designer",
+    name: "Workflow Designer",
+    description: "Create efficient workflow descriptions and diagrams.",
+    icon: Workflow,
+    category: "Productivity & Organization",
+    href: "/tools/workflow-designer",
   },
 ];

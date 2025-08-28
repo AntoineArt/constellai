@@ -70,6 +70,16 @@ export const TOOL_IDS = {
   LEARNING_OBJECTIVE_WRITER: "learning-objective-writer",
   ASSESSMENT_RUBRIC_CREATOR: "assessment-rubric-creator",
   SYLLABUS_GENERATOR: "syllabus-generator",
+  MEETING_MINUTES_GENERATOR: "meeting-minutes-generator",
+  TASK_PRIORITIZER: "task-prioritizer",
+  PROJECT_TIMELINE_CREATOR: "project-timeline-creator",
+  GOAL_SETTING_ASSISTANT: "goal-setting-assistant",
+  HABIT_TRACKER_DESIGNER: "habit-tracker-designer",
+  DAILY_SCHEDULE_OPTIMIZER: "daily-schedule-optimizer",
+  DECISION_MATRIX_CREATOR: "decision-matrix-creator",
+  PROCESS_DOCUMENTER: "process-documenter",
+  SOP_GENERATOR: "sop-generator",
+  WORKFLOW_DESIGNER: "workflow-designer",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

@@ -19,14 +19,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useApiKey } from "@/hooks/use-api-key";
-import { Key, Settings, Plus } from "lucide-react";
+import { Key, Settings } from "lucide-react";
 
 const models = [
-	{ id: "openai/gpt-oss-20b", name: "GPT-OSS-20B" },
+  { id: "openai/gpt-oss-20b", name: "GPT-OSS-20B" },
   { id: "openai/gpt-4o", name: "GPT-4o" },
   { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
   { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
-	{ id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
+  { id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
 ];
 
 interface TopBarProps {
@@ -34,7 +34,6 @@ interface TopBarProps {
   selectedModel?: string;
   onModelChange?: (model: string) => void;
   actions?: React.ReactNode;
-  onNew?: () => void; // New button handler
 }
 
 export function TopBar({
@@ -42,7 +41,6 @@ export function TopBar({
   selectedModel,
   onModelChange,
   actions,
-  onNew,
 }: TopBarProps) {
   const { apiKey, setApiKey, getMaskedApiKey, hasApiKey } = useApiKey();
   const [tempApiKey, setTempApiKey] = useState("");
@@ -77,7 +75,9 @@ export function TopBar({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        setValidationError(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        setValidationError(
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`
+        );
         return false;
       }
 
@@ -115,17 +115,6 @@ export function TopBar({
         <h1 className="text-xl font-semibold">{title}</h1>
 
         <div className="flex items-center gap-4">
-          {onNew && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onNew}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              New
-            </Button>
-          )}
           {selectedModel && onModelChange && (
             <Select value={selectedModel} onValueChange={onModelChange}>
               <SelectTrigger className="w-[200px]">
@@ -173,16 +162,17 @@ export function TopBar({
                     className="w-full"
                   />
                   <p className="text-sm text-muted-foreground">
-                    Your API key is stored locally and never sent to our servers.
+                    Your API key is stored locally and never sent to our
+                    servers.
                   </p>
-                  
+
                   {/* Validation feedback */}
                   {validationError && (
                     <div className="text-sm text-destructive bg-destructive/10 p-2 rounded">
                       {validationError}
                     </div>
                   )}
-                  
+
                   {validationSuccess && (
                     <div className="text-sm text-green-600 bg-green-50 p-2 rounded">
                       ✓ API key is valid and working!
@@ -200,8 +190,8 @@ export function TopBar({
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     onClick={handleSaveApiKey}
                     disabled={isValidating}
                   >

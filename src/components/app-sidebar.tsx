@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Search } from "lucide-react";
+import { Home, Search, Pin, PinOff } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,12 +14,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuAction,
 } from "@/components/ui/sidebar";
 import { tools } from "@/lib/tools";
 import { cn } from "@/lib/utils";
+import { usePinnedTools } from "@/lib/storage";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { pinnedTools, toggle, isPinned, isLoaded } = usePinnedTools();
+
+  // Filter tools to show only pinned ones
+  const visibleTools = tools.filter((tool) => isPinned(tool.id));
 
   return (
     <Sidebar variant="inset">
@@ -53,16 +59,41 @@ export function AppSidebar() {
           <SidebarGroupLabel>AI Tools</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {tools.map((tool) => (
-                <SidebarMenuItem key={tool.id}>
-                  <SidebarMenuButton asChild isActive={pathname === tool.href}>
-                    <Link href={tool.href}>
-                      <tool.icon className="h-4 w-4" />
-                      <span>{tool.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {isLoaded &&
+                visibleTools.map((tool) => (
+                  <SidebarMenuItem key={tool.id}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === tool.href}
+                    >
+                      <Link href={tool.href}>
+                        <tool.icon className="h-4 w-4" />
+                        <span>{tool.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                    <SidebarMenuAction onClick={() => toggle(tool.id)}>
+                      <PinOff className="h-4 w-4" />
+                    </SidebarMenuAction>
+                  </SidebarMenuItem>
+                ))}
+
+              {/* Show unpinned tools for pinning */}
+              {isLoaded &&
+                tools
+                  .filter((tool) => !isPinned(tool.id))
+                  .map((tool) => (
+                    <SidebarMenuItem key={`unpinned-${tool.id}`}>
+                      <SidebarMenuButton asChild className="opacity-50">
+                        <Link href={tool.href}>
+                          <tool.icon className="h-4 w-4" />
+                          <span>{tool.name}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      <SidebarMenuAction onClick={() => toggle(tool.id)}>
+                        <Pin className="h-4 w-4" />
+                      </SidebarMenuAction>
+                    </SidebarMenuItem>
+                  ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

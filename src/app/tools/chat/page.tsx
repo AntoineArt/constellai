@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, useEffect, useMemo } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import type { ChatStatus } from "ai";
 
 import { TopBar } from "@/components/top-bar";
@@ -13,9 +13,9 @@ import type { ChatMessage } from "@/lib/storage/types";
 import { Trash2, Copy, RotateCcw } from "lucide-react";
 
 export default function ChatPage() {
-  const toolHistory = useToolHistory(TOOL_IDS.CHAT);
-  const { preferences } = usePreferences();
   const { hasApiKey, apiKey } = useApiKey();
+  const toolHistory = useToolHistory(TOOL_IDS.CHAT, { apiKey });
+  const { preferences } = usePreferences();
 
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
   const [messages, setMessages] = useState<Array<ChatMessage>>([]);
@@ -39,35 +39,38 @@ export default function ChatPage() {
     }
   }, [toolHistory.isLoaded, toolHistory.currentExecution]);
 
-  // Debounced auto-save messages when they change
-  const debouncedMessages = useMemo(() => messages, [JSON.stringify(messages)]);
-  
+  // Save conversation when not streaming and messages have changed
   useEffect(() => {
-    if (!toolHistory.isLoaded || messages.length === 0) return;
-    
-    const timeoutId = setTimeout(() => {
+    if (
+      !toolHistory.isLoaded ||
+      messages.length === 0 ||
+      status === "streaming" ||
+      status === "submitted"
+    )
+      return;
+
+    const timeoutId = setTimeout(async () => {
       if (!toolHistory.currentExecution) {
-        toolHistory.createNewExecution(
-          { messages: debouncedMessages },
-          { selectedModel }
-        );
+        await toolHistory.createNewExecution({ messages }, { selectedModel });
       } else {
         toolHistory.updateCurrentExecution({
-          inputs: { messages: debouncedMessages },
+          inputs: { messages },
           settings: { selectedModel },
         });
       }
-    }, 500); // 500ms debounce
+    }, 1000); // Longer debounce to avoid interference
 
     return () => clearTimeout(timeoutId);
-  }, [debouncedMessages, selectedModel]);
+  }, [messages, selectedModel, status, toolHistory]);
 
   // Auto-scroll to bottom when messages change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages is needed to trigger scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, status]);
+  }, [messages]);
 
   // Auto-resize textarea with strict max height
+  // biome-ignore lint/correctness/useExhaustiveDependencies: inputValue is needed to trigger resize
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -89,37 +92,23 @@ export default function ChatPage() {
     toolHistory.clearActiveExecution();
   }, [status, toolHistory]);
 
-  const copyMessage = useCallback(async (content: string, messageId: string) => {
-    try {
-      await navigator.clipboard.writeText(content);
-      setCopiedMessageId(messageId);
-      setTimeout(() => setCopiedMessageId(null), 2000);
-    } catch (error) {
-      console.error("Failed to copy message:", error);
-    }
-  }, []);
-
-  const regenerateLastResponse = useCallback(() => {
-    if (status === "streaming" || messages.length === 0) return;
-    
-    // Find the last user message
-    const lastUserMessageIndex = messages.findLastIndex(m => m.role === "user");
-    if (lastUserMessageIndex === -1) return;
-
-    // Remove all messages after the last user message
-    const newMessages = messages.slice(0, lastUserMessageIndex + 1);
-    setMessages(newMessages);
-    
-    // Re-trigger the API call with the last user message
-    const lastUserMessage = messages[lastUserMessageIndex];
-    if (lastUserMessage) {
-      handleSubmitWithMessage(newMessages);
-    }
-  }, [messages, status]);
+  const copyMessage = useCallback(
+    async (content: string, messageId: string) => {
+      try {
+        await navigator.clipboard.writeText(content);
+        setCopiedMessageId(messageId);
+        setTimeout(() => setCopiedMessageId(null), 2000);
+      } catch (error) {
+        console.error("Failed to copy message:", error);
+      }
+    },
+    []
+  );
 
   const handleSubmitWithMessage = useCallback(
     async (messagesToSend: ChatMessage[]) => {
-      if (!hasApiKey || status === "submitted" || status === "streaming") return;
+      if (!hasApiKey || status === "submitted" || status === "streaming")
+        return;
 
       setStatus("submitted");
 
@@ -146,7 +135,10 @@ export default function ChatPage() {
 
         if (!response.body) {
           const text = await response.text();
-          setMessages((prev) => [...prev, { role: "assistant", content: text }]);
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: text },
+          ]);
           setStatus(undefined);
           chatControllerRef.current = null;
           return;
@@ -169,7 +161,10 @@ export default function ChatPage() {
             const next = [...prev];
             const lastIndex = next.length - 1;
             if (lastIndex >= 0 && next[lastIndex]?.role === "assistant") {
-              next[lastIndex] = { role: "assistant", content: assistantContent };
+              next[lastIndex] = {
+                role: "assistant",
+                content: assistantContent,
+              };
             }
             return next;
           });
@@ -185,26 +180,73 @@ export default function ChatPage() {
           }
           return next;
         });
+
+        // Clean up and save after streaming completes
+        chatControllerRef.current = null;
         setStatus(undefined);
+
+        // Final save of the complete conversation
+        const finalMessages = [
+          ...messagesToSend,
+          { role: "assistant", content: assistantContent },
+        ];
+        if (!toolHistory.currentExecution) {
+          await toolHistory.createNewExecution(
+            { messages: finalMessages },
+            { selectedModel }
+          );
+        } else {
+          toolHistory.updateCurrentExecution({
+            inputs: { messages: finalMessages },
+            settings: { selectedModel },
+          });
+        }
       } catch (error) {
         chatControllerRef.current = null;
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "Sorry, an error occurred while communicating with the assistant.",
-          },
-        ]);
-        setStatus("error");
+        if (error instanceof Error && error.name === "AbortError") {
+          // Request was cancelled, don't show error message
+          setStatus(undefined);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content:
+                "Sorry, an error occurred while communicating with the assistant.",
+            },
+          ]);
+          setStatus("error");
+        }
       }
     },
-    [hasApiKey, apiKey, selectedModel]
+    [hasApiKey, apiKey, selectedModel, status, toolHistory]
   );
+
+  const regenerateLastResponse = useCallback(() => {
+    if (status === "streaming" || messages.length === 0) return;
+
+    // Find the last user message
+    const lastUserMessageIndex = messages.findLastIndex(
+      (m) => m.role === "user"
+    );
+    if (lastUserMessageIndex === -1) return;
+
+    // Remove all messages after the last user message
+    const newMessages = messages.slice(0, lastUserMessageIndex + 1);
+    setMessages(newMessages);
+
+    // Re-trigger the API call with the last user message
+    const lastUserMessage = messages[lastUserMessageIndex];
+    if (lastUserMessage) {
+      handleSubmitWithMessage(newMessages);
+    }
+  }, [messages, status, handleSubmitWithMessage]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!hasApiKey || status === "submitted" || status === "streaming") return;
+      if (!hasApiKey || status === "submitted" || status === "streaming")
+        return;
 
       const prompt = inputValue.trim();
       if (!prompt) return;
@@ -215,7 +257,7 @@ export default function ChatPage() {
       ];
       setMessages(newMessages);
       setInputValue("");
-      
+
       // Reset textarea height
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
@@ -235,6 +277,15 @@ export default function ChatPage() {
         onSelectExecution={toolHistory.switchToExecution}
         onDeleteExecution={toolHistory.deleteExecution}
         onRenameExecution={toolHistory.renameExecution}
+        onNewExecution={async () => {
+          if (status !== "streaming") {
+            clearChat();
+            await toolHistory.createNewExecution(
+              { messages: [] },
+              { selectedModel }
+            );
+          }
+        }}
         toolName="Chat"
       />
 
@@ -245,201 +296,219 @@ export default function ChatPage() {
           title="AI Chat"
           selectedModel={selectedModel}
           onModelChange={setSelectedModel}
-          onNew={() => {
-            if (status !== "streaming") {
-              clearChat();
-            }
-          }}
         />
 
-      {/* Main content area */}
-      <div className="h-[calc(100vh-64px)] overflow-hidden">
-        {!hasApiKey ? (
-          <div className="h-full flex items-center justify-center p-6">
-            <Card className="border-muted bg-muted/20 max-w-md">
-              <CardContent className="p-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Please set your Vercel AI Gateway API key in the top bar to start chatting
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <div className="h-full flex flex-col">
-            {/* Chat actions - when present */}
-            {messages.length > 0 && (
-              <div className="border-b bg-background px-6 py-3 flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  {messages.length} messages
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={regenerateLastResponse}
-                    disabled={status === "streaming" || messages.length === 0}
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Regenerate
-                  </Button>
-                  <Button
-                    variant="ghost" 
-                    size="sm"
-                    onClick={clearChat}
-                    disabled={status === "streaming"}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Clear
-                  </Button>
+        {/* Main content area */}
+        <div className="h-[calc(100vh-64px)] overflow-hidden">
+          {!hasApiKey ? (
+            <div className="h-full flex items-center justify-center p-6">
+              <Card className="border-muted bg-muted/20 max-w-md">
+                <CardContent className="p-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Please set your Vercel AI Gateway API key in the top bar to
+                    start chatting
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="h-full flex flex-col">
+              {/* Chat actions - when present */}
+              {messages.length > 0 && (
+                <div className="border-b bg-background px-6 py-3 flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {messages.length} messages
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={regenerateLastResponse}
+                      disabled={status === "streaming" || messages.length === 0}
+                    >
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Regenerate
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearChat}
+                      disabled={status === "streaming"}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Clear
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Messages area - scrollable */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="max-w-4xl mx-auto p-6">
-                <div className="space-y-6">
-                  {/* Welcome message */}
-                  {messages.length === 0 && (
-                    <div className="flex">
-                      <div className="bg-muted rounded-2xl p-4 max-w-[80%]">
-                        <p className="text-sm">
-                          Hello! I'm your AI assistant. How can I help you today?
-                        </p>
+              {/* Messages area - scrollable */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="max-w-4xl mx-auto p-6">
+                  <div className="space-y-6">
+                    {/* Welcome message */}
+                    {messages.length === 0 && (
+                      <div className="flex">
+                        <div className="bg-muted rounded-2xl p-4 max-w-[80%]">
+                          <p className="text-sm">
+                            Hello! I'm your AI assistant. How can I help you
+                            today?
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Chat messages */}
-                  {messages.map((message, index) => (
-                    <div key={`${index}-${message.role}`} className="group">
-                      <div className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                    {/* Chat messages */}
+                    {messages.map((message, index) => (
+                      <div key={`${index}-${message.role}`} className="group">
                         <div
-                          className={`relative max-w-[80%] rounded-2xl p-4 ${
-                            message.role === "user"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }`}
+                          className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                         >
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                          
-                          {/* Copy button */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-sm"
-                            onClick={() => copyMessage(message.content, `${index}-${message.role}`)}
+                          <div
+                            className={`relative max-w-[80%] rounded-2xl p-4 ${
+                              message.role === "user"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted"
+                            }`}
                           >
-                            <Copy 
-                              className={`h-3 w-3 ${
-                                copiedMessageId === `${index}-${message.role}` 
-                                  ? "text-green-600" 
-                                  : "text-muted-foreground"
-                              }`} 
-                            />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                            <p className="text-sm whitespace-pre-wrap">
+                              {message.content}
+                            </p>
 
-                  {/* Loading indicator */}
-                  {(status === "submitted" || status === "streaming") && (
-                    <div className="flex">
-                      <div className="bg-muted rounded-2xl p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="flex gap-1">
-                            <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.3s]" />
-                            <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.15s]" />
-                            <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" />
+                            {/* Copy button */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-sm"
+                              onClick={() =>
+                                copyMessage(
+                                  message.content,
+                                  `${index}-${message.role}`
+                                )
+                              }
+                            >
+                              <Copy
+                                className={`h-3 w-3 ${
+                                  copiedMessageId === `${index}-${message.role}`
+                                    ? "text-green-600"
+                                    : "text-muted-foreground"
+                                }`}
+                              />
+                            </Button>
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            {status === "submitted" ? "Thinking..." : "Typing..."}
-                          </span>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    ))}
 
-                  {/* Auto-scroll target */}
-                  <div ref={messagesEndRef} />
+                    {/* Loading indicator */}
+                    {(status === "submitted" || status === "streaming") && (
+                      <div className="flex">
+                        <div className="bg-muted rounded-2xl p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1">
+                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.3s]" />
+                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.15s]" />
+                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" />
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {status === "submitted"
+                                ? "Thinking..."
+                                : "Typing..."}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Auto-scroll target */}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Input area - fixed at bottom */}
+              <div className="border-t bg-background p-4">
+                <div className="max-w-4xl mx-auto">
+                  <form
+                    onSubmit={handleSubmit}
+                    className="bg-muted/50 rounded-2xl border focus-within:border-primary/50 focus-within:bg-background transition-all"
+                  >
+                    <div className="p-4">
+                      <textarea
+                        ref={textareaRef}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder={
+                          !hasApiKey
+                            ? "Please set your API key to start chatting..."
+                            : status === "streaming"
+                              ? "Please wait for the response to complete..."
+                              : "Type your message..."
+                        }
+                        className="w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none min-h-[60px] max-h-[120px]"
+                        disabled={!hasApiKey || status === "streaming"}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSubmit(e);
+                          }
+                          if (e.key === "Escape") {
+                            e.currentTarget.blur();
+                          }
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between px-4 pb-4">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>
+                          Press{" "}
+                          <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">
+                            ↵
+                          </kbd>{" "}
+                          to send
+                        </span>
+                        {inputValue.length > 0 && (
+                          <span>{inputValue.length} characters</span>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        {status === "streaming" && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (chatControllerRef.current) {
+                                chatControllerRef.current.abort();
+                                chatControllerRef.current = null;
+                                setStatus(undefined);
+                              }
+                            }}
+                          >
+                            Stop
+                          </Button>
+                        )}
+                        <Button
+                          type="submit"
+                          size="sm"
+                          disabled={
+                            !inputValue.trim() ||
+                            !hasApiKey ||
+                            status === "streaming"
+                          }
+                        >
+                          {status === "streaming" ? "Sending..." : "Send"}
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
-
-            {/* Input area - fixed at bottom */}
-            <div className="border-t bg-background p-4">
-              <div className="max-w-4xl mx-auto">
-                <form
-                  onSubmit={handleSubmit}
-                  className="bg-muted/50 rounded-2xl border focus-within:border-primary/50 focus-within:bg-background transition-all"
-                >
-                  <div className="p-4">
-                    <textarea
-                      ref={textareaRef}
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder={
-                        !hasApiKey 
-                          ? "Please set your API key to start chatting..." 
-                          : status === "streaming"
-                          ? "Please wait for the response to complete..."
-                          : "Type your message..."
-                      }
-                      className="w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none min-h-[60px] max-h-[120px]"
-                      disabled={!hasApiKey || status === "streaming"}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSubmit(e);
-                        }
-                        if (e.key === "Escape") {
-                          e.currentTarget.blur();
-                        }
-                      }}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between px-4 pb-4">
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span>Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">↵</kbd> to send</span>
-                      {inputValue.length > 0 && (
-                        <span>{inputValue.length} characters</span>
-                      )}
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      {status === "streaming" && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (chatControllerRef.current) {
-                              chatControllerRef.current.abort();
-                              chatControllerRef.current = null;
-                              setStatus(undefined);
-                            }
-                          }}
-                        >
-                          Stop
-                        </Button>
-                      )}
-                      <Button
-                        type="submit"
-                        size="sm"
-                        disabled={!inputValue.trim() || !hasApiKey || status === "streaming"}
-                      >
-                        {status === "streaming" ? "Sending..." : "Send"}
-                      </Button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       </div>
     </div>
   );

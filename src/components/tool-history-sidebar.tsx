@@ -10,6 +10,7 @@ import {
   Edit,
   Calendar,
   Clock,
+  Plus,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -34,6 +35,7 @@ interface ToolHistorySidebarProps {
   onSelectExecution: (executionId: string) => void;
   onDeleteExecution: (executionId: string) => void;
   onRenameExecution: (executionId: string, newTitle: string) => void;
+  onNewExecution: () => void;
   toolName: string;
 }
 
@@ -43,6 +45,7 @@ export function ToolHistorySidebar({
   onSelectExecution,
   onDeleteExecution,
   onRenameExecution,
+  onNewExecution,
   toolName,
 }: ToolHistorySidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,14 +58,17 @@ export function ToolHistorySidebar({
   );
 
   // Group executions by date
-  const groupedExecutions = filteredExecutions.reduce((groups, execution) => {
-    const date = new Date(execution.timestamp).toLocaleDateString();
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(execution);
-    return groups;
-  }, {} as Record<string, ToolExecution[]>);
+  const groupedExecutions = filteredExecutions.reduce(
+    (groups, execution) => {
+      const date = new Date(execution.timestamp).toLocaleDateString();
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(execution);
+      return groups;
+    },
+    {} as Record<string, ToolExecution[]>
+  );
 
   const handleStartEdit = (execution: ToolExecution) => {
     setEditingId(execution.id);
@@ -93,8 +99,14 @@ export function ToolHistorySidebar({
     <div className="w-80 border-r bg-muted/20 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b">
-        <h2 className="font-semibold text-lg">{toolName} History</h2>
-        <div className="relative mt-3">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-lg">{toolName} History</h2>
+          <Button size="sm" onClick={onNewExecution} className="gap-1">
+            <Plus className="h-4 w-4" />
+            New
+          </Button>
+        </div>
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search history..."
@@ -112,7 +124,9 @@ export function ToolHistorySidebar({
             <div className="text-center text-muted-foreground py-8">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-sm">No history yet</p>
-              <p className="text-xs">Start using {toolName.toLowerCase()} to see your history here</p>
+              <p className="text-xs">
+                Start using {toolName.toLowerCase()} to see your history here
+              </p>
             </div>
           ) : (
             Object.entries(groupedExecutions).map(([date, dateExecutions]) => (

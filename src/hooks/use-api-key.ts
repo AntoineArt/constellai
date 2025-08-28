@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getStoredData, setStoredData, removeStoredData } from "@/lib/storage/storage-utils";
+import {
+  getStoredData,
+  setStoredData,
+  removeStoredData,
+} from "@/lib/storage/storage-utils";
 import { STORAGE_KEYS } from "@/lib/storage/storage-keys";
 
 export function useApiKey() {

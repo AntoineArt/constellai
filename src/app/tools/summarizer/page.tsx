@@ -56,9 +56,9 @@ const models = [
 ];
 
 export default function SummarizerPage() {
-  const toolHistory = useToolHistory(TOOL_IDS.SUMMARIZER);
-  const { preferences } = usePreferences();
   const { hasApiKey, apiKey } = useApiKey();
+  const toolHistory = useToolHistory(TOOL_IDS.SUMMARIZER, { apiKey });
+  const { preferences } = usePreferences();
 
   const [inputText, setInputText] = useState("");
   const [summary, setSummary] = useState("");
@@ -86,17 +86,20 @@ export default function SummarizerPage() {
   }, [toolHistory.isLoaded, toolHistory.currentExecution]);
 
   // Debounced auto-save inputs when they change
-  const debouncedInputs = useMemo(() => ({ text: inputText, summaryType }), [inputText, summaryType]);
-  
+  const debouncedInputs = useMemo(
+    () => ({ text: inputText, summaryType }),
+    [inputText, summaryType]
+  );
+
   useEffect(() => {
-    if (!toolHistory.isLoaded || (!inputText && summaryType === "brief")) return;
-    
-    const timeoutId = setTimeout(() => {
+    if (!toolHistory.isLoaded || (!inputText && summaryType === "brief"))
+      return;
+
+    const timeoutId = setTimeout(async () => {
       if (!toolHistory.currentExecution) {
-        toolHistory.createNewExecution(
-          debouncedInputs,
-          { selectedModel }
-        );
+        await toolHistory.createNewExecution(debouncedInputs, {
+          selectedModel,
+        });
       } else {
         toolHistory.updateCurrentExecution({
           inputs: debouncedInputs,
@@ -232,6 +235,14 @@ export default function SummarizerPage() {
     toolHistory.clearActiveExecution();
   };
 
+  const createNewSummarizer = async () => {
+    clearSummarizer();
+    await toolHistory.createNewExecution(
+      { text: "", summaryType: "brief" },
+      { selectedModel }
+    );
+  };
+
   return (
     <div className="h-screen overflow-hidden flex">
       {/* Tool History Sidebar */}
@@ -241,6 +252,7 @@ export default function SummarizerPage() {
         onSelectExecution={toolHistory.switchToExecution}
         onDeleteExecution={toolHistory.deleteExecution}
         onRenameExecution={toolHistory.renameExecution}
+        onNewExecution={createNewSummarizer}
         toolName="Summarizer"
       />
 
@@ -250,185 +262,198 @@ export default function SummarizerPage() {
           title="Text Summarizer"
           selectedModel={selectedModel}
           onModelChange={setSelectedModel}
-          onNew={clearSummarizer}
         />
 
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Input Section */}
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Input Text
-                  </CardTitle>
-                  <CardDescription>
-                    Paste or type the text you want to summarize
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {!hasApiKey ? (
-                    <div className="rounded-lg border border-muted bg-muted/20 p-4">
-                      <p className="text-sm text-muted-foreground">
-                        Please set your Vercel AI Gateway API key in the top bar to summarize text
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <Textarea
-                        placeholder="Paste your text here..."
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        className="min-h-[300px]"
-                      />
-                      <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>
-                          {wordCount} words, {charCount} characters
-                        </span>
-                        <Badge variant="outline">
-                          {wordCount > 1000
-                            ? "Long"
-                            : wordCount > 500
-                              ? "Medium"
-                              : "Short"}{" "}
-                          text
-                        </Badge>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Summary Settings</CardTitle>
-                  <CardDescription>
-                    Choose the type of summary you want
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium">
-                        Summary Type
-                      </label>
-                      <Select
-                        value={summaryType}
-                        onValueChange={setSummaryType}
-                      >
-                        <SelectTrigger className="mt-2">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {summaryTypes.map((type) => (
-                            <SelectItem key={type.id} value={type.id}>
-                              <div className="text-left">
-                                <div className="font-medium">{type.name}</div>
-                                <div className="text-sm text-muted-foreground">
-                                  {type.description}
-                                </div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Output Section */}
-            <div className="space-y-4">
-              {isProcessing && (
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 animate-pulse" />
-                        <span className="text-sm font-medium">
-                          Processing your text...
-                        </span>
-                      </div>
-                      <Progress value={progress} className="w-full" />
-                      <p className="text-sm text-muted-foreground">
-                        Using {models.find((m) => m.id === selectedModel)?.name}{" "}
-                        to generate a{" "}
-                        {summaryTypes
-                          .find((t) => t.id === summaryType)
-                          ?.name.toLowerCase()}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {summary && !isProcessing && (
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Input Section */}
+              <div className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>Summary</CardTitle>
-                        <CardDescription>
-                          {
-                            summaryTypes.find((t) => t.id === summaryType)
-                              ?.description
-                          }
-                        </CardDescription>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Input Text
+                    </CardTitle>
+                    <CardDescription>
+                      Paste or type the text you want to summarize
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {!hasApiKey ? (
+                      <div className="rounded-lg border border-muted bg-muted/20 p-4">
+                        <p className="text-sm text-muted-foreground">
+                          Please set your Vercel AI Gateway API key in the top
+                          bar to summarize text
+                        </p>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={copyToClipboard}
-                        className="gap-2"
-                      >
-                        {copied ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                        {copied ? "Copied!" : "Copy"}
-                      </Button>
-                    </div>
+                    ) : (
+                      <>
+                        <Textarea
+                          placeholder="Paste your text here..."
+                          value={inputText}
+                          onChange={(e) => setInputText(e.target.value)}
+                          className="min-h-[300px]"
+                        />
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>
+                              {wordCount} words, {charCount} characters
+                            </span>
+                            <Badge variant="outline">
+                              {wordCount > 1000
+                                ? "Long"
+                                : wordCount > 500
+                                  ? "Medium"
+                                  : "Short"}{" "}
+                              text
+                            </Badge>
+                          </div>
+                          <Button
+                            onClick={handleSummarize}
+                            disabled={
+                              !inputText.trim() || !hasApiKey || isProcessing
+                            }
+                            className="gap-2"
+                          >
+                            <Sparkles className="h-4 w-4" />
+                            {isProcessing ? "Processing..." : "Summarize"}
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Settings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Summary Settings</CardTitle>
+                    <CardDescription>
+                      Choose the type of summary you want
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="prose prose-sm max-w-none">
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {summary}
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium">
+                          Summary Type
+                        </label>
+                        <Select
+                          value={summaryType}
+                          onValueChange={setSummaryType}
+                        >
+                          <SelectTrigger className="mt-2">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {summaryTypes.map((type) => (
+                              <SelectItem key={type.id} value={type.id}>
+                                <div className="text-left">
+                                  <div className="font-medium">{type.name}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {type.description}
+                                  </div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="mt-4 flex items-center gap-2">
-                      <Badge variant="secondary">
-                        {models.find((m) => m.id === selectedModel)?.name}
-                      </Badge>
-                      <Badge variant="outline">
-                        {summaryTypes.find((t) => t.id === summaryType)?.name}
-                      </Badge>
-                    </div>
                   </CardContent>
                 </Card>
-              )}
+              </div>
 
-              {!summary && !isProcessing && hasApiKey && (
-                <Card className="border-dashed">
-                  <CardContent className="p-12 text-center">
-                    <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-semibold">
-                      Ready to Summarize
-                    </h3>
-                    <p className="mt-2 text-muted-foreground">
-                      Enter your text and click "Summarize" to get started
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Output Section */}
+              <div className="space-y-4">
+                {isProcessing && (
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 animate-pulse" />
+                          <span className="text-sm font-medium">
+                            Processing your text...
+                          </span>
+                        </div>
+                        <Progress value={progress} className="w-full" />
+                        <p className="text-sm text-muted-foreground">
+                          Using{" "}
+                          {models.find((m) => m.id === selectedModel)?.name} to
+                          generate a{" "}
+                          {summaryTypes
+                            .find((t) => t.id === summaryType)
+                            ?.name.toLowerCase()}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {summary && !isProcessing && (
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle>Summary</CardTitle>
+                          <CardDescription>
+                            {
+                              summaryTypes.find((t) => t.id === summaryType)
+                                ?.description
+                            }
+                          </CardDescription>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={copyToClipboard}
+                          className="gap-2"
+                        >
+                          {copied ? (
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                          {copied ? "Copied!" : "Copy"}
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="prose prose-sm max-w-none">
+                        <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                          {summary}
+                        </div>
+                      </div>
+                      <div className="mt-4 flex items-center gap-2">
+                        <Badge variant="secondary">
+                          {models.find((m) => m.id === selectedModel)?.name}
+                        </Badge>
+                        <Badge variant="outline">
+                          {summaryTypes.find((t) => t.id === summaryType)?.name}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {!summary && !isProcessing && hasApiKey && (
+                  <Card className="border-dashed">
+                    <CardContent className="p-12 text-center">
+                      <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <h3 className="mt-4 text-lg font-semibold">
+                        Ready to Summarize
+                      </h3>
+                      <p className="mt-2 text-muted-foreground">
+                        Enter your text and click "Summarize" to get started
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );

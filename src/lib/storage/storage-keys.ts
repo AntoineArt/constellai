@@ -4,11 +4,12 @@ export const STORAGE_KEYS = {
   PREFERENCES: "constellai-preferences",
   TOOL_EXECUTIONS: "constellai-tool-executions",
   ACTIVE_EXECUTIONS: "constellai-active-executions",
+  PINNED_TOOLS: "constellai-pinned-tools",
 } as const;
 
 export const TOOL_IDS = {
   CHAT: "chat",
-  REGEX: "regex", 
+  REGEX: "regex",
   SUMMARIZER: "summarizer",
 } as const;
 

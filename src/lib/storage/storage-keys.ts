@@ -52,6 +52,16 @@ export const TOOL_IDS = {
   BUDGET_PLANNER: "budget-planner",
   PRICING_STRATEGY_GENERATOR: "pricing-strategy-generator",
   CUSTOMER_JOURNEY_MAPPER: "customer-journey-mapper",
+  LITERATURE_REVIEW_GENERATOR: "literature-review-generator",
+  SURVEY_DESIGNER: "survey-designer",
+  INTERVIEW_QUESTION_GENERATOR: "interview-question-generator",
+  DATA_ANALYSIS_INTERPRETER: "data-analysis-interpreter",
+  TREND_ANALYZER: "trend-analyzer",
+  CITATION_GENERATOR: "citation-generator",
+  FACT_CHECKER: "fact-checker",
+  RESEARCH_PROPOSAL_WRITER: "research-proposal-writer",
+  ABSTRACT_GENERATOR: "abstract-generator",
+  HYPOTHESIS_GENERATOR: "hypothesis-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

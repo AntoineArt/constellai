@@ -57,16 +57,16 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **Customer Journey Mapper** - Map customer touchpoints and experiences
 
 ## 🔍 Research & Analysis (10 tools)
-- [ ] **Literature Review Generator** - Synthesize academic papers and sources
-- [ ] **Survey Designer** - Create comprehensive surveys and questionnaires
-- [ ] **Interview Question Generator** - Generate targeted interview questions
-- [ ] **Data Analysis Interpreter** - Explain statistical analyses in plain language
-- [ ] **Trend Analyzer** - Identify patterns in data and market trends
-- [ ] **Citation Generator** - Generate proper citations in various formats
-- [ ] **Fact Checker** - Verify claims and provide source validation
-- [ ] **Research Proposal Writer** - Create structured research proposals
-- [ ] **Abstract Generator** - Generate academic abstracts from papers
-- [ ] **Hypothesis Generator** - Create testable hypotheses from research questions
+- [x] **Literature Review Generator** - Synthesize academic papers and sources
+- [x] **Survey Designer** - Create comprehensive surveys and questionnaires
+- [x] **Interview Question Generator** - Generate targeted interview questions
+- [x] **Data Analysis Interpreter** - Explain statistical analyses in plain language
+- [x] **Trend Analyzer** - Identify patterns in data and market trends
+- [x] **Citation Generator** - Generate proper citations in various formats
+- [x] **Fact Checker** - Verify claims and provide source validation
+- [x] **Research Proposal Writer** - Create structured research proposals
+- [x] **Abstract Generator** - Generate academic abstracts from papers
+- [x] **Hypothesis Generator** - Create testable hypotheses from research questions
 
 ## 📚 Education & Learning (8 tools)
 - [ ] **Quiz Generator** - Create educational quizzes from content

@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon, LayoutDashboard, DollarSign, Map as MapIcon } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon, LayoutDashboard, DollarSign, Map as MapIcon, BookOpen as BookOpenIcon, ClipboardList, MessageCircle, BarChart, TrendingUp as TrendingUpIcon, FileText as FileTextIcon4, CheckCircle, FileText as FileTextIcon5, FileText as FileTextIcon6, Lightbulb } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -393,5 +393,85 @@ export const tools: Tool[] = [
     icon: MapIcon,
     category: "Business & Analytics",
     href: "/tools/customer-journey-mapper",
+  },
+  {
+    id: "literature-review-generator",
+    name: "Literature Review Generator",
+    description: "Synthesize academic papers and sources into comprehensive literature reviews.",
+    icon: BookOpenIcon,
+    category: "Research & Analysis",
+    href: "/tools/literature-review-generator",
+  },
+  {
+    id: "survey-designer",
+    name: "Survey Designer",
+    description: "Create comprehensive surveys and questionnaires for research and feedback.",
+    icon: ClipboardList,
+    category: "Research & Analysis",
+    href: "/tools/survey-designer",
+  },
+  {
+    id: "interview-question-generator",
+    name: "Interview Question Generator",
+    description: "Generate targeted interview questions for research and hiring.",
+    icon: MessageCircle,
+    category: "Research & Analysis",
+    href: "/tools/interview-question-generator",
+  },
+  {
+    id: "data-analysis-interpreter",
+    name: "Data Analysis Interpreter",
+    description: "Explain statistical analyses and data insights in plain language.",
+    icon: BarChart,
+    category: "Research & Analysis",
+    href: "/tools/data-analysis-interpreter",
+  },
+  {
+    id: "trend-analyzer",
+    name: "Trend Analyzer",
+    description: "Identify patterns in data and market trends with actionable insights.",
+    icon: TrendingUpIcon,
+    category: "Research & Analysis",
+    href: "/tools/trend-analyzer",
+  },
+  {
+    id: "citation-generator",
+    name: "Citation Generator",
+    description: "Generate proper citations in various academic formats.",
+    icon: FileTextIcon4,
+    category: "Research & Analysis",
+    href: "/tools/citation-generator",
+  },
+  {
+    id: "fact-checker",
+    name: "Fact Checker",
+    description: "Verify claims and provide source validation for research.",
+    icon: CheckCircle,
+    category: "Research & Analysis",
+    href: "/tools/fact-checker",
+  },
+  {
+    id: "research-proposal-writer",
+    name: "Research Proposal Writer",
+    description: "Create structured research proposals with methodology and objectives.",
+    icon: FileTextIcon5,
+    category: "Research & Analysis",
+    href: "/tools/research-proposal-writer",
+  },
+  {
+    id: "abstract-generator",
+    name: "Abstract Generator",
+    description: "Generate academic abstracts from research papers and content.",
+    icon: FileTextIcon6,
+    category: "Research & Analysis",
+    href: "/tools/abstract-generator",
+  },
+  {
+    id: "hypothesis-generator",
+    name: "Hypothesis Generator",
+    description: "Create testable hypotheses from research questions and observations.",
+    icon: Lightbulb,
+    category: "Research & Analysis",
+    href: "/tools/hypothesis-generator",
   },
 ];

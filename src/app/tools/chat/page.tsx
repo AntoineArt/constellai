@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import type { ChatStatus } from "ai";
 
 import { TopBar } from "@/components/top-bar";
@@ -39,24 +39,28 @@ export default function ChatPage() {
     }
   }, [toolHistory.isLoaded, toolHistory.currentExecution]);
 
-  // Auto-save messages when they change
+  // Debounced auto-save messages when they change
+  const debouncedMessages = useMemo(() => messages, [JSON.stringify(messages)]);
+  
   useEffect(() => {
-    if (toolHistory.isLoaded && messages.length > 0) {
-      // Create new execution if none exists
+    if (!toolHistory.isLoaded || messages.length === 0) return;
+    
+    const timeoutId = setTimeout(() => {
       if (!toolHistory.currentExecution) {
         toolHistory.createNewExecution(
-          { messages },
+          { messages: debouncedMessages },
           { selectedModel }
         );
       } else {
-        // Update existing execution
         toolHistory.updateCurrentExecution({
-          inputs: { messages },
+          inputs: { messages: debouncedMessages },
           settings: { selectedModel },
         });
       }
-    }
-  }, [messages, selectedModel, toolHistory]);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [debouncedMessages, selectedModel]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -252,10 +256,10 @@ export default function ChatPage() {
       <div className="h-[calc(100vh-64px)] overflow-hidden">
         {!hasApiKey ? (
           <div className="h-full flex items-center justify-center p-6">
-            <Card className="border-destructive/50 bg-destructive/10 max-w-md">
+            <Card className="border-muted bg-muted/20 max-w-md">
               <CardContent className="p-6 text-center">
-                <p className="text-sm text-destructive">
-                  Please set your API key in the top bar to start chatting
+                <p className="text-sm text-muted-foreground">
+                  Please set your Vercel AI Gateway API key in the top bar to start chatting
                 </p>
               </CardContent>
             </Card>

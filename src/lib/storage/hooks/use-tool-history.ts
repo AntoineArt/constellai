@@ -44,14 +44,17 @@ export default function useToolHistory(toolId: string) {
       settings,
     };
 
-    const updatedExecutions = [newExecution, ...executions];
-    setExecutions(updatedExecutions);
+    setExecutions(prev => {
+      const updatedExecutions = [newExecution, ...prev];
+      saveToolExecution(newExecution);
+      return updatedExecutions;
+    });
+    
     setActiveExecutionId(toolId, newExecution.id);
     setActiveExecutionIdState(newExecution.id);
-    saveToolExecution(newExecution);
 
     return newExecution;
-  }, [toolId, executions]);
+  }, [toolId]);
 
   // Update current execution
   const updateCurrentExecution = useCallback((
@@ -59,38 +62,42 @@ export default function useToolHistory(toolId: string) {
   ) => {
     if (!activeExecutionId) return;
 
-    const updatedExecutions = executions.map(execution => {
-      if (execution.id === activeExecutionId) {
-        const updated = { ...execution, ...updates };
-        saveToolExecution(updated);
-        return updated;
-      }
-      return execution;
+    setExecutions(prev => {
+      const updatedExecutions = prev.map(execution => {
+        if (execution.id === activeExecutionId) {
+          const updated = { ...execution, ...updates };
+          saveToolExecution(updated);
+          return updated;
+        }
+        return execution;
+      });
+      return updatedExecutions;
     });
-
-    setExecutions(updatedExecutions);
-  }, [activeExecutionId, executions]);
+  }, [activeExecutionId]);
 
   // Switch to different execution
   const switchToExecution = useCallback((executionId: string) => {
-    if (executions.some(e => e.id === executionId)) {
-      setActiveExecutionId(toolId, executionId);
-      setActiveExecutionIdState(executionId);
-    }
-  }, [toolId, executions]);
+    setExecutions(prev => {
+      if (prev.some(e => e.id === executionId)) {
+        setActiveExecutionId(toolId, executionId);
+        setActiveExecutionIdState(executionId);
+      }
+      return prev;
+    });
+  }, [toolId]);
 
   // Delete execution
   const deleteExecution = useCallback((executionId: string) => {
     deleteToolExecution(executionId);
-    const updatedExecutions = executions.filter(e => e.id !== executionId);
-    setExecutions(updatedExecutions);
+    
+    setExecutions(prev => prev.filter(e => e.id !== executionId));
 
     // If deleting active execution, clear active state
     if (executionId === activeExecutionId) {
       setActiveExecutionId(toolId, null);
       setActiveExecutionIdState(null);
     }
-  }, [executions, activeExecutionId, toolId]);
+  }, [activeExecutionId, toolId]);
 
   // Clear active execution (start fresh)
   const clearActiveExecution = useCallback(() => {
@@ -100,16 +107,18 @@ export default function useToolHistory(toolId: string) {
 
   // Rename execution
   const renameExecution = useCallback((executionId: string, newTitle: string) => {
-    const updatedExecutions = executions.map(execution => {
-      if (execution.id === executionId) {
-        const updated = { ...execution, title: newTitle };
-        saveToolExecution(updated);
-        return updated;
-      }
-      return execution;
+    setExecutions(prev => {
+      const updatedExecutions = prev.map(execution => {
+        if (execution.id === executionId) {
+          const updated = { ...execution, title: newTitle };
+          saveToolExecution(updated);
+          return updated;
+        }
+        return execution;
+      });
+      return updatedExecutions;
     });
-    setExecutions(updatedExecutions);
-  }, [executions]);
+  }, []);
 
   return {
     executions,

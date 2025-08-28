@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FileText, Sparkles, Copy, CheckCircle2 } from "lucide-react";
 
 import { TopBar } from "@/components/top-bar";
@@ -85,22 +85,28 @@ export default function SummarizerPage() {
     }
   }, [toolHistory.isLoaded, toolHistory.currentExecution]);
 
-  // Auto-save inputs when they change
+  // Debounced auto-save inputs when they change
+  const debouncedInputs = useMemo(() => ({ text: inputText, summaryType }), [inputText, summaryType]);
+  
   useEffect(() => {
-    if (toolHistory.isLoaded && (inputText || summaryType !== "brief")) {
+    if (!toolHistory.isLoaded || (!inputText && summaryType === "brief")) return;
+    
+    const timeoutId = setTimeout(() => {
       if (!toolHistory.currentExecution) {
         toolHistory.createNewExecution(
-          { text: inputText, summaryType },
+          debouncedInputs,
           { selectedModel }
         );
       } else {
         toolHistory.updateCurrentExecution({
-          inputs: { text: inputText, summaryType },
+          inputs: debouncedInputs,
           settings: { selectedModel },
         });
       }
-    }
-  }, [inputText, summaryType, selectedModel, toolHistory]);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [debouncedInputs.text, debouncedInputs.summaryType, selectedModel]);
 
   const handleSummarize = async () => {
     if (!inputText.trim() || !hasApiKey) return;
@@ -264,9 +270,9 @@ export default function SummarizerPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {!hasApiKey ? (
-                    <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-                      <p className="text-sm text-destructive">
-                        Please set your API key in the top bar to summarize text
+                    <div className="rounded-lg border border-muted bg-muted/20 p-4">
+                      <p className="text-sm text-muted-foreground">
+                        Please set your Vercel AI Gateway API key in the top bar to summarize text
                       </p>
                     </div>
                   ) : (

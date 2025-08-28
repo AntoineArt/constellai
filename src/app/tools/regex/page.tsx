@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Zap, Copy, CheckCircle2, Play } from "lucide-react";
 
 import { TopBar } from "@/components/top-bar";
@@ -61,22 +61,28 @@ export default function RegexPage() {
     }
   }, [toolHistory.isLoaded, toolHistory.currentExecution]);
 
-  // Auto-save inputs when they change
+  // Debounced auto-save inputs when they change
+  const debouncedInputs = useMemo(() => ({ description, testText }), [description, testText]);
+  
   useEffect(() => {
-    if (toolHistory.isLoaded && (description || testText)) {
+    if (!toolHistory.isLoaded || (!description && !testText)) return;
+    
+    const timeoutId = setTimeout(() => {
       if (!toolHistory.currentExecution) {
         toolHistory.createNewExecution(
-          { description, testText },
+          debouncedInputs,
           { selectedModel }
         );
       } else {
         toolHistory.updateCurrentExecution({
-          inputs: { description, testText },
+          inputs: debouncedInputs,
           settings: { selectedModel },
         });
       }
-    }
-  }, [description, testText, selectedModel, toolHistory]);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [debouncedInputs.description, debouncedInputs.testText, selectedModel]);
 
   const handleGenerate = async () => {
     if (!description.trim() || !hasApiKey) return;
@@ -202,10 +208,9 @@ export default function RegexPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {!hasApiKey ? (
-                    <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-                      <p className="text-sm text-destructive">
-                        Please set your API key in the top bar to generate regex
-                        patterns
+                    <div className="rounded-lg border border-muted bg-muted/20 p-4">
+                      <p className="text-sm text-muted-foreground">
+                        Please set your Vercel AI Gateway API key in the top bar to generate regex patterns
                       </p>
                     </div>
                   ) : (

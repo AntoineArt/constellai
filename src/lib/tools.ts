@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -169,5 +169,45 @@ export const tools: Tool[] = [
     icon: FileTextIcon,
     category: "Text & Content Creation",
     href: "/tools/cover-letter-generator",
+  },
+  {
+    id: "grant-proposal-writer",
+    name: "Grant Proposal Writer",
+    description: "Generate funding proposals and applications with comprehensive documentation.",
+    icon: Award,
+    category: "Text & Content Creation",
+    href: "/tools/grant-proposal-writer",
+  },
+  {
+    id: "technical-documentation-writer",
+    name: "Technical Documentation Writer",
+    description: "Create user manuals and guides with comprehensive technical documentation.",
+    icon: FileTextIcon2,
+    category: "Text & Content Creation",
+    href: "/tools/technical-documentation-writer",
+  },
+  {
+    id: "content-calendar-planner",
+    name: "Content Calendar Planner",
+    description: "Plan and generate content schedules with strategic content planning.",
+    icon: Calendar,
+    category: "Text & Content Creation",
+    href: "/tools/content-calendar-planner",
+  },
+  {
+    id: "headline-generator",
+    name: "Headline Generator",
+    description: "Create attention-grabbing headlines and titles with SEO optimization.",
+    icon: Type,
+    category: "Text & Content Creation",
+    href: "/tools/headline-generator",
+  },
+  {
+    id: "meta-description-generator",
+    name: "Meta Description Generator",
+    description: "Create SEO meta descriptions with keyword optimization and CTR improvement.",
+    icon: Search,
+    category: "Text & Content Creation",
+    href: "/tools/meta-description-generator",
   },
 ];

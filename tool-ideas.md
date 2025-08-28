@@ -21,11 +21,11 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **Product Description Writer** - Create compelling product descriptions
 - [x] **Resume Builder** - Generate tailored resumes from experience data
 - [x] **Cover Letter Generator** - Create personalized cover letters
-- [ ] **Grant Proposal Writer** - Generate funding proposals and applications
-- [ ] **Technical Documentation Writer** - Create user manuals and guides
-- [ ] **Content Calendar Planner** - Plan and generate content schedules
-- [ ] **Headline Generator** - Create attention-grabbing headlines and titles
-- [ ] **Meta Description Generator** - Create SEO meta descriptions
+- [x] **Grant Proposal Writer** - Generate funding proposals and applications
+- [x] **Technical Documentation Writer** - Create user manuals and guides
+- [x] **Content Calendar Planner** - Plan and generate content schedules
+- [x] **Headline Generator** - Create attention-grabbing headlines and titles
+- [x] **Meta Description Generator** - Create SEO meta descriptions
 - [ ] **Newsletter Creator** - Generate engaging newsletter content
 - [ ] **Script Writer** - Create scripts for videos, presentations, podcasts
 - [ ] **Story Generator** - Generate creative stories from prompts

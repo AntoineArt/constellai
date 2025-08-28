@@ -24,6 +24,11 @@ export const TOOL_IDS = {
   PRODUCT_DESCRIPTION_WRITER: "product-description-writer",
   RESUME_BUILDER: "resume-builder",
   COVER_LETTER_GENERATOR: "cover-letter-generator",
+  GRANT_PROPOSAL_WRITER: "grant-proposal-writer",
+  TECHNICAL_DOCUMENTATION_WRITER: "technical-documentation-writer",
+  CONTENT_CALENDAR_PLANNER: "content-calendar-planner",
+  HEADLINE_GENERATOR: "headline-generator",
+  META_DESCRIPTION_GENERATOR: "meta-description-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

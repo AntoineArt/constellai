@@ -16,6 +16,8 @@ export const TOOL_IDS = {
   SCHEMA_DESIGNER: "schema-designer",
   ENV_GENERATOR: "env-generator",
   COMPLEXITY_ANALYZER: "complexity-analyzer",
+  PERFORMANCE_OPTIMIZER: "performance-optimizer",
+  README_GENERATOR: "readme-generator",
 } as const;
 
 export const DEFAULT_PREFERENCES = {

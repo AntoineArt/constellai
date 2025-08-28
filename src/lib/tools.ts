@@ -1,4 +1,4 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3 } from "lucide-react";
+import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen } from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -75,5 +75,21 @@ export const tools: Tool[] = [
     icon: BarChart3,
     category: "Development",
     href: "/tools/complexity-analyzer",
+  },
+  {
+    id: "performance-optimizer",
+    name: "Performance Optimizer",
+    description: "Suggest performance improvements for code with benchmarking guidance.",
+    icon: ZapIcon,
+    category: "Development",
+    href: "/tools/performance-optimizer",
+  },
+  {
+    id: "readme-generator",
+    name: "README Generator",
+    description: "Create comprehensive README files from codebases with customizable sections.",
+    icon: BookOpen,
+    category: "Development",
+    href: "/tools/readme-generator",
   },
 ];

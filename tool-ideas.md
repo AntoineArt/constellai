@@ -8,8 +8,8 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **Database Schema Designer** - Create database schemas from requirements
 - [x] **Environment Config Generator** - Create .env templates with documentation
 - [x] **Code Complexity Analyzer** - Analyze and suggest code simplifications
-- [ ] **Performance Optimizer** - Suggest performance improvements for code
-- [ ] **README Generator** - Create comprehensive README files from codebases
+- [x] **Performance Optimizer** - Suggest performance improvements for code
+- [x] **README Generator** - Create comprehensive README files from codebases
 - [ ] **Error Message Decoder** - Explain and suggest fixes for error messages
 - [ ] **Git PR Message Writer** - Generate pull request descriptions from commit history
 

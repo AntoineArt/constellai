@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
+    const body = await req.json();
     const {
       budgetType,
       totalBudget,
@@ -24,7 +25,9 @@ export async function POST(req: Request) {
       timePeriod,
       includeDetailedBreakdown,
       includeForecasting,
-    } = await req.json();
+    } = body;
+    // Budget planning works best with more capable models
+    const model = getModelFromRequest(body, "openai/gpt-4o");
 
     const prompt = `You are an expert financial planner and budget consultant. Create a comprehensive budget plan based on the following information:
 
@@ -156,7 +159,7 @@ Format your response as:
 **Achievement Tracking**: [How to track budget goal achievement]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

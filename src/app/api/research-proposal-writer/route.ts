@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { researchTopic, objectives, methodology, timeline, includeDetailedMethodology, includeBudget } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { researchTopic, objectives, methodology, timeline, includeDetailedMethodology, includeBudget } = body;
 
     const prompt = `You are an expert research proposal writer. Create a research proposal based on:
 
@@ -63,7 +65,7 @@ Create a comprehensive research proposal including:
 **Future Research**: [Follow-up research directions]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

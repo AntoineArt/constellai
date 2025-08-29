@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { processDescription, processType, audience, includeScreenshots, includeTroubleshooting } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { processDescription, processType, audience, includeScreenshots, includeTroubleshooting } = body;
 
     const prompt = `You are an expert process documentation specialist and technical writer. Create step-by-step process documentation based on:
 
@@ -75,7 +77,7 @@ Create comprehensive process documentation including:
 [How to keep this documentation current]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { researchTopic, sources, researchQuestion, includeComprehensiveAnalysis, includeGapAnalysis } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { researchTopic, sources, researchQuestion, includeComprehensiveAnalysis, includeGapAnalysis } = body;
 
     const prompt = `You are an expert academic researcher and literature review specialist. Create a comprehensive literature review based on the following information:
 
@@ -148,7 +150,7 @@ Format your response as:
 **Future Directions**: [Recommendations for future research]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

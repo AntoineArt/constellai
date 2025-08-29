@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { courseTitle, subject, gradeLevel, duration, learningObjectives, includeSchedule, includePolicies } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { courseTitle, subject, gradeLevel, duration, learningObjectives, includeSchedule, includePolicies } = body;
 
     const prompt = `You are an expert course designer. Generate a comprehensive course syllabus based on:
 
@@ -81,7 +83,7 @@ Create a detailed course syllabus including:
 [Information about accommodations and support services]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { campaignName, client, objectives, targetAudience, includeDetailedStrategy, includeDeliverables } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { campaignName, client, objectives, targetAudience, includeDetailedStrategy, includeDeliverables } = body;
 
     const prompt = `You are an expert creative director and marketing strategist. Create a comprehensive creative brief based on the following information:
 
@@ -152,7 +154,7 @@ Format your response as:
 **Optimization Strategy**: [How to improve performance]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

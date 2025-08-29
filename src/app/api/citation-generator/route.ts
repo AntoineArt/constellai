@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { sourceInfo, citationStyle, includeMultipleFormats, includeBibliography } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { sourceInfo, citationStyle, includeMultipleFormats, includeBibliography } = body;
 
     const prompt = `You are an expert academic citation specialist. Generate citations based on:
 
@@ -49,7 +51,7 @@ Create comprehensive citations including:
 **Style-Specific Requirements**: [Requirements specific to the citation style]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

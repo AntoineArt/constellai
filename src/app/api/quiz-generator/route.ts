@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { content, subject, gradeLevel, questionTypes, numberOfQuestions, includeAnswers } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { content, subject, gradeLevel, questionTypes, numberOfQuestions, includeAnswers } = body;
 
     const prompt = `You are an expert educational content creator. Generate a comprehensive quiz based on:
 
@@ -62,7 +64,7 @@ D) [Option D]
 [Assessment of quiz difficulty]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

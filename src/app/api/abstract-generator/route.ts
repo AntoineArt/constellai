@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { paperContent, abstractType, wordLimit, includeKeywords } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { paperContent, abstractType, wordLimit, includeKeywords } = body;
 
     const prompt = `You are an expert academic abstract writer. Generate an abstract based on:
 
@@ -47,7 +49,7 @@ Create a comprehensive abstract including:
 **Style**: [Academic writing style tips]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

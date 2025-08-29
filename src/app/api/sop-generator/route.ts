@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { procedure, department, compliance, includeSafety, includeQualityControl } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { procedure, department, compliance, includeSafety, includeQualityControl } = body;
 
     const prompt = `You are an expert SOP (Standard Operating Procedure) specialist and compliance consultant. Generate a comprehensive SOP based on:
 
@@ -85,7 +87,7 @@ Create a comprehensive SOP including:
 [Approval process and review schedule]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

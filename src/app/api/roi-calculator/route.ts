@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { investmentType, initialInvestment, expectedReturns, timePeriod, additionalCosts, includeDetailedAnalysis, includeRecommendations } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { investmentType, initialInvestment, expectedReturns, timePeriod, additionalCosts, includeDetailedAnalysis, includeRecommendations } = body;
 
     const prompt = `You are an expert financial analyst and investment consultant. Create a comprehensive ROI analysis based on the following information:
 
@@ -157,7 +159,7 @@ Format your response as:
 **Success Metrics**: [KPIs and success indicators]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

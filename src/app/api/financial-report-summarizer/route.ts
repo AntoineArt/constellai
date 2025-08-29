@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { companyName, reportType, financialData, includeKeyInsights, includeRecommendations } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { companyName, reportType, financialData, includeKeyInsights, includeRecommendations } = body;
 
     const prompt = `You are an expert financial analyst and business consultant. Create a comprehensive financial report summary based on the following information:
 
@@ -148,7 +150,7 @@ Format your response as:
 **Success Metrics**: [How to measure success]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

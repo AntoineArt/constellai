@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { commits, branchName, includeTesting, includeBreakingChanges } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { commits, branchName, includeTesting, includeBreakingChanges } = body;
 
     const prompt = `You are an expert technical writer specializing in creating professional pull request descriptions. Generate a comprehensive PR description based on the following commit history:
 
@@ -48,7 +50,7 @@ Format your response as:
 [any additional recommendations or suggestions]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

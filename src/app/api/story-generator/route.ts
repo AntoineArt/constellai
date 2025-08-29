@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { storyPrompt, genre, targetAudience, length, tone, includeCharacters, includeDialogue } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { storyPrompt, genre, targetAudience, length, tone, includeCharacters, includeDialogue } = body;
 
     const prompt = `You are an expert storyteller and creative writer. Create engaging stories based on the following information:
 
@@ -66,7 +68,7 @@ Format your response as:
 [genre conventions and elements used in the story]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

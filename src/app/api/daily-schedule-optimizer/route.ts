@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { currentSchedule, priorities, energyLevels, workHours, includeBreaks, includeBufferTime } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { currentSchedule, priorities, energyLevels, workHours, includeBreaks, includeBufferTime } = body;
 
     const prompt = `You are an expert productivity consultant and time management specialist. Optimize a daily schedule based on:
 
@@ -78,7 +80,7 @@ Create an optimized daily schedule including:
 [How to measure schedule effectiveness]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

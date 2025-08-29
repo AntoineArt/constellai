@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { dataDescription, analysisResults, statisticalTests, includePlainLanguageExplanation, includeRecommendations } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { dataDescription, analysisResults, statisticalTests, includePlainLanguageExplanation, includeRecommendations } = body;
 
     const prompt = `You are an expert data analyst and statistical consultant. Interpret data analysis results based on:
 
@@ -67,7 +69,7 @@ Create a comprehensive data interpretation including:
 **Implementation**: [How to apply findings in practice]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

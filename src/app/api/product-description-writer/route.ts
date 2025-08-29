@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { productName, category, features, targetAudience, tone, includeBenefits, includeSpecs, platform } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { productName, category, features, targetAudience, tone, includeBenefits, includeSpecs, platform } = body;
 
     const prompt = `You are an expert copywriter and e-commerce specialist. Create compelling product descriptions based on the following information:
 
@@ -57,7 +59,7 @@ Format your response as:
 [suggestions to improve conversion rates]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

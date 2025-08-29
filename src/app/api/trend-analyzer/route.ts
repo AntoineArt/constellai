@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { dataSet, timePeriod, trendType, includePredictions, includeActionableInsights } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { dataSet, timePeriod, trendType, includePredictions, includeActionableInsights } = body;
 
     const prompt = `You are an expert trend analyst and data scientist. Analyze trends based on:
 
@@ -68,7 +70,7 @@ Create a comprehensive trend analysis including:
 **Review Frequency**: [How often to reassess trends]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

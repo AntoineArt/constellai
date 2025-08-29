@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,10 +17,12 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { description, model } = await req.json();
+    const body = await req.json();
+    const { description } = body;
+    const model = getModelFromRequest(body);
 
     const { text } = await generateText({
-      model: model || "openai/gpt-4o",
+      model,
       system: `You are a regex expert. Generate regular expressions based on natural language descriptions.
       
       Always respond with a JSON object containing:

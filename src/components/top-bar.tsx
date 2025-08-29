@@ -19,15 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useApiKey } from "@/hooks/use-api-key";
+import { AI_MODELS } from "@/lib/models";
 import { Key, Settings } from "lucide-react";
-
-const models = [
-  { id: "openai/gpt-oss-20b", name: "GPT-OSS-20B" },
-  { id: "openai/gpt-4o", name: "GPT-4o" },
-  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
-  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
-  { id: "google/gemini-2.0-flash", name: "Gemini 2.0 Flash" },
-];
 
 interface TopBarProps {
   title: string;
@@ -69,7 +62,7 @@ export function TopBar({
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: "test" }],
-          model: "openai/gpt-oss-20b",
+          model: AI_MODELS[0].id,
         }),
       });
 
@@ -124,7 +117,7 @@ export function TopBar({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {models.map((model) => (
+                {AI_MODELS.map((model) => (
                   <SelectItem key={model.id} value={model.id}>
                     {model.name}
                   </SelectItem>

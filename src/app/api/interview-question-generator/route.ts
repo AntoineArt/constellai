@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { interviewType, position, candidateProfile, includeBehavioralQuestions, includeTechnicalQuestions } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { interviewType, position, candidateProfile, includeBehavioralQuestions, includeTechnicalQuestions } = body;
 
     const prompt = `You are an expert interviewer and HR professional. Create comprehensive interview questions based on:
 
@@ -60,7 +62,7 @@ Create a detailed interview question set including:
 **Scoring Guide**: [How to evaluate responses]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

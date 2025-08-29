@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { topic, platform, tone, includeHashtags, includeCallToAction, targetAudience } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { topic, platform, tone, includeHashtags, includeCallToAction, targetAudience } = body;
 
     const prompt = `You are an expert social media content creator and digital marketing specialist. Create engaging social media posts based on the following requirements:
 
@@ -54,7 +56,7 @@ Format your response as:
 [best practices for the selected platform]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

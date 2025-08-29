@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { iconPurpose, style, context, includeTechnicalSpecs, includeAccessibility } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { iconPurpose, style, context, includeTechnicalSpecs, includeAccessibility } = body;
 
     const prompt = `You are an expert icon designer and UX specialist. Create detailed icon descriptions based on the following information:
 
@@ -100,7 +102,7 @@ Format your response as:
 **Context Variations**: [Different contexts where this icon might appear]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { name, email, phone, company, title, address, website, notes, format } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { name, email, phone, company, title, address, website, notes, format } = body;
 
     const prompt = `You are an expert in contact information management and vCard format. Create a professional contact card based on the following information:
 
@@ -58,7 +60,7 @@ Format your response as:
 [how to import into different platforms]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

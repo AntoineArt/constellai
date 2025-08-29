@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { tasks, priorityMethod, context, includeDeadlines, includeEffort } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { tasks, priorityMethod, context, includeDeadlines, includeEffort } = body;
 
     const prompt = `You are an expert productivity consultant and task management specialist. Prioritize and organize tasks based on:
 
@@ -62,7 +64,7 @@ Create a prioritized task list including:
 [Immediate actions to take based on this prioritization]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

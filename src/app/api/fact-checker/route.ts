@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { claim, context, includeSourceValidation, includeDetailedAnalysis } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { claim, context, includeSourceValidation, includeDetailedAnalysis } = body;
 
     const prompt = `You are an expert fact-checker and research analyst. Verify claims based on:
 
@@ -55,7 +57,7 @@ Create a comprehensive fact-check report including:
 **Further Research**: [Additional areas to investigate]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

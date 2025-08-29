@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { topic, contentType, targetAudience, tone, length, includeSEO, includeEmotional } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { topic, contentType, targetAudience, tone, length, includeSEO, includeEmotional } = body;
 
     const prompt = `You are an expert copywriter and headline specialist. Create compelling, attention-grabbing headlines based on the following information:
 
@@ -68,7 +70,7 @@ Format your response as:
 [suggestions for testing different headlines]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

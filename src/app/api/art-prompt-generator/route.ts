@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { artStyle, subject, mood, includeDetailedDescriptions, includeTechnicalSpecs } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { artStyle, subject, mood, includeDetailedDescriptions, includeTechnicalSpecs } = body;
 
     const prompt = `You are an expert art director and creative consultant. Create detailed art prompts based on the following information:
 
@@ -115,7 +117,7 @@ Format your response as:
 **Review Criteria**: [What to look for in the final artwork]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

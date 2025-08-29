@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { errorMessage, language, context, includeCodeExamples } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { errorMessage, language, context, includeCodeExamples } = body;
 
     const prompt = `You are an expert error message decoder and debugging specialist. Analyze the following error message and provide a comprehensive explanation and solution:
 
@@ -62,7 +64,7 @@ Format your response as:
 [additional debugging strategies and tools]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

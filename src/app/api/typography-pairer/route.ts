@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { projectType, brandPersonality, targetAudience, includeWebFonts, includePrintFonts } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { projectType, brandPersonality, targetAudience, includeWebFonts, includePrintFonts } = body;
 
     const prompt = `You are an expert typography designer and brand strategist. Create harmonious font combinations based on the following information:
 
@@ -102,7 +104,7 @@ Format your response as:
 [Technical implementation guidelines]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

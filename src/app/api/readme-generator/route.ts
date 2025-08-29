@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { code, description, projectName, includeSections, format } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { code, description, projectName, includeSections, format } = body;
 
     const prompt = `You are an expert technical writer specializing in creating comprehensive README files. Generate a professional README based on the following information:
 
@@ -54,7 +56,7 @@ Format your response as:
 [any additional recommendations or suggestions]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

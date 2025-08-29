@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { researchQuestion, context, variables, includeTestableHypotheses, includeResearchDesign } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { researchQuestion, context, variables, includeTestableHypotheses, includeResearchDesign } = body;
 
     const prompt = `You are an expert research methodologist. Generate hypotheses based on:
 
@@ -57,7 +59,7 @@ Create comprehensive hypotheses including:
 **Analysis Plan**: [Statistical analysis approach]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

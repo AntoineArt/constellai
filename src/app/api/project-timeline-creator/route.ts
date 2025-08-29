@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { projectDescription, projectScope, teamSize, startDate, includeMilestones, includeDependencies } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { projectDescription, projectScope, teamSize, startDate, includeMilestones, includeDependencies } = body;
 
     const prompt = `You are an expert project manager and timeline specialist. Create a comprehensive project timeline based on:
 
@@ -74,7 +76,7 @@ Create a detailed project timeline including:
 [How project success will be measured]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

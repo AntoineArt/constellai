@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { brandName, industry, targetAudience, style, includeTypography, includeColorSuggestions } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { brandName, industry, targetAudience, style, includeTypography, includeColorSuggestions } = body;
 
     const prompt = `You are an expert logo designer and brand strategist. Create logo concept ideas based on the following information:
 
@@ -71,7 +73,7 @@ Format your response as:
 [specific considerations for the industry and target audience]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

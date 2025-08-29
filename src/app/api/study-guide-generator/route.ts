@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { notes, subject, studyLevel, includePracticeQuestions, includeSummary } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { notes, subject, studyLevel, includePracticeQuestions, includeSummary } = body;
 
     const prompt = `You are an expert educational content organizer. Create a comprehensive study guide based on:
 
@@ -61,7 +63,7 @@ Create a detailed study guide including:
 [Suggested readings and resources for further study]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

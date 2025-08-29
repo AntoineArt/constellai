@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { name, contactInfo, summary, experience, education, skills, targetJob, format, includeKeywords } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { name, contactInfo, summary, experience, education, skills, targetJob, format, includeKeywords } = body;
 
     const prompt = `You are an expert resume writer and career coach. Create a professional, tailored resume based on the following information:
 
@@ -55,7 +57,7 @@ Format your response as:
 [suggested talking points based on the resume]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { meetingNotes, meetingType, participants, duration, includeActionItems, includeDecisions } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { meetingNotes, meetingType, participants, duration, includeActionItems, includeDecisions } = body;
 
     const prompt = `You are an expert meeting facilitator and documentation specialist. Generate structured meeting minutes based on:
 
@@ -66,7 +68,7 @@ Create comprehensive meeting minutes including:
 [Additional important information or context]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

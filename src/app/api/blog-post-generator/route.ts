@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { topic, targetAudience, tone, wordCount, includeSEO, includeOutline } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { topic, targetAudience, tone, wordCount, includeSEO, includeOutline } = body;
 
     const prompt = `You are an expert content writer and SEO specialist. Create a comprehensive, SEO-optimized blog post based on the following requirements:
 
@@ -57,7 +59,7 @@ Format your response as:
 [additional recommendations for content marketing]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { requirements, databaseType, includeIndexes, includeRelationships } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { requirements, databaseType, includeIndexes, includeRelationships } = body;
 
     const prompt = `You are an expert database designer. Create a comprehensive database schema based on the following requirements:
 
@@ -54,7 +56,7 @@ Format your response as:
 [example of how data would be structured]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

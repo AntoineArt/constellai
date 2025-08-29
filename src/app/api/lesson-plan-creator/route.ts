@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { topic, gradeLevel, duration, learningObjectives, includeActivities, includeAssessment } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { topic, gradeLevel, duration, learningObjectives, includeActivities, includeAssessment } = body;
 
     const prompt = `You are an expert curriculum developer. Create a comprehensive lesson plan based on:
 
@@ -76,7 +78,7 @@ Create a detailed lesson plan including:
 [Additional activities or assignments]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
 
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { decision, options, criteria, weights, includeProsCons, includeRiskAnalysis } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { decision, options, criteria, weights, includeProsCons, includeRiskAnalysis } = body;
 
     const prompt = `You are an expert decision analyst and strategic consultant. Create a decision matrix based on:
 
@@ -74,7 +76,7 @@ Create a comprehensive decision matrix including:
 [How to track the success of the decision]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

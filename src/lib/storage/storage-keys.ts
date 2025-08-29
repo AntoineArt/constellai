@@ -87,8 +87,10 @@ export const TOOL_IDS = {
   WORKFLOW_DESIGNER: "workflow-designer",
 } as const;
 
+import { DEFAULT_MODEL_ID } from "../models";
+
 export const DEFAULT_PREFERENCES = {
-  defaultModel: "openai/gpt-oss-20b",
+  defaultModel: DEFAULT_MODEL_ID,
   theme: "system" as const,
   sidebarCollapsed: false,
   toolSettings: {},

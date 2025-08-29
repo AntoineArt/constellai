@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -17,7 +17,9 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { purpose, tone, recipient, keyPoints, includeSignature, format } = await req.json();
+    const body = await req.json();
+    const model = getModelFromRequest(body);
+    const { purpose, tone, recipient, keyPoints, includeSignature, format } = body;
 
     const prompt = `You are an expert email writer and communication specialist. Create a professional email template based on the following requirements:
 
@@ -51,7 +53,7 @@ Format your response as:
 [suggestions for follow-up actions or communications]`;
 
     const result = streamText({
-      model: "openai/gpt-4o",
+      model,
       messages: [
         {
           role: "system",

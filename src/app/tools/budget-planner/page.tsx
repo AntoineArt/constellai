@@ -47,7 +47,7 @@ export default function BudgetPlannerPage() {
   const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
   const [copiedResult, setCopiedResult] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
-  const budgetTypeRef = useRef<HTMLSelectElement>(null);
+  const budgetTypeRef = useRef<HTMLButtonElement>(null);
 
   // Load current execution data
   useEffect(() => {

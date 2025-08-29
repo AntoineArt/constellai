@@ -48,7 +48,7 @@ export default function RoiCalculatorPage() {
   const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
   const [copiedResult, setCopiedResult] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
-  const investmentTypeRef = useRef<HTMLSelectElement>(null);
+  const investmentTypeRef = useRef<HTMLButtonElement>(null);
 
   // Load current execution data
   useEffect(() => {

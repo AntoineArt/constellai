@@ -1,6 +1,9 @@
 export const STORAGE_KEYS = {
   API_KEY: "api-key",
   PREFERENCES: "preferences",
+  TOOL_EXECUTIONS: "tool-executions",
+  ACTIVE_EXECUTIONS: "active-executions",
+  PINNED_TOOLS: "pinned-tools",
 } as const;
 
 export const TOOL_IDS = {
@@ -52,6 +55,8 @@ export const TOOL_IDS = {
   BUDGET_PLANNER: "budget-planner",
   PRICING_STRATEGY_GENERATOR: "pricing-strategy-generator",
   CUSTOMER_JOURNEY_MAPPER: "customer-journey-mapper",
+  COMPETITOR_ANALYSIS_TOOL: "competitor-analysis-tool",
+  SALES_PITCH_GENERATOR: "sales-pitch-generator",
   LITERATURE_REVIEW_GENERATOR: "literature-review-generator",
   SURVEY_DESIGNER: "survey-designer",
   INTERVIEW_QUESTION_GENERATOR: "interview-question-generator",

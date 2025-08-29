@@ -45,7 +45,7 @@ export default function RiskAssessmentToolPage() {
   const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
   const [copiedResult, setCopiedResult] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
-  const businessTypeRef = useRef<HTMLSelectElement>(null);
+  const businessTypeRef = useRef<HTMLButtonElement>(null);
 
   // Load current execution data
   useEffect(() => {

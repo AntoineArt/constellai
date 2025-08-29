@@ -17,7 +17,14 @@ export async function POST(req: Request) {
     // Set the API key as environment variable for this request
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
-    const { budgetType, totalBudget, categories, timePeriod, includeDetailedBreakdown, includeForecasting } = await req.json();
+    const {
+      budgetType,
+      totalBudget,
+      categories,
+      timePeriod,
+      includeDetailedBreakdown,
+      includeForecasting,
+    } = await req.json();
 
     const prompt = `You are an expert financial planner and budget consultant. Create a comprehensive budget plan based on the following information:
 
@@ -153,7 +160,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert financial planner and budget consultant who creates comprehensive, practical budget plans. Focus on providing clear allocations, strategic planning, and actionable implementation guidance that helps organizations manage their finances effectively.",
+          content:
+            "You are an expert financial planner and budget consultant who creates comprehensive, practical budget plans. Focus on providing clear allocations, strategic planning, and actionable implementation guidance that helps organizations manage their finances effectively.",
         },
         {
           role: "user",

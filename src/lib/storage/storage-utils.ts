@@ -295,7 +295,7 @@ export function hasContentForAITitle(
       );
     case "regex":
       const description = inputs.description as string;
-      return description && description.trim().length > 0;
+      return !!(description && description.trim().length > 0);
     case "summarizer":
       const text = inputs.text as string;
       return (

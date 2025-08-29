@@ -43,6 +43,7 @@ export default function SyllabusGenerator() {
   const inputId = useId();
   const subjectId = useId();
   const durationId = useId();
+  const learningObjectivesId = useId();
   const scheduleId = useId();
   const policiesId = useId();
 

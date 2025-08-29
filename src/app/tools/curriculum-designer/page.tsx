@@ -41,6 +41,7 @@ export default function CurriculumDesigner() {
   const learningObjectivesRef = useRef<HTMLTextAreaElement>(null);
   const inputId = useId();
   const durationId = useId();
+  const learningObjectivesId = useId();
   const assessmentsId = useId();
   const resourcesId = useId();
 

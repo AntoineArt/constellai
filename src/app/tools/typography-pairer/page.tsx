@@ -44,7 +44,7 @@ export default function TypographyPairerPage() {
   const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
   const [copiedResult, setCopiedResult] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
-  const projectTypeRef = useRef<HTMLSelectElement>(null);
+  const projectTypeRef = useRef<HTMLButtonElement>(null);
 
   // Load current execution data
   useEffect(() => {

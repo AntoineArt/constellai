@@ -18,7 +18,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { tasks, priorityMethod, context, includeDeadlines, includeEffort } = body;
+    const { tasks, priorityMethod, context, includeDeadlines, includeEffort } =
+      body;
 
     const prompt = `You are an expert productivity consultant and task management specialist. Prioritize and organize tasks based on:
 
@@ -68,7 +69,8 @@ Create a prioritized task list including:
       messages: [
         {
           role: "system",
-          content: "You are an expert productivity consultant who helps people organize and prioritize tasks effectively. Focus on using proven prioritization frameworks, considering context and goals, and providing actionable recommendations for task management.",
+          content:
+            "You are an expert productivity consultant who helps people organize and prioritize tasks effectively. Focus on using proven prioritization frameworks, considering context and goals, and providing actionable recommendations for task management.",
         },
         {
           role: "user",

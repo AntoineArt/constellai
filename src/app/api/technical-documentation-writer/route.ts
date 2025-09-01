@@ -19,7 +19,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { productName, productDescription, targetAudience, documentationType, features, includeScreenshots, includeTroubleshooting } = body;
+    const {
+      productName,
+      productDescription,
+      targetAudience,
+      documentationType,
+      features,
+      includeScreenshots,
+      includeTroubleshooting,
+    } = body;
 
     const prompt = `You are an expert technical writer specializing in creating comprehensive user documentation. Create professional technical documentation based on the following information:
 
@@ -86,7 +94,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert technical writer with extensive experience in creating clear, comprehensive, and user-friendly documentation. Focus on creating documentation that is accessible to the target audience while being thorough and well-structured.",
+          content:
+            "You are an expert technical writer with extensive experience in creating clear, comprehensive, and user-friendly documentation. Focus on creating documentation that is accessible to the target audience while being thorough and well-structured.",
         },
         {
           role: "user",

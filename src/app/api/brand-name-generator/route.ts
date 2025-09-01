@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { industry, targetAudience, brandPersonality, nameStyle, includeDomainCheck, includeTrademarkCheck } = body;
+    const {
+      industry,
+      targetAudience,
+      brandPersonality,
+      nameStyle,
+      includeDomainCheck,
+      includeTrademarkCheck,
+    } = body;
 
     const prompt = `You are an expert brand strategist and naming specialist. Create unique and memorable brand names based on the following criteria:
 
@@ -97,7 +104,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert brand strategist and naming specialist who creates unique, memorable, and legally viable brand names. Focus on creating names that are distinctive, meaningful, and aligned with the brand's personality and target audience.",
+          content:
+            "You are an expert brand strategist and naming specialist who creates unique, memorable, and legally viable brand names. Focus on creating names that are distinctive, meaningful, and aligned with the brand's personality and target audience.",
         },
         {
           role: "user",

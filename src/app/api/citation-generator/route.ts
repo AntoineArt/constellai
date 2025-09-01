@@ -18,7 +18,12 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { sourceInfo, citationStyle, includeMultipleFormats, includeBibliography } = body;
+    const {
+      sourceInfo,
+      citationStyle,
+      includeMultipleFormats,
+      includeBibliography,
+    } = body;
 
     const prompt = `You are an expert academic citation specialist. Generate citations based on:
 
@@ -55,7 +60,8 @@ Create comprehensive citations including:
       messages: [
         {
           role: "system",
-          content: "You are an expert academic citation specialist who generates accurate, properly formatted citations in various academic styles. Focus on providing correct formatting, complete information, and helpful guidance for proper citation practices.",
+          content:
+            "You are an expert academic citation specialist who generates accurate, properly formatted citations in various academic styles. Focus on providing correct formatting, complete information, and helpful guidance for proper citation practices.",
         },
         {
           role: "user",

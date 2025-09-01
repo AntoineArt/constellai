@@ -3,7 +3,7 @@ import { useCallback } from "react";
 export function usePreferences() {
   const getApiKey = useCallback((): string | null => {
     if (typeof window === "undefined") return null;
-    
+
     try {
       return localStorage.getItem("api-key");
     } catch (error) {
@@ -14,7 +14,7 @@ export function usePreferences() {
 
   const setApiKey = useCallback((apiKey: string) => {
     if (typeof window === "undefined") return;
-    
+
     try {
       localStorage.setItem("api-key", apiKey);
     } catch (error) {
@@ -24,7 +24,7 @@ export function usePreferences() {
 
   const clearApiKey = useCallback(() => {
     if (typeof window === "undefined") return;
-    
+
     try {
       localStorage.removeItem("api-key");
     } catch (error) {

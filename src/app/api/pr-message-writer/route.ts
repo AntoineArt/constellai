@@ -19,7 +19,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { commits, branchName, includeTesting, includeBreakingChanges } = body;
+    const { commits, branchName, includeTesting, includeBreakingChanges } =
+      body;
 
     const prompt = `You are an expert technical writer specializing in creating professional pull request descriptions. Generate a comprehensive PR description based on the following commit history:
 
@@ -54,7 +55,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert technical writer who creates clear, professional, and comprehensive pull request descriptions. Focus on clarity, completeness, and providing actionable information for reviewers.",
+          content:
+            "You are an expert technical writer who creates clear, professional, and comprehensive pull request descriptions. Focus on clarity, completeness, and providing actionable information for reviewers.",
         },
         {
           role: "user",

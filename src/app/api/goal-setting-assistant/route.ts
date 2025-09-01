@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { goalArea, currentSituation, desiredOutcome, timeframe, includeActionPlan, includeMetrics } = body;
+    const {
+      goalArea,
+      currentSituation,
+      desiredOutcome,
+      timeframe,
+      includeActionPlan,
+      includeMetrics,
+    } = body;
 
     const prompt = `You are an expert goal-setting coach and productivity specialist. Create SMART goals based on:
 
@@ -74,7 +81,8 @@ Create comprehensive SMART goals including:
       messages: [
         {
           role: "system",
-          content: "You are an expert goal-setting coach who helps people create clear, achievable SMART goals with actionable plans. Focus on making goals specific, measurable, and realistic while providing practical strategies for success.",
+          content:
+            "You are an expert goal-setting coach who helps people create clear, achievable SMART goals with actionable plans. Focus on making goals specific, measurable, and realistic while providing practical strategies for success.",
         },
         {
           role: "user",
@@ -87,9 +95,9 @@ Create comprehensive SMART goals including:
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("Goal Setting Assistant error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to create goals" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Failed to create goals" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

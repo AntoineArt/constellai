@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { researchTopic, dataSources, targetMarket, includeCompetitiveAnalysis, includeActionableInsights } = body;
+    const {
+      researchTopic,
+      dataSources,
+      targetMarket,
+      includeCompetitiveAnalysis,
+      includeActionableInsights,
+    } = body;
 
     const prompt = `You are an expert market research analyst and business strategist. Create a comprehensive market research synthesis based on the following information:
 
@@ -154,7 +160,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert market research analyst and business strategist who creates comprehensive, data-driven market research syntheses. Focus on providing actionable insights, clear market understanding, and strategic recommendations based on thorough analysis.",
+          content:
+            "You are an expert market research analyst and business strategist who creates comprehensive, data-driven market research syntheses. Focus on providing actionable insights, clear market understanding, and strategic recommendations based on thorough analysis.",
         },
         {
           role: "user",

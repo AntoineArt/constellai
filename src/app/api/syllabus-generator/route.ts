@@ -18,7 +18,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { courseTitle, subject, gradeLevel, duration, learningObjectives, includeSchedule, includePolicies } = body;
+    const {
+      courseTitle,
+      subject,
+      gradeLevel,
+      duration,
+      learningObjectives,
+      includeSchedule,
+      includePolicies,
+    } = body;
 
     const prompt = `You are an expert course designer. Generate a comprehensive course syllabus based on:
 
@@ -87,7 +95,8 @@ Create a detailed course syllabus including:
       messages: [
         {
           role: "system",
-          content: "You are an expert course designer who creates comprehensive, professional course syllabi that provide clear expectations and structure for effective learning. Focus on creating well-organized documents that include all necessary information for students and align with educational standards.",
+          content:
+            "You are an expert course designer who creates comprehensive, professional course syllabi that provide clear expectations and structure for effective learning. Focus on creating well-organized documents that include all necessary information for students and align with educational standards.",
         },
         {
           role: "user",

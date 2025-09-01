@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { brandName, industry, mood, colorPreferences, includeAccessibility, includeColorTheory } = body;
+    const {
+      brandName,
+      industry,
+      mood,
+      colorPreferences,
+      includeAccessibility,
+      includeColorTheory,
+    } = body;
 
     const prompt = `You are an expert color designer and brand strategist. Create a comprehensive color palette based on the following information:
 
@@ -98,7 +105,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert color designer and brand strategist who creates harmonious, accessible, and effective color palettes. Focus on creating palettes that are visually appealing, brand-appropriate, and functional across different applications.",
+          content:
+            "You are an expert color designer and brand strategist who creates harmonious, accessible, and effective color palettes. Focus on creating palettes that are visually appealing, brand-appropriate, and functional across different applications.",
         },
         {
           role: "user",

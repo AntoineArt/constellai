@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { workflowDescription, workflowType, stakeholders, includeAutomation, includeMetrics } = body;
+    const {
+      workflowDescription,
+      workflowType,
+      stakeholders,
+      includeAutomation,
+      includeMetrics,
+    } = body;
 
     const prompt = `You are an expert workflow designer and business process consultant. Design an efficient workflow based on:
 
@@ -88,7 +94,8 @@ Create a comprehensive workflow design including:
       messages: [
         {
           role: "system",
-          content: "You are an expert workflow designer who creates efficient, well-structured workflows that optimize business processes. Focus on creating clear process flows, defining roles and responsibilities, and identifying opportunities for improvement and automation.",
+          content:
+            "You are an expert workflow designer who creates efficient, well-structured workflows that optimize business processes. Focus on creating clear process flows, defining roles and responsibilities, and identifying opportunities for improvement and automation.",
         },
         {
           role: "user",

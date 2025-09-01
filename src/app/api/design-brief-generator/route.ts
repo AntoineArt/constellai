@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { projectName, clientRequirements, targetAudience, designGoals, includeTechnicalSpecs, includeTimeline } = body;
+    const {
+      projectName,
+      clientRequirements,
+      targetAudience,
+      designGoals,
+      includeTechnicalSpecs,
+      includeTimeline,
+    } = body;
 
     const prompt = `You are an expert design strategist and project manager. Create a comprehensive design brief based on the following information:
 
@@ -128,7 +135,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert design strategist and project manager who creates comprehensive, actionable design briefs. Focus on creating briefs that are clear, detailed, and provide all necessary information for successful design execution.",
+          content:
+            "You are an expert design strategist and project manager who creates comprehensive, actionable design briefs. Focus on creating briefs that are clear, detailed, and provide all necessary information for successful design execution.",
         },
         {
           role: "user",

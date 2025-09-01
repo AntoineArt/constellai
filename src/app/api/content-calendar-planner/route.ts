@@ -19,7 +19,17 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { brandName, industry, targetAudience, contentGoals, platforms, frequency, duration, includeHolidays, includeTrending } = body;
+    const {
+      brandName,
+      industry,
+      targetAudience,
+      contentGoals,
+      platforms,
+      frequency,
+      duration,
+      includeHolidays,
+      includeTrending,
+    } = body;
 
     const prompt = `You are an expert content strategist and marketing specialist. Create a comprehensive content calendar based on the following information:
 
@@ -83,7 +93,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert content strategist with extensive experience in creating comprehensive content calendars that drive engagement and achieve marketing goals. Focus on creating strategic, well-organized content plans that align with business objectives.",
+          content:
+            "You are an expert content strategist with extensive experience in creating comprehensive content calendars that drive engagement and achieve marketing goals. Focus on creating strategic, well-organized content plans that align with business objectives.",
         },
         {
           role: "user",

@@ -18,7 +18,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { claim, context, includeSourceValidation, includeDetailedAnalysis } = body;
+    const { claim, context, includeSourceValidation, includeDetailedAnalysis } =
+      body;
 
     const prompt = `You are an expert fact-checker and research analyst. Verify claims based on:
 
@@ -61,7 +62,8 @@ Create a comprehensive fact-check report including:
       messages: [
         {
           role: "system",
-          content: "You are an expert fact-checker and research analyst who verifies claims with accuracy and provides reliable source validation. Focus on providing objective assessments, credible sources, and clear explanations of verification results.",
+          content:
+            "You are an expert fact-checker and research analyst who verifies claims with accuracy and provides reliable source validation. Focus on providing objective assessments, credible sources, and clear explanations of verification results.",
         },
         {
           role: "user",

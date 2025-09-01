@@ -19,7 +19,17 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { name, contactInfo, company, position, experience, skills, motivation, tone, includeCallToAction } = body;
+    const {
+      name,
+      contactInfo,
+      company,
+      position,
+      experience,
+      skills,
+      motivation,
+      tone,
+      includeCallToAction,
+    } = body;
 
     const prompt = `You are an expert cover letter writer and career coach. Create a compelling, personalized cover letter based on the following information:
 
@@ -61,7 +71,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert cover letter writer who creates compelling, personalized cover letters that help candidates stand out to employers. Focus on making specific connections between the candidate's experience and the target position.",
+          content:
+            "You are an expert cover letter writer who creates compelling, personalized cover letters that help candidates stand out to employers. Focus on making specific connections between the candidate's experience and the target position.",
         },
         {
           role: "user",

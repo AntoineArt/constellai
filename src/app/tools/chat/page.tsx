@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import type { ChatStatus } from "ai";
 
 import { TopBar } from "@/components/top-bar";
@@ -11,6 +11,13 @@ import { useApiKey } from "@/hooks/use-api-key";
 import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
 import type { ChatMessage } from "@/lib/storage/types";
 import { Trash2, Copy, RotateCcw } from "lucide-react";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import { Message, MessageContent } from "@/components/ai-elements/message";
+import { Response } from "@/components/ai-elements/response";
 
 export default function ChatPage() {
   const { hasApiKey, apiKey } = useApiKey();
@@ -18,13 +25,14 @@ export default function ChatPage() {
   const { preferences } = usePreferences();
 
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
-  const [messages, setMessages] = useState<Array<ChatMessage>>([]);
+  const [messages, setMessages] = useState<
+    Array<ChatMessage & { id?: string }>
+  >([]);
   const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const chatControllerRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load current execution data
   useEffect(() => {
@@ -62,12 +70,6 @@ export default function ChatPage() {
 
     return () => clearTimeout(timeoutId);
   }, [messages, selectedModel, status, toolHistory]);
-
-  // Auto-scroll to bottom when messages change
-  // biome-ignore lint/correctness/useExhaustiveDependencies: messages is needed to trigger scroll
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   // Auto-resize textarea with strict max height
   // biome-ignore lint/correctness/useExhaustiveDependencies: inputValue is needed to trigger resize
@@ -150,33 +152,57 @@ export default function ChatPage() {
         let assistantContent = "";
 
         // Push an empty assistant message to stream into
-        setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+        const assistantMessageId = `assistant-${Date.now()}`;
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "",
+            id: assistantMessageId,
+          },
+        ]);
 
-        // Stream loop
+        // Stream loop with reduced re-renders
+        let lastUpdateTime = 0;
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           assistantContent += decoder.decode(value, { stream: true });
-          setMessages((prev) => {
-            const next = [...prev];
-            const lastIndex = next.length - 1;
-            if (lastIndex >= 0 && next[lastIndex]?.role === "assistant") {
-              next[lastIndex] = {
-                role: "assistant",
-                content: assistantContent,
-              };
-            }
-            return next;
-          });
+
+          // Throttle updates to reduce re-renders and focus loss
+          const now = Date.now();
+          if (now - lastUpdateTime > 50 || done) {
+            // Update at most every 50ms
+            lastUpdateTime = now;
+            setMessages((prev) => {
+              const next = [...prev];
+              const lastIndex = next.length - 1;
+              if (
+                lastIndex >= 0 &&
+                next[lastIndex]?.id === assistantMessageId
+              ) {
+                next[lastIndex] = {
+                  role: "assistant",
+                  content: assistantContent,
+                  id: assistantMessageId,
+                };
+              }
+              return next;
+            });
+          }
         }
 
-        // Flush
+        // Flush final content
         assistantContent += decoder.decode();
         setMessages((prev) => {
           const next = [...prev];
           const lastIndex = next.length - 1;
-          if (lastIndex >= 0 && next[lastIndex]?.role === "assistant") {
-            next[lastIndex] = { role: "assistant", content: assistantContent };
+          if (lastIndex >= 0 && next[lastIndex]?.id === assistantMessageId) {
+            next[lastIndex] = {
+              role: "assistant",
+              content: assistantContent,
+              id: assistantMessageId,
+            };
           }
           return next;
         });
@@ -184,6 +210,13 @@ export default function ChatPage() {
         // Clean up and save after streaming completes
         chatControllerRef.current = null;
         setStatus(undefined);
+
+        // Refocus the input after streaming completes
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.focus();
+          }
+        }, 100);
 
         // Final save of the complete conversation
         const finalMessages = [
@@ -251,9 +284,9 @@ export default function ChatPage() {
       const prompt = inputValue.trim();
       if (!prompt) return;
 
-      const newMessages: ChatMessage[] = [
+      const newMessages: (ChatMessage & { id?: string })[] = [
         ...messages,
-        { role: "user", content: prompt },
+        { role: "user", content: prompt, id: `user-${Date.now()}` },
       ];
       setMessages(newMessages);
       setInputValue("");
@@ -343,88 +376,72 @@ export default function ChatPage() {
               )}
 
               {/* Messages area - scrollable */}
-              <div className="flex-1 overflow-y-auto">
-                <div className="max-w-4xl mx-auto p-6">
-                  <div className="space-y-6">
-                    {/* Welcome message */}
-                    {messages.length === 0 && (
-                      <div className="flex">
-                        <div className="bg-muted rounded-2xl p-4 max-w-[80%]">
-                          <p className="text-sm">
-                            Hello! I'm your AI assistant. How can I help you
-                            today?
-                          </p>
-                        </div>
-                      </div>
-                    )}
+              <Conversation className="flex-1">
+                <ConversationContent className="max-w-4xl mx-auto">
+                  {/* Welcome message */}
+                  {messages.length === 0 && (
+                    <Message from="assistant">
+                      <MessageContent>
+                        <Response>
+                          Hello! I'm your AI assistant. How can I help you
+                          today?
+                        </Response>
+                      </MessageContent>
+                    </Message>
+                  )}
 
-                    {/* Chat messages */}
-                    {messages.map((message, index) => (
-                      <div key={`${index}-${message.role}`} className="group">
-                        <div
-                          className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                        >
-                          <div
-                            className={`relative max-w-[80%] rounded-2xl p-4 ${
-                              message.role === "user"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
-                            }`}
+                  {/* Chat messages */}
+                  {messages.map((message, index) => {
+                    const messageKey = message.id || `${index}-${message.role}`;
+                    return (
+                      <Message key={messageKey} from={message.role}>
+                        <MessageContent className="relative">
+                          <Response>{message.content}</Response>
+
+                          {/* Copy button */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-sm"
+                            onClick={() =>
+                              copyMessage(message.content, messageKey)
+                            }
                           >
-                            <p className="text-sm whitespace-pre-wrap">
-                              {message.content}
-                            </p>
+                            <Copy
+                              className={`h-3 w-3 ${
+                                copiedMessageId === messageKey
+                                  ? "text-green-600"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          </Button>
+                        </MessageContent>
+                      </Message>
+                    );
+                  })}
 
-                            {/* Copy button */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-sm"
-                              onClick={() =>
-                                copyMessage(
-                                  message.content,
-                                  `${index}-${message.role}`
-                                )
-                              }
-                            >
-                              <Copy
-                                className={`h-3 w-3 ${
-                                  copiedMessageId === `${index}-${message.role}`
-                                    ? "text-green-600"
-                                    : "text-muted-foreground"
-                                }`}
-                              />
-                            </Button>
+                  {/* Loading indicator */}
+                  {(status === "submitted" || status === "streaming") && (
+                    <Message from="assistant">
+                      <MessageContent>
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-1">
+                            <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.3s]" />
+                            <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.15s]" />
+                            <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" />
                           </div>
+                          <span className="text-xs text-muted-foreground">
+                            {status === "submitted"
+                              ? "Thinking..."
+                              : "Typing..."}
+                          </span>
                         </div>
-                      </div>
-                    ))}
-
-                    {/* Loading indicator */}
-                    {(status === "submitted" || status === "streaming") && (
-                      <div className="flex">
-                        <div className="bg-muted rounded-2xl p-4">
-                          <div className="flex items-center gap-2">
-                            <div className="flex gap-1">
-                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.3s]" />
-                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:-0.15s]" />
-                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" />
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {status === "submitted"
-                                ? "Thinking..."
-                                : "Typing..."}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Auto-scroll target */}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </div>
-              </div>
+                      </MessageContent>
+                    </Message>
+                  )}
+                </ConversationContent>
+                <ConversationScrollButton />
+              </Conversation>
 
               {/* Input area - fixed at bottom */}
               <div className="border-t bg-background p-4">

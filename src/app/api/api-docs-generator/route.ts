@@ -53,7 +53,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert API documentation specialist who creates comprehensive, accurate, and well-structured OpenAPI/Swagger documentation. Always include proper schemas, examples, and error handling.",
+          content:
+            "You are an expert API documentation specialist who creates comprehensive, accurate, and well-structured OpenAPI/Swagger documentation. Always include proper schemas, examples, and error handling.",
         },
         {
           role: "user",

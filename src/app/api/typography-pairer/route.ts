@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { projectType, brandPersonality, targetAudience, includeWebFonts, includePrintFonts } = body;
+    const {
+      projectType,
+      brandPersonality,
+      targetAudience,
+      includeWebFonts,
+      includePrintFonts,
+    } = body;
 
     const prompt = `You are an expert typography designer and brand strategist. Create harmonious font combinations based on the following information:
 
@@ -108,7 +114,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert typography designer and brand strategist who creates harmonious, readable, and brand-appropriate font combinations. Focus on creating pairings that enhance readability, maintain brand consistency, and provide clear visual hierarchy.",
+          content:
+            "You are an expert typography designer and brand strategist who creates harmonious, readable, and brand-appropriate font combinations. Focus on creating pairings that enhance readability, maintain brand consistency, and provide clear visual hierarchy.",
         },
         {
           role: "user",

@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { topic, gradeLevel, subject, learningLevel, includeAssessment, includeActivities } = body;
+    const {
+      topic,
+      gradeLevel,
+      subject,
+      learningLevel,
+      includeAssessment,
+      includeActivities,
+    } = body;
 
     const prompt = `You are an expert educational content developer. Generate clear learning objectives based on:
 
@@ -79,7 +86,8 @@ Create comprehensive learning objectives including:
       messages: [
         {
           role: "system",
-          content: "You are an expert educational content developer who creates clear, measurable learning objectives that align with educational standards and promote effective learning. Focus on using action verbs, creating specific and measurable outcomes, and ensuring objectives are appropriate for the grade level.",
+          content:
+            "You are an expert educational content developer who creates clear, measurable learning objectives that align with educational standards and promote effective learning. Focus on using action verbs, creating specific and measurable outcomes, and ensuring objectives are appropriate for the grade level.",
         },
         {
           role: "user",

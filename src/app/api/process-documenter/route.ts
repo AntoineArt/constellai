@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { processDescription, processType, audience, includeScreenshots, includeTroubleshooting } = body;
+    const {
+      processDescription,
+      processType,
+      audience,
+      includeScreenshots,
+      includeTroubleshooting,
+    } = body;
 
     const prompt = `You are an expert process documentation specialist and technical writer. Create step-by-step process documentation based on:
 
@@ -81,7 +87,8 @@ Create comprehensive process documentation including:
       messages: [
         {
           role: "system",
-          content: "You are an expert process documentation specialist who creates clear, comprehensive step-by-step process documentation. Focus on making instructions easy to follow, including all necessary details, and creating documentation that can be used by people with varying levels of expertise.",
+          content:
+            "You are an expert process documentation specialist who creates clear, comprehensive step-by-step process documentation. Focus on making instructions easy to follow, including all necessary details, and creating documentation that can be used by people with varying levels of expertise.",
         },
         {
           role: "user",

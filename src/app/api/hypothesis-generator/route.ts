@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { researchQuestion, context, variables, includeTestableHypotheses, includeResearchDesign } = body;
+    const {
+      researchQuestion,
+      context,
+      variables,
+      includeTestableHypotheses,
+      includeResearchDesign,
+    } = body;
 
     const prompt = `You are an expert research methodologist. Generate hypotheses based on:
 
@@ -63,7 +69,8 @@ Create comprehensive hypotheses including:
       messages: [
         {
           role: "system",
-          content: "You are an expert research methodologist who creates testable, well-formulated hypotheses. Focus on providing clear, falsifiable hypotheses with proper theoretical grounding and practical testing strategies.",
+          content:
+            "You are an expert research methodologist who creates testable, well-formulated hypotheses. Focus on providing clear, falsifiable hypotheses with proper theoretical grounding and practical testing strategies.",
         },
         {
           role: "user",

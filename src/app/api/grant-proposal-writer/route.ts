@@ -19,7 +19,17 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { organization, projectTitle, projectDescription, fundingAmount, grantType, targetAudience, timeline, includeBudget, includeEvaluation } = body;
+    const {
+      organization,
+      projectTitle,
+      projectDescription,
+      fundingAmount,
+      grantType,
+      targetAudience,
+      timeline,
+      includeBudget,
+      includeEvaluation,
+    } = body;
 
     const prompt = `You are an expert grant writer and funding specialist. Create a comprehensive grant proposal based on the following information:
 
@@ -83,7 +93,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert grant writer with extensive experience in securing funding for nonprofit organizations, research projects, and community initiatives. Focus on creating compelling, well-structured proposals that clearly articulate the need, solution, and impact.",
+          content:
+            "You are an expert grant writer with extensive experience in securing funding for nonprofit organizations, research projects, and community initiatives. Focus on creating compelling, well-structured proposals that clearly articulate the need, solution, and impact.",
         },
         {
           role: "user",

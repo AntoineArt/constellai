@@ -19,7 +19,17 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { name, contactInfo, summary, experience, education, skills, targetJob, format, includeKeywords } = body;
+    const {
+      name,
+      contactInfo,
+      summary,
+      experience,
+      education,
+      skills,
+      targetJob,
+      format,
+      includeKeywords,
+    } = body;
 
     const prompt = `You are an expert resume writer and career coach. Create a professional, tailored resume based on the following information:
 
@@ -61,7 +71,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert resume writer and career coach who creates compelling, ATS-optimized resumes that help candidates stand out to employers. Focus on highlighting achievements, using action verbs, and tailoring content to the target position.",
+          content:
+            "You are an expert resume writer and career coach who creates compelling, ATS-optimized resumes that help candidates stand out to employers. Focus on highlighting achievements, using action verbs, and tailoring content to the target position.",
         },
         {
           role: "user",

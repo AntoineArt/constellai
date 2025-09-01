@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { businessIdea, industry, targetMarket, fundingNeeds, includeFinancialProjections, includeMarketAnalysis } = body;
+    const {
+      businessIdea,
+      industry,
+      targetMarket,
+      fundingNeeds,
+      includeFinancialProjections,
+      includeMarketAnalysis,
+    } = body;
 
     const prompt = `You are an expert business strategist and consultant. Create a comprehensive business plan based on the following information:
 
@@ -138,7 +145,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert business strategist and consultant who creates comprehensive, realistic, and actionable business plans. Focus on creating plans that are well-structured, financially sound, and provide clear strategic direction.",
+          content:
+            "You are an expert business strategist and consultant who creates comprehensive, realistic, and actionable business plans. Focus on creating plans that are well-structured, financially sound, and provide clear strategic direction.",
         },
         {
           role: "user",

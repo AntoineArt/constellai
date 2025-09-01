@@ -19,7 +19,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { topic, contentType, targetAudience, tone, length, includeSEO, includeEmotional } = body;
+    const {
+      topic,
+      contentType,
+      targetAudience,
+      tone,
+      length,
+      includeSEO,
+      includeEmotional,
+    } = body;
 
     const prompt = `You are an expert copywriter and headline specialist. Create compelling, attention-grabbing headlines based on the following information:
 
@@ -74,7 +82,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert copywriter and headline specialist who creates compelling, click-worthy headlines that drive engagement and conversions. Focus on creating headlines that are both attention-grabbing and accurately represent the content.",
+          content:
+            "You are an expert copywriter and headline specialist who creates compelling, click-worthy headlines that drive engagement and conversions. Focus on creating headlines that are both attention-grabbing and accurately represent the content.",
         },
         {
           role: "user",

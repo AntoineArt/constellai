@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { topic, platform, tone, includeHashtags, includeCallToAction, targetAudience } = body;
+    const {
+      topic,
+      platform,
+      tone,
+      includeHashtags,
+      includeCallToAction,
+      targetAudience,
+    } = body;
 
     const prompt = `You are an expert social media content creator and digital marketing specialist. Create engaging social media posts based on the following requirements:
 
@@ -60,7 +67,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert social media strategist who creates engaging, platform-optimized content that drives engagement and achieves marketing goals. Focus on creating authentic, valuable content that resonates with the target audience.",
+          content:
+            "You are an expert social media strategist who creates engaging, platform-optimized content that drives engagement and achieves marketing goals. Focus on creating authentic, valuable content that resonates with the target audience.",
         },
         {
           role: "user",

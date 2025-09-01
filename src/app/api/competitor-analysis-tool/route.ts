@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { companyName, industry, competitors, includeDetailedAnalysis, includeStrategicRecommendations } = body;
+    const {
+      companyName,
+      industry,
+      competitors,
+      includeDetailedAnalysis,
+      includeStrategicRecommendations,
+    } = body;
 
     const prompt = `You are an expert competitive intelligence analyst and business strategist. Create a comprehensive competitor analysis based on the following information:
 
@@ -172,7 +178,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert competitive intelligence analyst and business strategist who creates comprehensive, actionable competitor analyses. Focus on providing insights that help businesses understand their competitive position and develop effective strategies.",
+          content:
+            "You are an expert competitive intelligence analyst and business strategist who creates comprehensive, actionable competitor analyses. Focus on providing insights that help businesses understand their competitive position and develop effective strategies.",
         },
         {
           role: "user",

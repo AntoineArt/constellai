@@ -19,7 +19,17 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { name, email, phone, company, title, address, website, notes, format } = body;
+    const {
+      name,
+      email,
+      phone,
+      company,
+      title,
+      address,
+      website,
+      notes,
+      format,
+    } = body;
 
     const prompt = `You are an expert in contact information management and vCard format. Create a professional contact card based on the following information:
 
@@ -64,7 +74,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert in contact management and vCard standards who creates professional, properly formatted contact cards that can be easily imported into various platforms and devices.",
+          content:
+            "You are an expert in contact management and vCard standards who creates professional, properly formatted contact cards that can be easily imported into various platforms and devices.",
         },
         {
           role: "user",

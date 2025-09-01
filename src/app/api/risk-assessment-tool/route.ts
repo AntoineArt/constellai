@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { businessType, industry, currentSituation, includeDetailedAnalysis, includeMitigationStrategies } = body;
+    const {
+      businessType,
+      industry,
+      currentSituation,
+      includeDetailedAnalysis,
+      includeMitigationStrategies,
+    } = body;
 
     const prompt = `You are an expert risk management consultant and business strategist. Create a comprehensive risk assessment based on the following information:
 
@@ -158,7 +164,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert risk management consultant and business strategist who creates comprehensive, actionable risk assessments. Focus on providing clear risk identification, practical mitigation strategies, and structured monitoring frameworks that help organizations manage risks effectively.",
+          content:
+            "You are an expert risk management consultant and business strategist who creates comprehensive, actionable risk assessments. Focus on providing clear risk identification, practical mitigation strategies, and structured monitoring frameworks that help organizations manage risks effectively.",
         },
         {
           role: "user",

@@ -19,7 +19,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { headline, company, announcement, keyPoints, targetMedia, includeQuotes, includeBoilerplate } = body;
+    const {
+      headline,
+      company,
+      announcement,
+      keyPoints,
+      targetMedia,
+      includeQuotes,
+      includeBoilerplate,
+    } = body;
 
     const prompt = `You are an expert public relations specialist and press release writer. Create a professional press release based on the following information:
 
@@ -59,7 +67,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert public relations specialist who writes compelling, newsworthy press releases that follow journalistic standards and capture media attention. Focus on creating clear, engaging content that tells a compelling story.",
+          content:
+            "You are an expert public relations specialist who writes compelling, newsworthy press releases that follow journalistic standards and capture media attention. Focus on creating clear, engaging content that tells a compelling story.",
         },
         {
           role: "user",

@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { projectDescription, projectScope, teamSize, startDate, includeMilestones, includeDependencies } = body;
+    const {
+      projectDescription,
+      projectScope,
+      teamSize,
+      startDate,
+      includeMilestones,
+      includeDependencies,
+    } = body;
 
     const prompt = `You are an expert project manager and timeline specialist. Create a comprehensive project timeline based on:
 
@@ -80,7 +87,8 @@ Create a detailed project timeline including:
       messages: [
         {
           role: "system",
-          content: "You are an expert project manager who creates comprehensive project timelines that are realistic, well-structured, and actionable. Focus on breaking down projects into manageable phases, identifying dependencies, and providing clear deliverables and milestones.",
+          content:
+            "You are an expert project manager who creates comprehensive project timelines that are realistic, well-structured, and actionable. Focus on breaking down projects into manageable phases, identifying dependencies, and providing clear deliverables and milestones.",
         },
         {
           role: "user",

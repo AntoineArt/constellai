@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { companyName, reportType, financialData, includeKeyInsights, includeRecommendations } = body;
+    const {
+      companyName,
+      reportType,
+      financialData,
+      includeKeyInsights,
+      includeRecommendations,
+    } = body;
 
     const prompt = `You are an expert financial analyst and business consultant. Create a comprehensive financial report summary based on the following information:
 
@@ -154,7 +160,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert financial analyst and business consultant who creates comprehensive, insightful financial report summaries. Focus on providing clear analysis, actionable insights, and strategic recommendations based on thorough financial analysis.",
+          content:
+            "You are an expert financial analyst and business consultant who creates comprehensive, insightful financial report summaries. Focus on providing clear analysis, actionable insights, and strategic recommendations based on thorough financial analysis.",
         },
         {
           role: "user",

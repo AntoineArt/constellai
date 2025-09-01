@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { meetingNotes, meetingType, participants, duration, includeActionItems, includeDecisions } = body;
+    const {
+      meetingNotes,
+      meetingType,
+      participants,
+      duration,
+      includeActionItems,
+      includeDecisions,
+    } = body;
 
     const prompt = `You are an expert meeting facilitator and documentation specialist. Generate structured meeting minutes based on:
 
@@ -72,7 +79,8 @@ Create comprehensive meeting minutes including:
       messages: [
         {
           role: "system",
-          content: "You are an expert meeting facilitator who creates clear, structured meeting minutes that capture key discussions, decisions, and action items. Focus on organizing information logically, highlighting important outcomes, and ensuring all participants and stakeholders have clear next steps.",
+          content:
+            "You are an expert meeting facilitator who creates clear, structured meeting minutes that capture key discussions, decisions, and action items. Focus on organizing information logically, highlighting important outcomes, and ensuring all participants and stakeholders have clear next steps.",
         },
         {
           role: "user",

@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { currentSchedule, priorities, energyLevels, workHours, includeBreaks, includeBufferTime } = body;
+    const {
+      currentSchedule,
+      priorities,
+      energyLevels,
+      workHours,
+      includeBreaks,
+      includeBufferTime,
+    } = body;
 
     const prompt = `You are an expert productivity consultant and time management specialist. Optimize a daily schedule based on:
 
@@ -84,7 +91,8 @@ Create an optimized daily schedule including:
       messages: [
         {
           role: "system",
-          content: "You are an expert productivity consultant who creates optimized daily schedules that maximize productivity and energy management. Focus on aligning tasks with natural energy patterns, incorporating strategic breaks, and creating realistic, flexible schedules.",
+          content:
+            "You are an expert productivity consultant who creates optimized daily schedules that maximize productivity and energy management. Focus on aligning tasks with natural energy patterns, incorporating strategic breaks, and creating realistic, flexible schedules.",
         },
         {
           role: "user",

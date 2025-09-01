@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { assignment, gradeLevel, subject, rubricType, includeCriteria, includeScoring } = body;
+    const {
+      assignment,
+      gradeLevel,
+      subject,
+      rubricType,
+      includeCriteria,
+      includeScoring,
+    } = body;
 
     const prompt = `You are an expert assessment specialist. Create a comprehensive grading rubric based on:
 
@@ -77,7 +84,8 @@ Create a detailed assessment rubric including:
       messages: [
         {
           role: "system",
-          content: "You are an expert assessment specialist who creates fair, comprehensive grading rubrics that provide clear expectations and consistent evaluation criteria. Focus on creating specific, measurable criteria that align with learning objectives and provide meaningful feedback.",
+          content:
+            "You are an expert assessment specialist who creates fair, comprehensive grading rubrics that provide clear expectations and consistent evaluation criteria. Focus on creating specific, measurable criteria that align with learning objectives and provide meaningful feedback.",
         },
         {
           role: "user",

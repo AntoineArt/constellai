@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { surveyPurpose, targetAudience, researchObjectives, includeComprehensiveQuestions, includeAnalysisFramework } = body;
+    const {
+      surveyPurpose,
+      targetAudience,
+      researchObjectives,
+      includeComprehensiveQuestions,
+      includeAnalysisFramework,
+    } = body;
 
     const prompt = `You are an expert survey designer and research methodologist. Create a comprehensive survey based on the following information:
 
@@ -156,7 +162,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert survey designer and research methodologist who creates comprehensive, well-structured surveys. Focus on providing clear question design, proper methodology, and actionable insights that help researchers collect high-quality data for their studies.",
+          content:
+            "You are an expert survey designer and research methodologist who creates comprehensive, well-structured surveys. Focus on providing clear question design, proper methodology, and actionable insights that help researchers collect high-quality data for their studies.",
         },
         {
           role: "user",

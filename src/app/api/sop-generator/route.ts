@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { procedure, department, compliance, includeSafety, includeQualityControl } = body;
+    const {
+      procedure,
+      department,
+      compliance,
+      includeSafety,
+      includeQualityControl,
+    } = body;
 
     const prompt = `You are an expert SOP (Standard Operating Procedure) specialist and compliance consultant. Generate a comprehensive SOP based on:
 
@@ -91,7 +97,8 @@ Create a comprehensive SOP including:
       messages: [
         {
           role: "system",
-          content: "You are an expert SOP specialist who creates comprehensive, compliant standard operating procedures. Focus on creating clear, detailed procedures that ensure consistency, safety, and quality while meeting regulatory and organizational requirements.",
+          content:
+            "You are an expert SOP specialist who creates comprehensive, compliant standard operating procedures. Focus on creating clear, detailed procedures that ensure consistency, safety, and quality while meeting regulatory and organizational requirements.",
         },
         {
           role: "user",
@@ -104,9 +111,9 @@ Create a comprehensive SOP including:
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("SOP Generator error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to generate SOP" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Failed to generate SOP" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

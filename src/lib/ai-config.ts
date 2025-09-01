@@ -15,10 +15,10 @@ export function getModelFromRequest(
   // Priority: 1) user selection, 2) tool-specific default, 3) global default
   const requestedModel = body?.model || body?.selectedModel;
   const fallback = toolSpecificDefault || DEFAULT_API_MODEL;
-  
+
   if (requestedModel && getModelById(requestedModel)) {
     return requestedModel;
   }
-  
+
   return fallback;
 }

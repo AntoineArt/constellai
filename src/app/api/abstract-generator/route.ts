@@ -53,7 +53,8 @@ Create a comprehensive abstract including:
       messages: [
         {
           role: "system",
-          content: "You are an expert academic abstract writer who creates concise, well-structured abstracts that accurately summarize research papers. Focus on providing clear summaries, proper structure, and appropriate academic tone.",
+          content:
+            "You are an expert academic abstract writer who creates concise, well-structured abstracts that accurately summarize research papers. Focus on providing clear summaries, proper structure, and appropriate academic tone.",
         },
         {
           role: "user",

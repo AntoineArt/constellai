@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { subject, gradeLevel, duration, learningObjectives, includeAssessments, includeResources } = body;
+    const {
+      subject,
+      gradeLevel,
+      duration,
+      learningObjectives,
+      includeAssessments,
+      includeResources,
+    } = body;
 
     const prompt = `You are an expert curriculum designer. Create a comprehensive curriculum outline based on:
 
@@ -87,7 +94,8 @@ Create a detailed curriculum including:
       messages: [
         {
           role: "system",
-          content: "You are an expert curriculum designer who creates comprehensive, standards-aligned curriculum outlines that promote deep learning and skill development. Focus on creating logical progressions, clear learning objectives, and appropriate assessments.",
+          content:
+            "You are an expert curriculum designer who creates comprehensive, standards-aligned curriculum outlines that promote deep learning and skill development. Focus on creating logical progressions, clear learning objectives, and appropriate assessments.",
         },
         {
           role: "user",

@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { businessType, goals, metrics, includeDetailedDashboard, includeImplementationGuidance } = body;
+    const {
+      businessType,
+      goals,
+      metrics,
+      includeDetailedDashboard,
+      includeImplementationGuidance,
+    } = body;
 
     const prompt = `You are an expert business intelligence consultant and dashboard designer. Create a comprehensive KPI dashboard design based on the following information:
 
@@ -154,7 +160,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert business intelligence consultant and dashboard designer who creates comprehensive, actionable KPI dashboard designs. Focus on providing clear structure, relevant metrics, and practical implementation guidance that helps organizations build effective performance monitoring systems.",
+          content:
+            "You are an expert business intelligence consultant and dashboard designer who creates comprehensive, actionable KPI dashboard designs. Focus on providing clear structure, relevant metrics, and practical implementation guidance that helps organizations build effective performance monitoring systems.",
         },
         {
           role: "user",

@@ -19,7 +19,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { pageTitle, content, targetKeywords, targetAudience, callToAction, includeKeywords, length } = body;
+    const {
+      pageTitle,
+      content,
+      targetKeywords,
+      targetAudience,
+      callToAction,
+      includeKeywords,
+      length,
+    } = body;
 
     const prompt = `You are an expert SEO specialist and copywriter. Create compelling meta descriptions based on the following information:
 
@@ -74,7 +82,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert SEO specialist who creates compelling, keyword-optimized meta descriptions that improve search engine rankings and drive click-through rates. Focus on creating descriptions that accurately represent the content while being engaging and action-oriented.",
+          content:
+            "You are an expert SEO specialist who creates compelling, keyword-optimized meta descriptions that improve search engine rankings and drive click-through rates. Focus on creating descriptions that accurately represent the content while being engaging and action-oriented.",
         },
         {
           role: "user",

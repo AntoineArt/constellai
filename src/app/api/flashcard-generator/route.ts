@@ -63,7 +63,8 @@ Create comprehensive study flashcards including:
       messages: [
         {
           role: "system",
-          content: "You are an expert educational content creator who creates effective study flashcards that promote active recall and long-term retention. Focus on creating clear, concise cards that cover key concepts and provide meaningful examples when appropriate.",
+          content:
+            "You are an expert educational content creator who creates effective study flashcards that promote active recall and long-term retention. Focus on creating clear, concise cards that cover key concepts and provide meaningful examples when appropriate.",
         },
         {
           role: "user",

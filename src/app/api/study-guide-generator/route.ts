@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { notes, subject, studyLevel, includePracticeQuestions, includeSummary } = body;
+    const {
+      notes,
+      subject,
+      studyLevel,
+      includePracticeQuestions,
+      includeSummary,
+    } = body;
 
     const prompt = `You are an expert educational content organizer. Create a comprehensive study guide based on:
 
@@ -67,7 +73,8 @@ Create a detailed study guide including:
       messages: [
         {
           role: "system",
-          content: "You are an expert educational content organizer who creates comprehensive, well-structured study guides that help students understand and retain information effectively. Focus on organizing content logically, highlighting key concepts, and providing clear explanations.",
+          content:
+            "You are an expert educational content organizer who creates comprehensive, well-structured study guides that help students understand and retain information effectively. Focus on organizing content logically, highlighting key concepts, and providing clear explanations.",
         },
         {
           role: "user",

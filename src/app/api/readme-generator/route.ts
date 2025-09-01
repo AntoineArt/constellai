@@ -60,7 +60,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert technical writer who creates clear, comprehensive, and professional README files. Focus on clarity, completeness, and user-friendliness. Include all necessary sections and provide practical examples.",
+          content:
+            "You are an expert technical writer who creates clear, comprehensive, and professional README files. Focus on clarity, completeness, and user-friendliness. Include all necessary sections and provide practical examples.",
         },
         {
           role: "user",

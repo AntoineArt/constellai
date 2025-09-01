@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { productName, interfaceType, targetAudience, tone, includeMicrocopy, includeErrorMessages } = body;
+    const {
+      productName,
+      interfaceType,
+      targetAudience,
+      tone,
+      includeMicrocopy,
+      includeErrorMessages,
+    } = body;
 
     const prompt = `You are an expert UX writer and interface copy specialist. Create comprehensive UI/UX copy for the following product:
 
@@ -109,7 +116,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert UX writer and interface copy specialist who creates clear, user-friendly, and effective copy for digital interfaces. Focus on creating copy that is concise, helpful, and aligned with the product's tone and target audience.",
+          content:
+            "You are an expert UX writer and interface copy specialist who creates clear, user-friendly, and effective copy for digital interfaces. Focus on creating copy that is concise, helpful, and aligned with the product's tone and target audience.",
         },
         {
           role: "user",

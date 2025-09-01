@@ -1,6 +1,13 @@
 "use client";
 
-import { Home, Search, Pin, PinOff, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  Home,
+  Search,
+  Pin,
+  PinOff,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -24,7 +31,9 @@ import { usePinnedTools } from "@/lib/storage";
 export function AppSidebar() {
   const pathname = usePathname();
   const { pinnedTools, toggle, isPinned, isLoaded } = usePinnedTools();
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [expandedCategories, setExpandedCategories] = useState<
+    Record<string, boolean>
+  >({});
 
   // Get current tool from pathname
   const getCurrentToolId = () => {
@@ -50,13 +59,16 @@ export function AppSidebar() {
   // Group tools by category and sort
   const getGroupedTools = () => {
     const visibleTools = getVisibleTools();
-    const grouped = visibleTools.reduce((acc, tool) => {
-      if (!acc[tool.category]) {
-        acc[tool.category] = [];
-      }
-      acc[tool.category].push(tool);
-      return acc;
-    }, {} as Record<string, typeof tools>);
+    const grouped = visibleTools.reduce(
+      (acc, tool) => {
+        if (!acc[tool.category]) {
+          acc[tool.category] = [];
+        }
+        acc[tool.category].push(tool);
+        return acc;
+      },
+      {} as Record<string, typeof tools>
+    );
 
     // Sort tools within each category by name
     Object.keys(grouped).forEach((category) => {
@@ -104,67 +116,71 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isLoaded && categories.map((category) => {
-          const isExpanded = expandedCategories[category] !== false; // Default to expanded
-          const categoryTools = groupedTools[category];
+        {isLoaded &&
+          categories.map((category) => {
+            const isExpanded = expandedCategories[category] !== false; // Default to expanded
+            const categoryTools = groupedTools[category];
 
-          return (
-            <SidebarGroup key={category}>
-              <SidebarGroupLabel 
-                className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md transition-colors flex items-center justify-between"
-                onClick={() => toggleCategory(category)}
-              >
-                <span>{category}</span>
-                {isExpanded ? (
-                  <ChevronDown className="h-3 w-3" />
-                ) : (
-                  <ChevronRight className="h-3 w-3" />
-                )}
-              </SidebarGroupLabel>
-              {isExpanded && (
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {categoryTools.map((tool) => {
-                      const isCurrentTool = currentToolId === tool.id;
-                      const isToolPinned = isPinned(tool.id);
-                      const isTemporary = isCurrentTool && !isToolPinned;
+            return (
+              <SidebarGroup key={category}>
+                <SidebarGroupLabel
+                  className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md transition-colors flex items-center justify-between"
+                  onClick={() => toggleCategory(category)}
+                >
+                  <span>{category}</span>
+                  {isExpanded ? (
+                    <ChevronDown className="h-3 w-3" />
+                  ) : (
+                    <ChevronRight className="h-3 w-3" />
+                  )}
+                </SidebarGroupLabel>
+                {isExpanded && (
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {categoryTools.map((tool) => {
+                        const isCurrentTool = currentToolId === tool.id;
+                        const isToolPinned = isPinned(tool.id);
+                        const isTemporary = isCurrentTool && !isToolPinned;
 
-                      return (
-                        <SidebarMenuItem key={tool.id}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={pathname === tool.href}
-                            className={cn(
-                              isTemporary && "opacity-70 italic border-l-2 border-amber-400"
-                            )}
-                          >
-                            <Link href={tool.href}>
-                              <tool.icon className="h-4 w-4" />
-                              <span>{tool.name}</span>
-                              {isTemporary && (
-                                <span className="text-xs text-amber-600 ml-1">(visiting)</span>
+                        return (
+                          <SidebarMenuItem key={tool.id}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={pathname === tool.href}
+                              className={cn(
+                                isTemporary &&
+                                  "opacity-70 italic border-l-2 border-amber-400"
                               )}
-                            </Link>
-                          </SidebarMenuButton>
-                          <SidebarMenuAction 
-                            onClick={() => toggle(tool.id)}
-                            showOnHover={true}
-                          >
-                            {isToolPinned ? (
-                              <PinOff className="h-4 w-4" />
-                            ) : (
-                              <Pin className="h-4 w-4" />
-                            )}
-                          </SidebarMenuAction>
-                        </SidebarMenuItem>
-                      );
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              )}
-            </SidebarGroup>
-          );
-        })}
+                            >
+                              <Link href={tool.href}>
+                                <tool.icon className="h-4 w-4" />
+                                <span>{tool.name}</span>
+                                {isTemporary && (
+                                  <span className="text-xs text-amber-600 ml-1">
+                                    (visiting)
+                                  </span>
+                                )}
+                              </Link>
+                            </SidebarMenuButton>
+                            <SidebarMenuAction
+                              onClick={() => toggle(tool.id)}
+                              showOnHover={true}
+                            >
+                              {isToolPinned ? (
+                                <PinOff className="h-4 w-4" />
+                              ) : (
+                                <Pin className="h-4 w-4" />
+                              )}
+                            </SidebarMenuAction>
+                          </SidebarMenuItem>
+                        );
+                      })}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                )}
+              </SidebarGroup>
+            );
+          })}
       </SidebarContent>
     </Sidebar>
   );

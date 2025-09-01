@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { researchTopic, sources, researchQuestion, includeComprehensiveAnalysis, includeGapAnalysis } = body;
+    const {
+      researchTopic,
+      sources,
+      researchQuestion,
+      includeComprehensiveAnalysis,
+      includeGapAnalysis,
+    } = body;
 
     const prompt = `You are an expert academic researcher and literature review specialist. Create a comprehensive literature review based on the following information:
 
@@ -154,7 +160,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert academic researcher and literature review specialist who creates comprehensive, well-structured literature reviews. Focus on providing clear synthesis, critical analysis, and actionable insights that help researchers understand the current state of knowledge in their field.",
+          content:
+            "You are an expert academic researcher and literature review specialist who creates comprehensive, well-structured literature reviews. Focus on providing clear synthesis, critical analysis, and actionable insights that help researchers understand the current state of knowledge in their field.",
         },
         {
           role: "user",

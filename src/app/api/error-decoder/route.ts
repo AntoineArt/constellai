@@ -68,7 +68,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert software engineer who specializes in debugging and error resolution. Provide clear, actionable solutions with practical code examples and prevention strategies.",
+          content:
+            "You are an expert software engineer who specializes in debugging and error resolution. Provide clear, actionable solutions with practical code examples and prevention strategies.",
         },
         {
           role: "user",

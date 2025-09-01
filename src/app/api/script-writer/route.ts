@@ -19,7 +19,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { scriptType, topic, targetAudience, duration, tone, includeVisualCues, includeTiming } = body;
+    const {
+      scriptType,
+      topic,
+      targetAudience,
+      duration,
+      tone,
+      includeVisualCues,
+      includeTiming,
+    } = body;
 
     const prompt = `You are an expert script writer and content creator. Create professional scripts based on the following information:
 
@@ -82,7 +90,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert script writer with extensive experience in creating engaging, well-structured scripts for various media formats. Focus on creating scripts that are clear, engaging, and optimized for the target medium and audience.",
+          content:
+            "You are an expert script writer with extensive experience in creating engaging, well-structured scripts for various media formats. Focus on creating scripts that are clear, engaging, and optimized for the target medium and audience.",
         },
         {
           role: "user",

@@ -53,7 +53,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert SQL developer who writes clean, efficient, and well-documented SQL queries. Always provide practical optimization suggestions and explain your reasoning.",
+          content:
+            "You are an expert SQL developer who writes clean, efficient, and well-documented SQL queries. Always provide practical optimization suggestions and explain your reasoning.",
         },
         {
           role: "user",

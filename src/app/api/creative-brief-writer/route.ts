@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { campaignName, client, objectives, targetAudience, includeDetailedStrategy, includeDeliverables } = body;
+    const {
+      campaignName,
+      client,
+      objectives,
+      targetAudience,
+      includeDetailedStrategy,
+      includeDeliverables,
+    } = body;
 
     const prompt = `You are an expert creative director and marketing strategist. Create a comprehensive creative brief based on the following information:
 
@@ -158,7 +165,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert creative director and marketing strategist who creates comprehensive, actionable creative briefs. Focus on providing clear direction, measurable objectives, and strategic insights that guide successful campaign execution.",
+          content:
+            "You are an expert creative director and marketing strategist who creates comprehensive, actionable creative briefs. Focus on providing clear direction, measurable objectives, and strategic insights that guide successful campaign execution.",
         },
         {
           role: "user",

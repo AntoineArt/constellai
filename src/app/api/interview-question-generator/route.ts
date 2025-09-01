@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { interviewType, position, candidateProfile, includeBehavioralQuestions, includeTechnicalQuestions } = body;
+    const {
+      interviewType,
+      position,
+      candidateProfile,
+      includeBehavioralQuestions,
+      includeTechnicalQuestions,
+    } = body;
 
     const prompt = `You are an expert interviewer and HR professional. Create comprehensive interview questions based on:
 
@@ -66,7 +72,8 @@ Create a detailed interview question set including:
       messages: [
         {
           role: "system",
-          content: "You are an expert interviewer and HR professional who creates comprehensive, effective interview questions. Focus on providing structured, relevant questions that help assess candidate qualifications, skills, and cultural fit.",
+          content:
+            "You are an expert interviewer and HR professional who creates comprehensive, effective interview questions. Focus on providing structured, relevant questions that help assess candidate qualifications, skills, and cultural fit.",
         },
         {
           role: "user",

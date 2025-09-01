@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { iconPurpose, style, context, includeTechnicalSpecs, includeAccessibility } = body;
+    const {
+      iconPurpose,
+      style,
+      context,
+      includeTechnicalSpecs,
+      includeAccessibility,
+    } = body;
 
     const prompt = `You are an expert icon designer and UX specialist. Create detailed icon descriptions based on the following information:
 
@@ -106,7 +112,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert icon designer and UX specialist who creates clear, detailed, and actionable icon descriptions. Focus on creating descriptions that help designers and developers understand both the visual and functional aspects of icons.",
+          content:
+            "You are an expert icon designer and UX specialist who creates clear, detailed, and actionable icon descriptions. Focus on creating descriptions that help designers and developers understand both the visual and functional aspects of icons.",
         },
         {
           role: "user",

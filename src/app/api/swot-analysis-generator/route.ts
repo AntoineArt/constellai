@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { businessName, industry, currentSituation, includeDetailedAnalysis, includeActionPlans } = body;
+    const {
+      businessName,
+      industry,
+      currentSituation,
+      includeDetailedAnalysis,
+      includeActionPlans,
+    } = body;
 
     const prompt = `You are an expert business strategist and consultant. Create a comprehensive SWOT analysis based on the following information:
 
@@ -109,7 +115,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert business strategist and consultant who creates comprehensive, actionable SWOT analyses. Focus on providing insights that are specific, relevant, and actionable for strategic planning.",
+          content:
+            "You are an expert business strategist and consultant who creates comprehensive, actionable SWOT analyses. Focus on providing insights that are specific, relevant, and actionable for strategic planning.",
         },
         {
           role: "user",

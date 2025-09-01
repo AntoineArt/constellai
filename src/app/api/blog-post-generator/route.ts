@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { topic, targetAudience, tone, wordCount, includeSEO, includeOutline } = body;
+    const {
+      topic,
+      targetAudience,
+      tone,
+      wordCount,
+      includeSEO,
+      includeOutline,
+    } = body;
 
     const prompt = `You are an expert content writer and SEO specialist. Create a comprehensive, SEO-optimized blog post based on the following requirements:
 
@@ -63,7 +70,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert content writer and SEO specialist who creates engaging, well-researched, and SEO-optimized blog posts. Focus on providing value to readers while incorporating best practices for search engine optimization.",
+          content:
+            "You are an expert content writer and SEO specialist who creates engaging, well-researched, and SEO-optimized blog posts. Focus on providing value to readers while incorporating best practices for search engine optimization.",
         },
         {
           role: "user",

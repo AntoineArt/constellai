@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { productService, targetMarket, costStructure, competitiveLandscape, includeDetailedAnalysis, includeCompetitivePositioning } = body;
+    const {
+      productService,
+      targetMarket,
+      costStructure,
+      competitiveLandscape,
+      includeDetailedAnalysis,
+      includeCompetitivePositioning,
+    } = body;
 
     const prompt = `You are an expert pricing strategist and market analyst. Create a comprehensive pricing strategy based on the following information:
 
@@ -155,7 +162,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert pricing strategist and market analyst who creates comprehensive, data-driven pricing strategies. Focus on providing clear recommendations, competitive analysis, and actionable implementation plans that help businesses optimize their pricing for maximum profitability and market success.",
+          content:
+            "You are an expert pricing strategist and market analyst who creates comprehensive, data-driven pricing strategies. Focus on providing clear recommendations, competitive analysis, and actionable implementation plans that help businesses optimize their pricing for maximum profitability and market success.",
         },
         {
           role: "user",

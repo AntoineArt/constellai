@@ -19,7 +19,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { storyPrompt, genre, targetAudience, length, tone, includeCharacters, includeDialogue } = body;
+    const {
+      storyPrompt,
+      genre,
+      targetAudience,
+      length,
+      tone,
+      includeCharacters,
+      includeDialogue,
+    } = body;
 
     const prompt = `You are an expert storyteller and creative writer. Create engaging stories based on the following information:
 
@@ -72,7 +80,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert storyteller and creative writer who creates engaging, well-crafted stories that captivate readers. Focus on creating stories with compelling characters, engaging plots, and emotional resonance.",
+          content:
+            "You are an expert storyteller and creative writer who creates engaging, well-crafted stories that captivate readers. Focus on creating stories with compelling characters, engaging plots, and emotional resonance.",
         },
         {
           role: "user",
@@ -85,9 +94,9 @@ Format your response as:
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("Story Generator error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to generate story" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Failed to generate story" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

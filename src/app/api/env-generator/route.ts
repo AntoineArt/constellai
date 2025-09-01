@@ -59,7 +59,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert DevOps engineer who creates secure, well-documented environment configurations. Always consider security best practices, validation requirements, and provide clear documentation.",
+          content:
+            "You are an expert DevOps engineer who creates secure, well-documented environment configurations. Always consider security best practices, validation requirements, and provide clear documentation.",
         },
         {
           role: "user",

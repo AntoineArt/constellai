@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { brandName, industry, brandPersonality, includeComprehensiveGuidelines, includeExamples } = body;
+    const {
+      brandName,
+      industry,
+      brandPersonality,
+      includeComprehensiveGuidelines,
+      includeExamples,
+    } = body;
 
     const prompt = `You are an expert brand strategist and design consultant. Create a comprehensive brand style guide based on the following information:
 
@@ -167,7 +173,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert brand strategist and design consultant who creates comprehensive, professional brand style guides. Focus on creating guidelines that are clear, actionable, and maintain brand consistency across all touchpoints.",
+          content:
+            "You are an expert brand strategist and design consultant who creates comprehensive, professional brand style guides. Focus on creating guidelines that are clear, actionable, and maintain brand consistency across all touchpoints.",
         },
         {
           role: "user",

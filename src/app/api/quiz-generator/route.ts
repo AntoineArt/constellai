@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { content, subject, gradeLevel, questionTypes, numberOfQuestions, includeAnswers } = body;
+    const {
+      content,
+      subject,
+      gradeLevel,
+      questionTypes,
+      numberOfQuestions,
+      includeAnswers,
+    } = body;
 
     const prompt = `You are an expert educational content creator. Generate a comprehensive quiz based on:
 
@@ -68,7 +75,8 @@ D) [Option D]
       messages: [
         {
           role: "system",
-          content: "You are an expert educational content creator who creates engaging, age-appropriate quizzes that effectively test knowledge and promote learning. Focus on creating clear, well-structured questions that align with educational standards and learning objectives.",
+          content:
+            "You are an expert educational content creator who creates engaging, age-appropriate quizzes that effectively test knowledge and promote learning. Focus on creating clear, well-structured questions that align with educational standards and learning objectives.",
         },
         {
           role: "user",
@@ -81,9 +89,9 @@ D) [Option D]
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("Quiz Generator error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to generate quiz" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Failed to generate quiz" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { habits, habitType, trackingPeriod, includeReminders, includeRewards } = body;
+    const {
+      habits,
+      habitType,
+      trackingPeriod,
+      includeReminders,
+      includeRewards,
+    } = body;
 
     const prompt = `You are an expert habit formation specialist and behavior change coach. Design a personalized habit tracking system based on:
 
@@ -79,7 +85,8 @@ Create a comprehensive habit tracking system including:
       messages: [
         {
           role: "system",
-          content: "You are an expert habit formation specialist who helps people design effective habit tracking systems. Focus on creating realistic, sustainable habits with clear tracking mechanisms and practical strategies for long-term success.",
+          content:
+            "You are an expert habit formation specialist who helps people design effective habit tracking systems. Focus on creating realistic, sustainable habits with clear tracking mechanisms and practical strategies for long-term success.",
         },
         {
           role: "user",

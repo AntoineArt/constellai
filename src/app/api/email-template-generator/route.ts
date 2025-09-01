@@ -19,7 +19,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { purpose, tone, recipient, keyPoints, includeSignature, format } = body;
+    const { purpose, tone, recipient, keyPoints, includeSignature, format } =
+      body;
 
     const prompt = `You are an expert email writer and communication specialist. Create a professional email template based on the following requirements:
 
@@ -57,7 +58,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert email communication specialist who creates professional, effective, and engaging email templates. Focus on clarity, professionalism, and achieving the intended communication goals.",
+          content:
+            "You are an expert email communication specialist who creates professional, effective, and engaging email templates. Focus on clarity, professionalism, and achieving the intended communication goals.",
         },
         {
           role: "user",

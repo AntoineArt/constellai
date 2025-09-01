@@ -19,7 +19,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { investmentType, initialInvestment, expectedReturns, timePeriod, additionalCosts, includeDetailedAnalysis, includeRecommendations } = body;
+    const {
+      investmentType,
+      initialInvestment,
+      expectedReturns,
+      timePeriod,
+      additionalCosts,
+      includeDetailedAnalysis,
+      includeRecommendations,
+    } = body;
 
     const prompt = `You are an expert financial analyst and investment consultant. Create a comprehensive ROI analysis based on the following information:
 
@@ -163,7 +171,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert financial analyst and investment consultant who creates comprehensive, accurate ROI analyses. Focus on providing clear calculations, practical insights, and actionable recommendations that help stakeholders make informed investment decisions.",
+          content:
+            "You are an expert financial analyst and investment consultant who creates comprehensive, accurate ROI analyses. Focus on providing clear calculations, practical insights, and actionable recommendations that help stakeholders make informed investment decisions.",
         },
         {
           role: "user",

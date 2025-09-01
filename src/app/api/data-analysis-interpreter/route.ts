@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { dataDescription, analysisResults, statisticalTests, includePlainLanguageExplanation, includeRecommendations } = body;
+    const {
+      dataDescription,
+      analysisResults,
+      statisticalTests,
+      includePlainLanguageExplanation,
+      includeRecommendations,
+    } = body;
 
     const prompt = `You are an expert data analyst and statistical consultant. Interpret data analysis results based on:
 
@@ -73,7 +79,8 @@ Create a comprehensive data interpretation including:
       messages: [
         {
           role: "system",
-          content: "You are an expert data analyst and statistical consultant who explains complex statistical analyses in clear, understandable language. Focus on providing accurate interpretations, practical insights, and actionable recommendations.",
+          content:
+            "You are an expert data analyst and statistical consultant who explains complex statistical analyses in clear, understandable language. Focus on providing accurate interpretations, practical insights, and actionable recommendations.",
         },
         {
           role: "user",

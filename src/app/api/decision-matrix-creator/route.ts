@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { decision, options, criteria, weights, includeProsCons, includeRiskAnalysis } = body;
+    const {
+      decision,
+      options,
+      criteria,
+      weights,
+      includeProsCons,
+      includeRiskAnalysis,
+    } = body;
 
     const prompt = `You are an expert decision analyst and strategic consultant. Create a decision matrix based on:
 
@@ -80,7 +87,8 @@ Create a comprehensive decision matrix including:
       messages: [
         {
           role: "system",
-          content: "You are an expert decision analyst who creates comprehensive decision matrices that help people make informed, objective decisions. Focus on creating clear criteria, fair scoring systems, and actionable recommendations based on the analysis.",
+          content:
+            "You are an expert decision analyst who creates comprehensive decision matrices that help people make informed, objective decisions. Focus on creating clear criteria, fair scoring systems, and actionable recommendations based on the analysis.",
         },
         {
           role: "user",

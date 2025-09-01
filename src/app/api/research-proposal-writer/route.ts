@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { researchTopic, objectives, methodology, timeline, includeDetailedMethodology, includeBudget } = body;
+    const {
+      researchTopic,
+      objectives,
+      methodology,
+      timeline,
+      includeDetailedMethodology,
+      includeBudget,
+    } = body;
 
     const prompt = `You are an expert research proposal writer. Create a research proposal based on:
 
@@ -69,7 +76,8 @@ Create a comprehensive research proposal including:
       messages: [
         {
           role: "system",
-          content: "You are an expert research proposal writer who creates comprehensive, well-structured research proposals. Focus on providing clear methodology, realistic timelines, and compelling justifications for research projects.",
+          content:
+            "You are an expert research proposal writer who creates comprehensive, well-structured research proposals. Focus on providing clear methodology, realistic timelines, and compelling justifications for research projects.",
         },
         {
           role: "user",

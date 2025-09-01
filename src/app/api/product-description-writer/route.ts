@@ -19,7 +19,16 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { productName, category, features, targetAudience, tone, includeBenefits, includeSpecs, platform } = body;
+    const {
+      productName,
+      category,
+      features,
+      targetAudience,
+      tone,
+      includeBenefits,
+      includeSpecs,
+      platform,
+    } = body;
 
     const prompt = `You are an expert copywriter and e-commerce specialist. Create compelling product descriptions based on the following information:
 
@@ -63,7 +72,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert e-commerce copywriter who creates compelling, conversion-focused product descriptions that drive sales. Focus on highlighting benefits, solving customer problems, and creating emotional connections with the target audience.",
+          content:
+            "You are an expert e-commerce copywriter who creates compelling, conversion-focused product descriptions that drive sales. Focus on highlighting benefits, solving customer problems, and creating emotional connections with the target audience.",
         },
         {
           role: "user",

@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { businessType, customerSegments, currentJourney, includeDetailedMapping, includeOptimizationRecommendations } = body;
+    const {
+      businessType,
+      customerSegments,
+      currentJourney,
+      includeDetailedMapping,
+      includeOptimizationRecommendations,
+    } = body;
 
     const prompt = `You are an expert customer experience strategist and journey mapping consultant. Create a comprehensive customer journey map based on the following information:
 
@@ -165,7 +171,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert customer experience strategist and journey mapping consultant who creates comprehensive, actionable customer journey maps. Focus on providing clear insights, practical recommendations, and strategic guidance that helps organizations improve customer experiences and drive business growth.",
+          content:
+            "You are an expert customer experience strategist and journey mapping consultant who creates comprehensive, actionable customer journey maps. Focus on providing clear insights, practical recommendations, and strategic guidance that helps organizations improve customer experiences and drive business growth.",
         },
         {
           role: "user",

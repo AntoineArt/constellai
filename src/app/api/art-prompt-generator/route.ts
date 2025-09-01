@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { artStyle, subject, mood, includeDetailedDescriptions, includeTechnicalSpecs } = body;
+    const {
+      artStyle,
+      subject,
+      mood,
+      includeDetailedDescriptions,
+      includeTechnicalSpecs,
+    } = body;
 
     const prompt = `You are an expert art director and creative consultant. Create detailed art prompts based on the following information:
 
@@ -121,7 +127,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert art director and creative consultant who creates detailed, inspiring, and actionable art prompts. Focus on providing clear visual direction, technical specifications, and creative guidance that helps artists create exceptional artwork.",
+          content:
+            "You are an expert art director and creative consultant who creates detailed, inspiring, and actionable art prompts. Focus on providing clear visual direction, technical specifications, and creative guidance that helps artists create exceptional artwork.",
         },
         {
           role: "user",

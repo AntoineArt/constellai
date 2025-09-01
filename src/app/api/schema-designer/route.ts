@@ -19,7 +19,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { requirements, databaseType, includeIndexes, includeRelationships } = body;
+    const { requirements, databaseType, includeIndexes, includeRelationships } =
+      body;
 
     const prompt = `You are an expert database designer. Create a comprehensive database schema based on the following requirements:
 
@@ -60,7 +61,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert database architect who designs efficient, normalized, and scalable database schemas. Always consider performance, data integrity, and best practices for the specified database type.",
+          content:
+            "You are an expert database architect who designs efficient, normalized, and scalable database schemas. Always consider performance, data integrity, and best practices for the specified database type.",
         },
         {
           role: "user",

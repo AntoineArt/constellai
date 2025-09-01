@@ -18,7 +18,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { dataSet, timePeriod, trendType, includePredictions, includeActionableInsights } = body;
+    const {
+      dataSet,
+      timePeriod,
+      trendType,
+      includePredictions,
+      includeActionableInsights,
+    } = body;
 
     const prompt = `You are an expert trend analyst and data scientist. Analyze trends based on:
 
@@ -74,7 +80,8 @@ Create a comprehensive trend analysis including:
       messages: [
         {
           role: "system",
-          content: "You are an expert trend analyst and data scientist who identifies patterns in data and provides actionable insights. Focus on providing clear trend identification, accurate predictions, and practical recommendations.",
+          content:
+            "You are an expert trend analyst and data scientist who identifies patterns in data and provides actionable insights. Focus on providing clear trend identification, accurate predictions, and practical recommendations.",
         },
         {
           role: "user",
@@ -87,9 +94,9 @@ Create a comprehensive trend analysis including:
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("Trend Analyzer error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to analyze trends" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Failed to analyze trends" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

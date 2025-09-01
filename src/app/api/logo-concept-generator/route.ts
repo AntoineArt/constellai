@@ -19,7 +19,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { brandName, industry, targetAudience, style, includeTypography, includeColorSuggestions } = body;
+    const {
+      brandName,
+      industry,
+      targetAudience,
+      style,
+      includeTypography,
+      includeColorSuggestions,
+    } = body;
 
     const prompt = `You are an expert logo designer and brand strategist. Create logo concept ideas based on the following information:
 
@@ -77,7 +84,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert logo designer and brand strategist who creates innovative, memorable, and effective logo concepts. Focus on creating concepts that are unique, scalable, and aligned with the brand's personality and industry requirements.",
+          content:
+            "You are an expert logo designer and brand strategist who creates innovative, memorable, and effective logo concepts. Focus on creating concepts that are unique, scalable, and aligned with the brand's personality and industry requirements.",
         },
         {
           role: "user",

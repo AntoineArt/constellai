@@ -67,7 +67,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert software engineer who specializes in code quality, complexity analysis, and refactoring. Provide actionable insights and concrete suggestions for improving code maintainability and performance.",
+          content:
+            "You are an expert software engineer who specializes in code quality, complexity analysis, and refactoring. Provide actionable insights and concrete suggestions for improving code maintainability and performance.",
         },
         {
           role: "user",

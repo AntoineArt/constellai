@@ -18,7 +18,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { topic, gradeLevel, duration, learningObjectives, includeActivities, includeAssessment } = body;
+    const {
+      topic,
+      gradeLevel,
+      duration,
+      learningObjectives,
+      includeActivities,
+      includeAssessment,
+    } = body;
 
     const prompt = `You are an expert curriculum developer. Create a comprehensive lesson plan based on:
 
@@ -82,7 +89,8 @@ Create a detailed lesson plan including:
       messages: [
         {
           role: "system",
-          content: "You are an expert curriculum developer who creates engaging, standards-aligned lesson plans that promote active learning and student engagement. Focus on creating clear, structured plans that include appropriate activities, assessments, and differentiation strategies.",
+          content:
+            "You are an expert curriculum developer who creates engaging, standards-aligned lesson plans that promote active learning and student engagement. Focus on creating clear, structured plans that include appropriate activities, assessments, and differentiation strategies.",
         },
         {
           role: "user",

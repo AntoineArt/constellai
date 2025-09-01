@@ -19,7 +19,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { newsletterName, topic, targetAudience, tone, length, includeCallToAction, includeSocialLinks } = body;
+    const {
+      newsletterName,
+      topic,
+      targetAudience,
+      tone,
+      length,
+      includeCallToAction,
+      includeSocialLinks,
+    } = body;
 
     const prompt = `You are an expert newsletter writer and email marketing specialist. Create engaging newsletter content based on the following information:
 
@@ -81,7 +89,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert newsletter writer and email marketing specialist who creates engaging, value-driven newsletter content that builds relationships with subscribers and drives engagement. Focus on creating content that is informative, entertaining, and actionable.",
+          content:
+            "You are an expert newsletter writer and email marketing specialist who creates engaging, value-driven newsletter content that builds relationships with subscribers and drives engagement. Focus on creating content that is informative, entertaining, and actionable.",
         },
         {
           role: "user",

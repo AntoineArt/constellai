@@ -92,7 +92,7 @@ export function TopBar({
       setTempApiKey("");
       setIsDialogOpen(false);
       setValidationError(null);
-      
+
       // Refresh the page after successfully setting API key
       window.location.reload();
     }

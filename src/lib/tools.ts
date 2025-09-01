@@ -1,4 +1,71 @@
-import { MessageSquare, Zap, FileText, Database, FileCode, Table, Settings, BarChart3, Zap as ZapIcon, BookOpen, AlertTriangle, GitBranch, Mail, Share2, User, Newspaper, ShoppingBag, FileText as FileTextIcon, Briefcase, PenSquare, Award, FileText as FileTextIcon2, Calendar, Type, Search, Palette, Sparkles, Monitor, Building2, Type as TypeIcon, Image, TrendingUp, FileText as FileTextIcon3, Palette as PaletteIcon, BarChart3 as BarChart3Icon, LayoutDashboard, DollarSign, Map as MapIcon, BookOpen as BookOpenIcon, ClipboardList, MessageCircle, BarChart, TrendingUp as TrendingUpIcon, FileText as FileTextIcon4, CheckCircle, FileText as FileTextIcon5, FileText as FileTextIcon6, Lightbulb, HelpCircle, BookOpen as BookOpenIcon2, FileText as FileTextIcon7, GraduationCap, Target, FileText as FileTextIcon8, FileText as FileTextIcon9, Calendar as CalendarIcon, Clock, CheckSquare, Calendar as CalendarIcon2, Target as TargetIcon, Calendar as CalendarIcon3, Clock as ClockIcon, Table as TableIcon, FileText as FileTextIcon10, FileText as FileTextIcon11, Workflow } from "lucide-react";
+import {
+  MessageSquare,
+  Zap,
+  FileText,
+  Database,
+  FileCode,
+  Table,
+  Settings,
+  BarChart3,
+  Zap as ZapIcon,
+  BookOpen,
+  AlertTriangle,
+  GitBranch,
+  Mail,
+  Share2,
+  User,
+  Newspaper,
+  ShoppingBag,
+  FileText as FileTextIcon,
+  Briefcase,
+  PenSquare,
+  Award,
+  FileText as FileTextIcon2,
+  Calendar,
+  Type,
+  Search,
+  Palette,
+  Sparkles,
+  Monitor,
+  Building2,
+  Type as TypeIcon,
+  Image,
+  TrendingUp,
+  FileText as FileTextIcon3,
+  Palette as PaletteIcon,
+  BarChart3 as BarChart3Icon,
+  LayoutDashboard,
+  DollarSign,
+  Map as MapIcon,
+  BookOpen as BookOpenIcon,
+  ClipboardList,
+  MessageCircle,
+  BarChart,
+  TrendingUp as TrendingUpIcon,
+  FileText as FileTextIcon4,
+  CheckCircle,
+  FileText as FileTextIcon5,
+  FileText as FileTextIcon6,
+  Lightbulb,
+  HelpCircle,
+  BookOpen as BookOpenIcon2,
+  FileText as FileTextIcon7,
+  GraduationCap,
+  Target,
+  FileText as FileTextIcon8,
+  FileText as FileTextIcon9,
+  Calendar as CalendarIcon,
+  Clock,
+  CheckSquare,
+  Calendar as CalendarIcon2,
+  Target as TargetIcon,
+  Calendar as CalendarIcon3,
+  Clock as ClockIcon,
+  Table as TableIcon,
+  FileText as FileTextIcon10,
+  FileText as FileTextIcon11,
+  Workflow,
+} from "lucide-react";
 
 export interface Tool {
   id: string;
@@ -29,7 +96,8 @@ export const tools: Tool[] = [
   {
     id: "summarizer",
     name: "Text Summarizer",
-    description: "Summarize long text content with customizable length and style.",
+    description:
+      "Summarize long text content with customizable length and style.",
     icon: FileText,
     category: "Text Processing",
     href: "/tools/summarizer",
@@ -37,7 +105,8 @@ export const tools: Tool[] = [
   {
     id: "sql-generator",
     name: "SQL Query Generator",
-    description: "Generate SQL queries from natural language with optimization suggestions.",
+    description:
+      "Generate SQL queries from natural language with optimization suggestions.",
     icon: Database,
     category: "Development",
     href: "/tools/sql-generator",
@@ -53,7 +122,8 @@ export const tools: Tool[] = [
   {
     id: "schema-designer",
     name: "Database Schema Designer",
-    description: "Create database schemas from requirements with relationships and indexes.",
+    description:
+      "Create database schemas from requirements with relationships and indexes.",
     icon: Table,
     category: "Development",
     href: "/tools/schema-designer",
@@ -93,7 +163,8 @@ export const tools: Tool[] = [
   {
     id: "error-decoder",
     name: "Error Message Decoder",
-    description: "Explain and suggest fixes for error messages with code examples.",
+    description:
+      "Explain and suggest fixes for error messages with code examples.",
     icon: AlertTriangle,
     category: "Development",
     href: "/tools/error-decoder",
@@ -101,7 +172,8 @@ export const tools: Tool[] = [
   {
     id: "pr-message-writer",
     name: "Git PR Message Writer",
-    description: "Generate pull request descriptions from commit history with testing notes.",
+    description:
+      "Generate pull request descriptions from commit history with testing notes.",
     icon: GitBranch,
     category: "Development",
     href: "/tools/pr-message-writer",
@@ -109,7 +181,8 @@ export const tools: Tool[] = [
   {
     id: "email-template-generator",
     name: "Email Template Generator",
-    description: "Create professional email templates with customizable tone and format.",
+    description:
+      "Create professional email templates with customizable tone and format.",
     icon: Mail,
     category: "Communication",
     href: "/tools/email-template-generator",
@@ -117,7 +190,8 @@ export const tools: Tool[] = [
   {
     id: "social-media-post-generator",
     name: "Social Media Post Generator",
-    description: "Create engaging social media content with platform-specific optimizations.",
+    description:
+      "Create engaging social media content with platform-specific optimizations.",
     icon: Share2,
     category: "Marketing",
     href: "/tools/social-media-post-generator",
@@ -125,7 +199,8 @@ export const tools: Tool[] = [
   {
     id: "contact-card-generator",
     name: "Contact Card Generator",
-    description: "Convert contact info to vCard format with QR codes and import instructions.",
+    description:
+      "Convert contact info to vCard format with QR codes and import instructions.",
     icon: User,
     category: "Productivity",
     href: "/tools/contact-card-generator",
@@ -133,7 +208,8 @@ export const tools: Tool[] = [
   {
     id: "blog-post-generator",
     name: "Blog Post Generator",
-    description: "Create SEO-optimized blog posts from topics with outlines and keywords.",
+    description:
+      "Create SEO-optimized blog posts from topics with outlines and keywords.",
     icon: PenSquare,
     category: "Text & Content Creation",
     href: "/tools/blog-post-generator",
@@ -141,7 +217,8 @@ export const tools: Tool[] = [
   {
     id: "press-release-writer",
     name: "Press Release Writer",
-    description: "Generate professional press releases for company announcements and news.",
+    description:
+      "Generate professional press releases for company announcements and news.",
     icon: Newspaper,
     category: "Text & Content Creation",
     href: "/tools/press-release-writer",
@@ -149,7 +226,8 @@ export const tools: Tool[] = [
   {
     id: "product-description-writer",
     name: "Product Description Writer",
-    description: "Create compelling product descriptions with features, benefits, and SEO.",
+    description:
+      "Create compelling product descriptions with features, benefits, and SEO.",
     icon: ShoppingBag,
     category: "Text & Content Creation",
     href: "/tools/product-description-writer",
@@ -157,7 +235,8 @@ export const tools: Tool[] = [
   {
     id: "resume-builder",
     name: "Resume Builder",
-    description: "Generate tailored resumes from experience data with ATS optimization.",
+    description:
+      "Generate tailored resumes from experience data with ATS optimization.",
     icon: Briefcase,
     category: "Text & Content Creation",
     href: "/tools/resume-builder",
@@ -165,7 +244,8 @@ export const tools: Tool[] = [
   {
     id: "cover-letter-generator",
     name: "Cover Letter Generator",
-    description: "Create personalized cover letters for job applications with key selling points.",
+    description:
+      "Create personalized cover letters for job applications with key selling points.",
     icon: FileTextIcon,
     category: "Text & Content Creation",
     href: "/tools/cover-letter-generator",
@@ -173,7 +253,8 @@ export const tools: Tool[] = [
   {
     id: "grant-proposal-writer",
     name: "Grant Proposal Writer",
-    description: "Generate funding proposals and applications with comprehensive documentation.",
+    description:
+      "Generate funding proposals and applications with comprehensive documentation.",
     icon: Award,
     category: "Text & Content Creation",
     href: "/tools/grant-proposal-writer",
@@ -181,7 +262,8 @@ export const tools: Tool[] = [
   {
     id: "technical-documentation-writer",
     name: "Technical Documentation Writer",
-    description: "Create user manuals and guides with comprehensive technical documentation.",
+    description:
+      "Create user manuals and guides with comprehensive technical documentation.",
     icon: FileTextIcon2,
     category: "Text & Content Creation",
     href: "/tools/technical-documentation-writer",
@@ -189,7 +271,8 @@ export const tools: Tool[] = [
   {
     id: "content-calendar-planner",
     name: "Content Calendar Planner",
-    description: "Plan and generate content schedules with strategic content planning.",
+    description:
+      "Plan and generate content schedules with strategic content planning.",
     icon: Calendar,
     category: "Text & Content Creation",
     href: "/tools/content-calendar-planner",
@@ -197,7 +280,8 @@ export const tools: Tool[] = [
   {
     id: "headline-generator",
     name: "Headline Generator",
-    description: "Create attention-grabbing headlines and titles with SEO optimization.",
+    description:
+      "Create attention-grabbing headlines and titles with SEO optimization.",
     icon: Type,
     category: "Text & Content Creation",
     href: "/tools/headline-generator",
@@ -205,7 +289,8 @@ export const tools: Tool[] = [
   {
     id: "meta-description-generator",
     name: "Meta Description Generator",
-    description: "Create SEO meta descriptions with keyword optimization and CTR improvement.",
+    description:
+      "Create SEO meta descriptions with keyword optimization and CTR improvement.",
     icon: Search,
     category: "Text & Content Creation",
     href: "/tools/meta-description-generator",
@@ -213,7 +298,8 @@ export const tools: Tool[] = [
   {
     id: "newsletter-creator",
     name: "Newsletter Creator",
-    description: "Generate engaging newsletter content with call-to-action and social links.",
+    description:
+      "Generate engaging newsletter content with call-to-action and social links.",
     icon: Mail,
     category: "Text & Content Creation",
     href: "/tools/newsletter-creator",
@@ -221,7 +307,8 @@ export const tools: Tool[] = [
   {
     id: "script-writer",
     name: "Script Writer",
-    description: "Create professional scripts for videos, presentations, and podcasts.",
+    description:
+      "Create professional scripts for videos, presentations, and podcasts.",
     icon: FileTextIcon,
     category: "Text & Content Creation",
     href: "/tools/script-writer",
@@ -229,7 +316,8 @@ export const tools: Tool[] = [
   {
     id: "story-generator",
     name: "Story Generator",
-    description: "Generate compelling stories with character development and dialogue.",
+    description:
+      "Generate compelling stories with character development and dialogue.",
     icon: PenSquare,
     category: "Text & Content Creation",
     href: "/tools/story-generator",
@@ -237,7 +325,8 @@ export const tools: Tool[] = [
   {
     id: "logo-concept-generator",
     name: "Logo Concept Generator",
-    description: "Generate logo concept ideas with typography and color suggestions.",
+    description:
+      "Generate logo concept ideas with typography and color suggestions.",
     icon: Sparkles,
     category: "Creative & Design",
     href: "/tools/logo-concept-generator",
@@ -245,7 +334,8 @@ export const tools: Tool[] = [
   {
     id: "color-palette-generator",
     name: "Color Palette Generator",
-    description: "Create harmonious color palettes with accessibility and theory explanations.",
+    description:
+      "Create harmonious color palettes with accessibility and theory explanations.",
     icon: Palette,
     category: "Creative & Design",
     href: "/tools/color-palette-generator",
@@ -253,7 +343,8 @@ export const tools: Tool[] = [
   {
     id: "ui-ux-copy-generator",
     name: "UI/UX Copy Generator",
-    description: "Generate microcopy for interfaces with user-friendly messaging.",
+    description:
+      "Generate microcopy for interfaces with user-friendly messaging.",
     icon: Monitor,
     category: "Creative & Design",
     href: "/tools/ui-ux-copy-generator",
@@ -261,7 +352,8 @@ export const tools: Tool[] = [
   {
     id: "brand-name-generator",
     name: "Brand Name Generator",
-    description: "Create unique brand and product names with domain and trademark considerations.",
+    description:
+      "Create unique brand and product names with domain and trademark considerations.",
     icon: Sparkles,
     category: "Creative & Design",
     href: "/tools/brand-name-generator",
@@ -269,7 +361,8 @@ export const tools: Tool[] = [
   {
     id: "design-brief-generator",
     name: "Design Brief Generator",
-    description: "Create comprehensive design briefs with technical specifications and timelines.",
+    description:
+      "Create comprehensive design briefs with technical specifications and timelines.",
     icon: FileTextIcon,
     category: "Creative & Design",
     href: "/tools/design-brief-generator",
@@ -277,7 +370,8 @@ export const tools: Tool[] = [
   {
     id: "business-plan-generator",
     name: "Business Plan Generator",
-    description: "Create comprehensive business plans with financial projections and market analysis.",
+    description:
+      "Create comprehensive business plans with financial projections and market analysis.",
     icon: Building2,
     category: "Business & Analytics",
     href: "/tools/business-plan-generator",
@@ -285,7 +379,8 @@ export const tools: Tool[] = [
   {
     id: "typography-pairer",
     name: "Typography Pairer",
-    description: "Suggest font combinations for designs with web and print alternatives.",
+    description:
+      "Suggest font combinations for designs with web and print alternatives.",
     icon: TypeIcon,
     category: "Creative & Design",
     href: "/tools/typography-pairer",
@@ -293,7 +388,8 @@ export const tools: Tool[] = [
   {
     id: "icon-description-generator",
     name: "Icon Description Generator",
-    description: "Generate detailed descriptions for icon creation with technical specifications.",
+    description:
+      "Generate detailed descriptions for icon creation with technical specifications.",
     icon: Image,
     category: "Creative & Design",
     href: "/tools/icon-description-generator",
@@ -301,7 +397,8 @@ export const tools: Tool[] = [
   {
     id: "swot-analysis-generator",
     name: "SWOT Analysis Generator",
-    description: "Generate strategic analysis frameworks with detailed insights and action plans.",
+    description:
+      "Generate strategic analysis frameworks with detailed insights and action plans.",
     icon: TrendingUp,
     category: "Business & Analytics",
     href: "/tools/swot-analysis-generator",
@@ -309,7 +406,8 @@ export const tools: Tool[] = [
   {
     id: "style-guide-generator",
     name: "Style Guide Generator",
-    description: "Create comprehensive brand style guides with design standards and guidelines.",
+    description:
+      "Create comprehensive brand style guides with design standards and guidelines.",
     icon: FileTextIcon3,
     category: "Creative & Design",
     href: "/tools/style-guide-generator",
@@ -317,7 +415,8 @@ export const tools: Tool[] = [
   {
     id: "creative-brief-writer",
     name: "Creative Brief Writer",
-    description: "Generate comprehensive creative campaign briefs with strategic direction.",
+    description:
+      "Generate comprehensive creative campaign briefs with strategic direction.",
     icon: FileTextIcon2,
     category: "Creative & Design",
     href: "/tools/creative-brief-writer",
@@ -325,7 +424,8 @@ export const tools: Tool[] = [
   {
     id: "art-prompt-generator",
     name: "Art Prompt Generator",
-    description: "Create detailed art prompts with visual descriptions and technical specifications.",
+    description:
+      "Create detailed art prompts with visual descriptions and technical specifications.",
     icon: PaletteIcon,
     category: "Creative & Design",
     href: "/tools/art-prompt-generator",
@@ -333,7 +433,8 @@ export const tools: Tool[] = [
   {
     id: "market-research-synthesizer",
     name: "Market Research Synthesizer",
-    description: "Analyze and synthesize market data with competitive analysis and insights.",
+    description:
+      "Analyze and synthesize market data with competitive analysis and insights.",
     icon: BarChart3Icon,
     category: "Business & Analytics",
     href: "/tools/market-research-synthesizer",
@@ -341,7 +442,8 @@ export const tools: Tool[] = [
   {
     id: "financial-report-summarizer",
     name: "Financial Report Summarizer",
-    description: "Summarize financial statements with key insights and strategic recommendations.",
+    description:
+      "Summarize financial statements with key insights and strategic recommendations.",
     icon: BarChart3,
     category: "Business & Analytics",
     href: "/tools/financial-report-summarizer",
@@ -349,7 +451,8 @@ export const tools: Tool[] = [
   {
     id: "kpi-dashboard-designer",
     name: "KPI Dashboard Designer",
-    description: "Design metrics tracking frameworks with key performance indicators and visualizations.",
+    description:
+      "Design metrics tracking frameworks with key performance indicators and visualizations.",
     icon: LayoutDashboard,
     category: "Business & Analytics",
     href: "/tools/kpi-dashboard-designer",
@@ -357,7 +460,8 @@ export const tools: Tool[] = [
   {
     id: "risk-assessment-tool",
     name: "Risk Assessment Tool",
-    description: "Identify and analyze business risks with mitigation strategies and monitoring frameworks.",
+    description:
+      "Identify and analyze business risks with mitigation strategies and monitoring frameworks.",
     icon: AlertTriangle,
     category: "Business & Analytics",
     href: "/tools/risk-assessment-tool",
@@ -365,7 +469,8 @@ export const tools: Tool[] = [
   {
     id: "roi-calculator",
     name: "ROI Calculator",
-    description: "Calculate and explain return on investment with detailed analysis and recommendations.",
+    description:
+      "Calculate and explain return on investment with detailed analysis and recommendations.",
     icon: TrendingUp,
     category: "Business & Analytics",
     href: "/tools/roi-calculator",
@@ -373,7 +478,8 @@ export const tools: Tool[] = [
   {
     id: "budget-planner",
     name: "Budget Planner",
-    description: "Create detailed budget breakdowns with forecasting and financial planning guidance.",
+    description:
+      "Create detailed budget breakdowns with forecasting and financial planning guidance.",
     icon: BarChart3,
     category: "Business & Analytics",
     href: "/tools/budget-planner",
@@ -381,7 +487,8 @@ export const tools: Tool[] = [
   {
     id: "pricing-strategy-generator",
     name: "Pricing Strategy Generator",
-    description: "Develop competitive pricing models with market analysis and optimization strategies.",
+    description:
+      "Develop competitive pricing models with market analysis and optimization strategies.",
     icon: DollarSign,
     category: "Business & Analytics",
     href: "/tools/pricing-strategy-generator",
@@ -389,7 +496,8 @@ export const tools: Tool[] = [
   {
     id: "customer-journey-mapper",
     name: "Customer Journey Mapper",
-    description: "Map customer touchpoints and experiences with optimization recommendations.",
+    description:
+      "Map customer touchpoints and experiences with optimization recommendations.",
     icon: MapIcon,
     category: "Business & Analytics",
     href: "/tools/customer-journey-mapper",
@@ -397,7 +505,8 @@ export const tools: Tool[] = [
   {
     id: "literature-review-generator",
     name: "Literature Review Generator",
-    description: "Synthesize academic papers and sources into comprehensive literature reviews.",
+    description:
+      "Synthesize academic papers and sources into comprehensive literature reviews.",
     icon: BookOpenIcon,
     category: "Research & Analysis",
     href: "/tools/literature-review-generator",
@@ -405,7 +514,8 @@ export const tools: Tool[] = [
   {
     id: "survey-designer",
     name: "Survey Designer",
-    description: "Create comprehensive surveys and questionnaires for research and feedback.",
+    description:
+      "Create comprehensive surveys and questionnaires for research and feedback.",
     icon: ClipboardList,
     category: "Research & Analysis",
     href: "/tools/survey-designer",
@@ -413,7 +523,8 @@ export const tools: Tool[] = [
   {
     id: "interview-question-generator",
     name: "Interview Question Generator",
-    description: "Generate targeted interview questions for research and hiring.",
+    description:
+      "Generate targeted interview questions for research and hiring.",
     icon: MessageCircle,
     category: "Research & Analysis",
     href: "/tools/interview-question-generator",
@@ -421,7 +532,8 @@ export const tools: Tool[] = [
   {
     id: "data-analysis-interpreter",
     name: "Data Analysis Interpreter",
-    description: "Explain statistical analyses and data insights in plain language.",
+    description:
+      "Explain statistical analyses and data insights in plain language.",
     icon: BarChart,
     category: "Research & Analysis",
     href: "/tools/data-analysis-interpreter",
@@ -429,7 +541,8 @@ export const tools: Tool[] = [
   {
     id: "trend-analyzer",
     name: "Trend Analyzer",
-    description: "Identify patterns in data and market trends with actionable insights.",
+    description:
+      "Identify patterns in data and market trends with actionable insights.",
     icon: TrendingUpIcon,
     category: "Research & Analysis",
     href: "/tools/trend-analyzer",
@@ -453,7 +566,8 @@ export const tools: Tool[] = [
   {
     id: "research-proposal-writer",
     name: "Research Proposal Writer",
-    description: "Create structured research proposals with methodology and objectives.",
+    description:
+      "Create structured research proposals with methodology and objectives.",
     icon: FileTextIcon5,
     category: "Research & Analysis",
     href: "/tools/research-proposal-writer",
@@ -461,7 +575,8 @@ export const tools: Tool[] = [
   {
     id: "abstract-generator",
     name: "Abstract Generator",
-    description: "Generate academic abstracts from research papers and content.",
+    description:
+      "Generate academic abstracts from research papers and content.",
     icon: FileTextIcon6,
     category: "Research & Analysis",
     href: "/tools/abstract-generator",
@@ -469,7 +584,8 @@ export const tools: Tool[] = [
   {
     id: "hypothesis-generator",
     name: "Hypothesis Generator",
-    description: "Create testable hypotheses from research questions and observations.",
+    description:
+      "Create testable hypotheses from research questions and observations.",
     icon: Lightbulb,
     category: "Research & Analysis",
     href: "/tools/hypothesis-generator",
@@ -477,7 +593,8 @@ export const tools: Tool[] = [
   {
     id: "quiz-generator",
     name: "Quiz Generator",
-    description: "Create educational quizzes from content with various question types.",
+    description:
+      "Create educational quizzes from content with various question types.",
     icon: HelpCircle,
     category: "Education & Learning",
     href: "/tools/quiz-generator",
@@ -485,7 +602,8 @@ export const tools: Tool[] = [
   {
     id: "lesson-plan-creator",
     name: "Lesson Plan Creator",
-    description: "Generate structured lesson plans with objectives and activities.",
+    description:
+      "Generate structured lesson plans with objectives and activities.",
     icon: BookOpenIcon2,
     category: "Education & Learning",
     href: "/tools/lesson-plan-creator",
@@ -493,7 +611,8 @@ export const tools: Tool[] = [
   {
     id: "flashcard-generator",
     name: "Flashcard Generator",
-    description: "Create study flashcards from text content for effective learning.",
+    description:
+      "Create study flashcards from text content for effective learning.",
     icon: FileTextIcon7,
     category: "Education & Learning",
     href: "/tools/flashcard-generator",
@@ -501,7 +620,8 @@ export const tools: Tool[] = [
   {
     id: "study-guide-generator",
     name: "Study Guide Generator",
-    description: "Convert notes into comprehensive study guides with key concepts.",
+    description:
+      "Convert notes into comprehensive study guides with key concepts.",
     icon: GraduationCap,
     category: "Education & Learning",
     href: "/tools/study-guide-generator",
@@ -509,7 +629,8 @@ export const tools: Tool[] = [
   {
     id: "curriculum-designer",
     name: "Curriculum Designer",
-    description: "Create educational curriculum outlines with learning objectives.",
+    description:
+      "Create educational curriculum outlines with learning objectives.",
     icon: Target,
     category: "Education & Learning",
     href: "/tools/curriculum-designer",

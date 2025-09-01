@@ -19,7 +19,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { code, language, context, includeBenchmarks, includeProfiling } = body;
+    const { code, language, context, includeBenchmarks, includeProfiling } =
+      body;
 
     const prompt = `You are an expert performance optimization specialist. Analyze the following code and provide comprehensive performance improvement suggestions:
 
@@ -79,7 +80,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert performance engineer who specializes in identifying and resolving performance bottlenecks. Provide actionable, specific recommendations with code examples and measurable improvements.",
+          content:
+            "You are an expert performance engineer who specializes in identifying and resolving performance bottlenecks. Provide actionable, specific recommendations with code examples and measurable improvements.",
         },
         {
           role: "user",

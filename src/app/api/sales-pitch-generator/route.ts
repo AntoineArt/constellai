@@ -19,7 +19,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const model = getModelFromRequest(body);
-    const { productService, targetAudience, valueProposition, includeDetailedPitch, includeObjectionHandling } = body;
+    const {
+      productService,
+      targetAudience,
+      valueProposition,
+      includeDetailedPitch,
+      includeObjectionHandling,
+    } = body;
 
     const prompt = `You are an expert sales strategist and pitch consultant. Create a compelling sales pitch based on the following information:
 
@@ -133,7 +139,8 @@ Format your response as:
       messages: [
         {
           role: "system",
-          content: "You are an expert sales strategist and pitch consultant who creates compelling, persuasive sales pitches. Focus on creating pitches that connect emotionally, address real pain points, and drive action through clear value propositions.",
+          content:
+            "You are an expert sales strategist and pitch consultant who creates compelling, persuasive sales pitches. Focus on creating pitches that connect emotionally, address real pain points, and drive action through clear value propositions.",
         },
         {
           role: "user",

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MessageCircle, Loader2, Send, Copy, Check } from "lucide-react";
+import { Response } from "@/components/ai-elements/response";
 import { useToolHistory } from "@/lib/hooks/use-tool-history";
 import { usePreferences } from "@/lib/hooks/use-preferences";
 import { TOOL_IDS } from "@/lib/storage/storage-keys";
@@ -311,15 +312,7 @@ export default function InterviewQuestionGenerator() {
                     )}
                   </Button>
                 </div>
-                <div
-                  className={cn(
-                    "prose prose-sm max-w-none",
-                    "bg-muted/50 rounded-lg p-4",
-                    "whitespace-pre-wrap"
-                  )}
-                >
-                  {result}
-                </div>
+                <Response>{result}</Response>
               </div>
             ) : (
               <div className="text-center text-muted-foreground py-8">

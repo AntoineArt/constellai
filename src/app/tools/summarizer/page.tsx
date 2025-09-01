@@ -25,6 +25,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { useApiKey } from "@/hooks/use-api-key";
 import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
+import { Response } from "@/components/ai-elements/response";
 
 const summaryTypes = [
   {
@@ -421,9 +422,7 @@ export default function SummarizerPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="prose prose-sm max-w-none">
-                        <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                          {summary}
-                        </div>
+                        <Response>{summary}</Response>
                       </div>
                       <div className="mt-4 flex items-center gap-2">
                         <Badge variant="secondary">

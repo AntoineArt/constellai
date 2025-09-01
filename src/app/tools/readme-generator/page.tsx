@@ -21,6 +21,7 @@ import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
 import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
 import { Copy, RotateCcw, Trash2 } from "lucide-react";
+import { Response } from "@/components/ai-elements/response";
 
 const README_SECTIONS = [
   { id: "features", label: "Features & Capabilities" },
@@ -473,11 +474,7 @@ export default function ReadmeGeneratorPage() {
                         {copiedResult ? "Copied!" : "Copy"}
                       </Button>
                     </div>
-                    <div className="bg-muted rounded-lg p-4">
-                      <pre className="whitespace-pre-wrap text-sm overflow-x-auto">
-                        {result}
-                      </pre>
-                    </div>
+                    <Response>{result}</Response>
                   </CardContent>
                 </Card>
               )}

@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApiKey } from "@/hooks/use-api-key";
 import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
+import { Response } from "@/components/ai-elements/response";
 
 export default function RegexPage() {
   const { hasApiKey, apiKey } = useApiKey();
@@ -380,9 +381,7 @@ export default function RegexPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm leading-relaxed">
-                        {generatedRegex.explanation}
-                      </p>
+                      <Response>{generatedRegex.explanation}</Response>
                     </CardContent>
                   </Card>
                 )}

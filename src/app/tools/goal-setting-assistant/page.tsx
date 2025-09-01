@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Target, Loader2, Send, Copy, Check } from "lucide-react";
+import { Response } from "@/components/ai-elements/response";
 import { useToolHistory } from "@/lib/hooks/use-tool-history";
 import { usePreferences } from "@/lib/hooks/use-preferences";
 import { TOOL_IDS } from "@/lib/storage/storage-keys";
@@ -331,7 +332,7 @@ export default function GoalSettingAssistant() {
                     "whitespace-pre-wrap"
                   )}
                 >
-                  {result}
+                  <Response>{result}</Response>
                 </div>
               </div>
             ) : (

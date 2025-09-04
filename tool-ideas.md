@@ -91,16 +91,16 @@ Select the tools you want to implement by checking the boxes below.
 - [x] **Workflow Designer** - Create efficient workflow descriptions
 
 ## 💡 Communication & Personal (10 tools)
-- [ ] **Presentation Outliner** - Create structured presentation outlines
-- [ ] **Speech Writer** - Generate speeches for various occasions
-- [ ] **Conflict Resolution Guide** - Generate mediation strategies
-- [ ] **Negotiation Prep Tool** - Prepare negotiation strategies and talking points
-- [ ] **Small Talk Generator** - Generate conversation starters for networking
-- [ ] **Apology Letter Writer** - Create sincere, appropriate apology letters
-- [ ] **Thank You Note Generator** - Generate personalized thank you messages
-- [ ] **Feedback Framework Creator** - Structure constructive feedback
-- [ ] **Personal Statement Writer** - Create compelling personal statements
-- [ ] **Networking Message Creator** - Generate professional networking messages
+- [x] **Presentation Outliner** - Create structured presentation outlines
+- [x] **Speech Writer** - Generate speeches for various occasions
+- [x] **Conflict Resolution Guide** - Generate mediation strategies
+- [x] **Negotiation Prep Tool** - Prepare negotiation strategies and talking points
+- [x] **Small Talk Generator** - Generate conversation starters for networking
+- [x] **Apology Letter Writer** - Create sincere, appropriate apology letters
+- [x] **Thank You Note Generator** - Generate personalized thank you messages
+- [x] **Feedback Framework Creator** - Structure constructive feedback
+- [x] **Personal Statement Writer** - Create compelling personal statements
+- [x] **Networking Message Creator** - Generate professional networking messages
 
 ## 🏠 Life & Personal Management (10 tools)
 - [ ] **Meal Plan Generator** - Create weekly meal plans with shopping lists

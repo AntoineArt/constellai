@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
+import { getApiKeyFromHeaders } from "@/lib/ai-config";
 
 export const maxDuration = 10;
 
@@ -17,7 +17,6 @@ export async function POST(req: Request) {
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
     const body = await req.json();
-    const model = getModelFromRequest(body);
     const { toolId, inputs } = body;
 
     // Create context-specific prompts for different tools

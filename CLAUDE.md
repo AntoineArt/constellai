@@ -123,19 +123,24 @@ ConstellAI is designed as a bold, fast web app offering AI tools with credit-bas
 - Functions auto-generate TypeScript types - import from `convex/_generated/api`
 
 ### Code Standards
-- Follow existing Biome configuration (2-space indentation, double quotes, trailing commas)
+- Follow existing Biome configuration (2-space indentation, double quotes, trailing commas, semicolons)
 - Use `import type` for type-only imports
 - Prefer server components over client components when possible
-- Never use `any` type (explicitly disabled in Biome config)
+- Never use `any` type (explicitly disabled in Biome config and enforced in project rules)
 - Use `for of` loops over `forEach` where possible
-- Strings use double quotes
-- Maintain consistent error handling in API routes
+- Strings use double quotes consistently
+- Line width limit: 80 characters
+- Maintain consistent error handling in API routes with proper status codes
 - Use `// biome-ignore` comments when dependency warnings are incorrect but necessary
+- Follow React 19 patterns with proper error boundaries and suspense
+- **AI UI Components**: Always use AI Elements from `src/components/ai-elements/` for chat interfaces, messages, conversations, and AI-related UI - never build custom AI UI components
 
 ### Environment Setup
 - Convex requires `NEXT_PUBLIC_CONVEX_URL` environment variable
 - Run `npx convex dev --once --configure=new` if env setup needed
-- Development requires both `pnpm dev` and `pnpm convex:dev` running
+- Development requires both `pnpm dev` and `pnpm convex:dev` running concurrently (user runs these)
+- AI integration requires API keys passed via headers (`x-api-key` or `authorization` with Bearer token)
+- Never run servers - user handles all server processes
 
 ## File Patterns
 
@@ -193,6 +198,11 @@ Every tool should follow this consistent pattern:
    - Save final conversation state after streaming completes
    - Handle AbortError gracefully without showing error messages to users
    - Use proper cleanup in AbortController for cancelled requests
+
+### Tool Registry
+- All tools are registered in `src/lib/tools.ts` with metadata (id, name, description, icon, category, href)
+- Tools are organized by categories: General, Development, Text Processing, Communication, Marketing, etc.
+- Each tool has a consistent URL pattern: `/tools/[tool-name]/page.tsx`
 
 ### API Route Pattern
 ```typescript

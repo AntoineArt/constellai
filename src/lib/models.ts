@@ -26,7 +26,6 @@ export const AI_MODELS: AIModel[] = [
     id: "openai/gpt-4o",
     name: "GPT-4o",
   },
-  },
   {
     id: "mistral/mistral-small",
     name: "Mistral small",

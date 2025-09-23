@@ -33,13 +33,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Project Structure
 - `src/app/` - Next.js App Router pages and layouts
-  - `api/` - API routes for AI services (chat, regex, summarize)
-  - `tools/` - Tool-specific pages (chat, regex, summarizer)
+  - `api/` - API routes for 80+ AI tools (chat, regex, content generation, analysis, etc.)
+  - `tools/` - Tool-specific pages matching API routes
 - `src/components/` - React components
   - `ai-elements/` - AI-specific components (conversation, message, etc.)
   - `ui/` - shadcn/ui component library
 - `src/hooks/` - Custom React hooks
 - `src/lib/` - Utility functions and configurations
+  - `storage/` - Client-side localStorage utilities
+  - `tools.ts` - Tool registry with metadata and icons
 - `convex/` - Convex backend functions and schema
 - `docs/` - Product specifications and concepts
 - Root contains config files (biome.json, tsconfig.json, etc.)
@@ -107,12 +109,12 @@ interface ToolExecution {
 - "New" button in TopBar to start fresh tool sessions
 
 ### Product Vision (from docs/concept.md)
-ConstellAI is designed as a bold, fast web app offering AI tools with credit-based usage. Key features planned:
-- **Authentication**: Clerk integration with App Router
-- **AI Tools**: Chat and Regex Generator initially
+ConstellAI is designed as a bold, fast web app offering AI tools with credit-based usage. Key features:
+- **Authentication**: Clerk integration with App Router (planned)
+- **AI Tools**: 80+ specialized tools including chat, regex, content generation, analysis, and productivity tools
 - **Navigation**: Primary sidebar (left) with secondary sidebar for tool history
-- **Billing**: Credit system with prepaid/postpaid options via Polar
-- **Attachments**: UploadThing integration for file uploads
+- **Billing**: Credit system with prepaid/postpaid options via Polar (planned)
+- **Attachments**: UploadThing integration for file uploads (planned)
 
 ## Development Guidelines
 
@@ -126,12 +128,14 @@ ConstellAI is designed as a bold, fast web app offering AI tools with credit-bas
 - Follow existing Biome configuration (2-space indentation, double quotes, trailing commas, semicolons)
 - Use `import type` for type-only imports
 - Prefer server components over client components when possible
-- Never use `any` type (explicitly disabled in Biome config and enforced in project rules)
+- `noExplicitAny` is disabled but avoid `any` type when possible (explicitly disabled in Biome config and enforced in project rules)
+- Use `const` over `let` (enforced by Biome)
 - Use `for of` loops over `forEach` where possible
-- Strings use double quotes consistently
+- Strings use double quotes consistently with ES5 trailing commas
 - Line width limit: 80 characters
 - Maintain consistent error handling in API routes with proper status codes
 - Use `// biome-ignore` comments when dependency warnings are incorrect but necessary
+- All unused variables throw errors
 - Follow React 19 patterns with proper error boundaries and suspense
 - **AI UI Components**: Always use AI Elements from `src/components/ai-elements/` for chat interfaces, messages, conversations, and AI-related UI - never build custom AI UI components
 

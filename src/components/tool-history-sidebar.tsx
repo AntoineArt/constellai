@@ -96,7 +96,7 @@ export function ToolHistorySidebar({
   };
 
   return (
-    <div className="w-80 border-r bg-muted/20 flex flex-col h-full">
+    <div className="w-80 md:w-72 lg:w-80 border-r bg-muted/20 flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-3">
@@ -178,18 +178,18 @@ export function ToolHistorySidebar({
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-sm truncate">
+                          <div className="flex items-start justify-between gap-2 min-w-0">
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <h4 className="font-medium text-sm truncate break-words" title={execution.title}>
                                 {execution.title}
                               </h4>
-                              <div className="flex items-center gap-2 mt-1">
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 <Clock className="h-3 w-3 text-muted-foreground" />
                                 <span className="text-xs text-muted-foreground">
                                   {formatTime(execution.timestamp)}
                                 </span>
                                 {execution.model && (
-                                  <Badge variant="outline" className="text-xs">
+                                  <Badge variant="outline" className="text-xs shrink-0">
                                     {execution.model.replace(/.*\//, "")}
                                   </Badge>
                                 )}

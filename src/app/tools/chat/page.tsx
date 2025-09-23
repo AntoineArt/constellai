@@ -10,7 +10,7 @@ import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
 import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
 import type { ChatMessage } from "@/lib/storage/types";
-import { Trash2, Copy, RotateCcw } from "lucide-react";
+import { Trash2, Copy, RotateCcw, Menu } from "lucide-react";
 import {
   Conversation,
   ConversationContent,
@@ -31,6 +31,7 @@ export default function ChatPage() {
   const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const chatControllerRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -302,37 +303,86 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="h-screen overflow-hidden flex">
+    <div className="h-screen overflow-hidden flex flex-col sm:flex-row">
       {/* Tool History Sidebar */}
-      <ToolHistorySidebar
-        executions={toolHistory.executions}
-        activeExecutionId={toolHistory.activeExecutionId}
-        onSelectExecution={toolHistory.switchToExecution}
-        onDeleteExecution={toolHistory.deleteExecution}
-        onRenameExecution={toolHistory.renameExecution}
-        onNewExecution={async () => {
-          if (status !== "streaming") {
-            clearChat();
-            await toolHistory.createNewExecution(
-              { messages: [] },
-              { selectedModel }
-            );
-          }
-        }}
-        toolName="Chat"
-      />
+      <div className="sm:block hidden">
+        <ToolHistorySidebar
+          executions={toolHistory.executions}
+          activeExecutionId={toolHistory.activeExecutionId}
+          onSelectExecution={toolHistory.switchToExecution}
+          onDeleteExecution={toolHistory.deleteExecution}
+          onRenameExecution={toolHistory.renameExecution}
+          onNewExecution={async () => {
+            if (status !== "streaming") {
+              clearChat();
+              await toolHistory.createNewExecution(
+                { messages: [] },
+                { selectedModel }
+              );
+            }
+          }}
+          toolName="Chat"
+        />
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 sm:hidden">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+          <div className="absolute left-0 top-0 h-full w-80 bg-background">
+            <ToolHistorySidebar
+              executions={toolHistory.executions}
+              activeExecutionId={toolHistory.activeExecutionId}
+              onSelectExecution={(id) => {
+                toolHistory.switchToExecution(id);
+                setIsMobileSidebarOpen(false);
+              }}
+              onDeleteExecution={toolHistory.deleteExecution}
+              onRenameExecution={toolHistory.renameExecution}
+              onNewExecution={async () => {
+                if (status !== "streaming") {
+                  clearChat();
+                  await toolHistory.createNewExecution(
+                    { messages: [] },
+                    { selectedModel }
+                  );
+                  setIsMobileSidebarOpen(false);
+                }
+              }}
+              toolName="Chat"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top bar - fixed height */}
-        <TopBar
-          title="AI Chat"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
-        />
+        <div className="flex items-center h-16 border-b bg-background px-4">
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="sm:hidden mr-2"
+            onClick={() => setIsMobileSidebarOpen(true)}
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+
+          <div className="flex-1">
+            <TopBar
+              title="AI Chat"
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+            />
+          </div>
+        </div>
 
         {/* Main content area */}
-        <div className="h-[calc(100vh-64px)] overflow-hidden">
+        <div className="h-[calc(100vh-128px)] sm:h-[calc(100vh-64px)] overflow-hidden">
           {!hasApiKey ? (
             <div className="h-full flex items-center justify-center p-6">
               <Card className="border-muted bg-muted/20 max-w-md">
@@ -348,11 +398,11 @@ export default function ChatPage() {
             <div className="h-full flex flex-col">
               {/* Chat actions - when present */}
               {messages.length > 0 && (
-                <div className="border-b bg-background px-6 py-3 flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
+                <div className="border-b bg-background px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
                     {messages.length} messages
                   </span>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -377,7 +427,7 @@ export default function ChatPage() {
 
               {/* Messages area - scrollable */}
               <Conversation className="flex-1">
-                <ConversationContent className="max-w-4xl mx-auto">
+                <ConversationContent className="max-w-4xl mx-auto px-2 sm:px-4">
                   {/* Welcome message */}
                   {messages.length === 0 && (
                     <Message from="assistant">
@@ -444,13 +494,13 @@ export default function ChatPage() {
               </Conversation>
 
               {/* Input area - fixed at bottom */}
-              <div className="border-t bg-background p-4">
+              <div className="border-t bg-background p-2 sm:p-4">
                 <div className="max-w-4xl mx-auto">
                   <form
                     onSubmit={handleSubmit}
                     className="bg-muted/50 rounded-2xl border focus-within:border-primary/50 focus-within:bg-background transition-all"
                   >
-                    <div className="p-4">
+                    <div className="p-2 sm:p-4">
                       <textarea
                         ref={textareaRef}
                         value={inputValue}
@@ -462,7 +512,7 @@ export default function ChatPage() {
                               ? "Please wait for the response to complete..."
                               : "Type your message..."
                         }
-                        className="w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none min-h-[60px] max-h-[120px]"
+                        className="w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none min-h-[60px] sm:min-h-[60px] max-h-[120px]"
                         disabled={!hasApiKey || status === "streaming"}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
@@ -476,8 +526,8 @@ export default function ChatPage() {
                       />
                     </div>
 
-                    <div className="flex items-center justify-between px-4 pb-4">
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between px-2 sm:px-4 pb-2 sm:pb-4 flex-wrap gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
                         <span>
                           Press{" "}
                           <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">

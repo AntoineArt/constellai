@@ -26,6 +26,15 @@ export const AI_MODELS: AIModel[] = [
     id: "openai/gpt-4o",
     name: "GPT-4o",
   },
+  },
+  {
+    id: "mistral/mistral-small",
+    name: "Mistral small",
+  },
+  {
+    id: "mistral/mistral-medium",
+    name: "Mistral medium",
+  },
   {
     id: "google/gemini-2.5-flash",
     name: "Gemini 2.5 Flash",

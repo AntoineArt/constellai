@@ -39,8 +39,20 @@ export const AI_MODELS: AIModel[] = [
     name: "Gemini 2.5 Flash",
   },
   {
-    id: "deepseek/deepseek-v3.1",
+    id: "deepseek/deepseek-v3.2-exp",
     name: "DeepSeek V3.1",
+  },
+  {
+    id: "meta/llama-4-scout",
+    name: "Meta Llama 4 Scout",
+  },
+  {
+    id: "xai/grok-4-fast-reasoning",
+    name: "Grok 4 Fast Reasoning",
+  },
+  {
+    id: "xai/grok-4-fast-non-reasoning",
+    name: "Grok 4 Fast Non-Reasoning",
   },
 ];
 

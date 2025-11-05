@@ -31,6 +31,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **shadcn/ui** with Radix UI primitives for components
 - **AI Elements** for chat UI components
 
+### Implementation Status
+- ✅ 80+ AI tools with unified storage pattern
+- ✅ Client-side localStorage for all user data
+- ✅ Multi-model support via Vercel AI Gateway
+- ✅ Tool registry and categorization
+- ✅ Streaming responses with proper error handling
+- 🚧 Clerk authentication (planned - see docs/concept.md)
+- 🚧 Credit-based billing via Polar (planned - see docs/concept.md)
+- 🚧 UploadThing attachments (planned - see docs/concept.md)
+
 ### Project Structure
 - `src/app/` - Next.js App Router pages and layouts
   - `api/` - API routes for 80+ AI tools (chat, regex, content generation, analysis, etc.)
@@ -79,6 +89,24 @@ export const createUser = mutation({
 - **AI Integration**: API routes handle AI model requests with API key authentication
 - **Client-Side Storage**: Unified localStorage system for all user data and tool history
 
+### AI Model Configuration
+Models are centrally defined in `src/lib/models.ts` with the `AIModel` interface. Current models include:
+
+- **GPT-OSS-20B** (default) - Fast, cost-effective model
+- **GPT-OSS-120B** - Larger context and capabilities
+- **GPT-5** and **GPT-5 Mini** - Latest generation models
+- **GPT-4o** - Optimized for general use
+- **Mistral Small/Medium** - European alternatives
+- **Gemini 2.5 Flash** - Google's fast model
+- **DeepSeek V3.2** - Open-weights alternative
+- **Meta Llama 4 Scout** - Meta's latest
+- **Grok 4 Fast** (Reasoning/Non-Reasoning) - xAI models
+
+Utility functions:
+- `getDefaultModel()` - Returns the model marked with `isDefault: true`
+- `getModelById(id)` - Looks up a model by its ID
+- `DEFAULT_API_MODEL` - Common fallback for API routes (currently "openai/gpt-4o")
+
 ### Client-Side Storage Architecture
 All user data is stored client-side using localStorage with plans for future database sync:
 
@@ -102,19 +130,43 @@ interface ToolExecution {
 }
 ```
 
-#### Key Components
-- `useToolHistory(toolId)` - Hook for managing tool executions and history
-- `usePreferences()` - Hook for user preferences and settings  
+#### Key Storage Hooks
+Exported from `src/lib/storage/`:
+
+- **`useToolHistory(toolId)`** - Returns:
+  - `executions` - Array of all executions for this tool
+  - `activeExecution` - Currently active execution object
+  - `updateCurrentExecution({ inputs?, outputs?, settings? })` - Update current execution
+  - `clearActiveExecution()` - Start fresh session
+  - `loadExecution(id)` - Switch to a previous execution
+  - `deleteExecution(id)` - Remove an execution from history
+
+- **`usePreferences()`** - Returns:
+  - `preferences` - User settings (defaultModel, theme, sidebarCollapsed, toolSettings)
+  - `updatePreferences(updates)` - Merge updates into preferences
+  - `isLoaded` - Loading state boolean
+
+- **`usePinnedTools()`** - Manages pinned tool state in primary sidebar
+
+#### Key UI Components
 - Secondary sidebar component for each tool showing execution history
-- "New" button in TopBar to start fresh tool sessions
+- "New" button in TopBar to start fresh tool sessions via `clearActiveExecution()`
 
 ### Product Vision (from docs/concept.md)
-ConstellAI is designed as a bold, fast web app offering AI tools with credit-based usage. Key features:
-- **Authentication**: Clerk integration with App Router (planned)
-- **AI Tools**: 80+ specialized tools including chat, regex, content generation, analysis, and productivity tools
-- **Navigation**: Primary sidebar (left) with secondary sidebar for tool history
-- **Billing**: Credit system with prepaid/postpaid options via Polar (planned)
-- **Attachments**: UploadThing integration for file uploads (planned)
+ConstellAI is designed as a bold, fast web app offering AI tools with credit-based usage.
+
+**Current features:**
+- 80+ specialized AI tools (chat, regex, content generation, analysis, productivity, etc.)
+- Primary sidebar (left) with secondary sidebar for tool history
+- Client-side storage with localStorage
+- Multi-model support via Vercel AI Gateway
+
+**Planned features (see docs/concept.md for details):**
+- Clerk authentication with App Router
+- Credit-based billing system via Polar (prepaid/postpaid)
+- UploadThing integration for file attachments
+- Usage tracking and billing reconciliation
+- Referral system and welcome credits
 
 ## Development Guidelines
 
@@ -145,6 +197,21 @@ ConstellAI is designed as a bold, fast web app offering AI tools with credit-bas
 - Development requires both `pnpm dev` and `pnpm convex:dev` running concurrently (user runs these)
 - AI integration requires API keys passed via headers (`x-api-key` or `authorization` with Bearer token)
 - Never run servers - user handles all server processes
+
+### AI Configuration Utilities
+Centralized in `src/lib/ai-config.ts`:
+
+- **`getApiKeyFromHeaders(headers)`** - Extracts API key from request headers
+  - Checks `x-api-key` header first
+  - Falls back to `authorization` header (strips "Bearer " prefix)
+  - Returns `null` if no key found
+  - Always validate with this function in API routes
+
+- **`getModelFromRequest(body, toolSpecificDefault?)`** - Resolves model selection
+  - Priority: 1) User selection from request, 2) Tool-specific default, 3) Global default
+  - Checks `body.model` or `body.selectedModel`
+  - Validates model exists via `getModelById()`
+  - Returns validated model ID or fallback
 
 ## File Patterns
 
@@ -200,8 +267,10 @@ Every tool should follow this consistent pattern:
 5. **Streaming considerations**:
    - Prevent auto-save during streaming (`status === "streaming"`) to avoid race conditions
    - Save final conversation state after streaming completes
-   - Handle AbortError gracefully without showing error messages to users
-   - Use proper cleanup in AbortController for cancelled requests
+   - Handle `AbortError` gracefully without showing error messages to users
+   - Use proper cleanup in `AbortController` for cancelled requests
+   - Always use try-catch around streaming operations
+   - Check for error types before displaying error UI (ignore user-initiated cancellations)
 
 ### Tool Registry
 - All tools are registered in `src/lib/tools.ts` with metadata (id, name, description, icon, category, href)
@@ -211,7 +280,7 @@ Every tool should follow this consistent pattern:
 ### API Route Pattern
 ```typescript
 import { streamText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -224,11 +293,25 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json" },
       });
     }
-    
+
     process.env.AI_GATEWAY_API_KEY = apiKey;
-    // Handle request logic here
+
+    const body = await req.json();
+    const model = getModelFromRequest(body); // Optional: pass tool-specific default
+
+    const result = streamText({
+      model,
+      messages: body.messages,
+      // Additional options...
+    });
+
+    return result.toTextStreamResponse();
   } catch (error) {
-    // Consistent error handling
+    console.error("API error:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to process request" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }
 ```

@@ -101,7 +101,7 @@ export function ToolHistorySidebar({
   };
 
   return (
-    <div className="w-80 md:w-72 lg:w-80 border-r bg-muted/20 flex flex-col h-full overflow-hidden">
+    <div className="w-72 lg:w-80 border-r bg-muted/20 flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-3">
@@ -183,29 +183,31 @@ export function ToolHistorySidebar({
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-start justify-between gap-2 min-w-0">
-                            <div className="flex-1 min-w-0 overflow-hidden">
-                              <h4 className="font-medium text-sm truncate break-words" title={execution.title}>
+                          <div className="flex items-start gap-2 min-w-0">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-sm truncate" title={execution.title}>
                                 {execution.title}
                               </h4>
                               {getPreviewText && getPreviewText(execution) && (
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2 break-words">
                                   {getPreviewText(execution)}
                                 </p>
                               )}
-                              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                <Clock className="h-3 w-3 text-muted-foreground" />
-                                <span className="text-xs text-muted-foreground">
-                                  {formatTime(execution.timestamp)}
-                                </span>
+                              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3 shrink-0" />
+                                  <span className="whitespace-nowrap">
+                                    {formatTime(execution.timestamp)}
+                                  </span>
+                                </div>
                                 {getMessageCount && getMessageCount(execution) !== undefined && (
-                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <MessageSquare className="h-3 w-3" />
+                                  <div className="flex items-center gap-1">
+                                    <MessageSquare className="h-3 w-3 shrink-0" />
                                     <span>{getMessageCount(execution)}</span>
                                   </div>
                                 )}
                                 {execution.model && (
-                                  <Badge variant="outline" className="text-xs shrink-0">
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 shrink-0">
                                     {execution.model.replace(/.*\//, "")}
                                   </Badge>
                                 )}
@@ -216,7 +218,7 @@ export function ToolHistorySidebar({
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 shrink-0"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <MoreHorizontal className="h-4 w-4" />

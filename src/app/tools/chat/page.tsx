@@ -513,7 +513,7 @@ export default function ChatPage() {
 
               {/* Messages area - scrollable */}
               <Conversation className="flex-1">
-                <ConversationContent className="max-w-4xl mx-auto px-2 sm:px-4">
+                <ConversationContent className="max-w-4xl mx-auto px-3 sm:px-6 md:px-8">
                   {/* Welcome message */}
                   {messages.length === 0 && (
                     <Message from="assistant">
@@ -531,20 +531,20 @@ export default function ChatPage() {
                     const messageKey = message.id || `${index}-${message.role}`;
                     return (
                       <Message key={messageKey} from={message.role}>
-                        <MessageContent className="relative">
+                        <MessageContent className="relative overflow-visible">
                           <Response>{message.content}</Response>
 
                           {/* Copy button */}
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background shadow-sm"
+                            className="absolute -top-2 -right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background border shadow-sm hover:bg-accent"
                             onClick={() =>
                               copyMessage(message.content, messageKey)
                             }
                           >
                             <Copy
-                              className={`h-3 w-3 ${
+                              className={`h-3.5 w-3.5 ${
                                 copiedMessageId === messageKey
                                   ? "text-green-600"
                                   : "text-muted-foreground"
@@ -580,7 +580,7 @@ export default function ChatPage() {
               </Conversation>
 
               {/* Input area - fixed at bottom */}
-              <div className="border-t bg-background p-2 sm:p-4">
+              <div className="border-t bg-background p-3 sm:p-4 md:p-6">
                 <div className="max-w-4xl mx-auto">
                   <form
                     onSubmit={handleSubmit}
@@ -614,7 +614,7 @@ export default function ChatPage() {
 
                     <div className="flex items-center justify-between px-2 sm:px-4 pb-2 sm:pb-4 flex-wrap gap-2">
                       <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
-                        <span>
+                        <span className="hidden xs:inline">
                           Press{" "}
                           <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">
                             ↵
@@ -622,7 +622,7 @@ export default function ChatPage() {
                           to send
                         </span>
                         {inputValue.length > 0 && (
-                          <span>{inputValue.length} characters</span>
+                          <span className="text-[11px] sm:text-xs">{inputValue.length} characters</span>
                         )}
                       </div>
 

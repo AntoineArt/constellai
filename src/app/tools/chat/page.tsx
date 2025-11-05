@@ -11,7 +11,15 @@ import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
 import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
 import type { ChatMessage } from "@/lib/storage/types";
-import { Trash2, Copy, RotateCcw, Menu, AlertCircle, X } from "lucide-react";
+import {
+  Trash2,
+  Copy,
+  RotateCcw,
+  Menu,
+  AlertCircle,
+  X,
+  PanelRight,
+} from "lucide-react";
 import {
   Conversation,
   ConversationContent,
@@ -438,6 +446,19 @@ export default function ChatPage() {
           >
             <Menu className="h-4 w-4" />
           </Button>
+
+          {/* History toggle button (desktop only) */}
+          {isHistoryCollapsed && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden sm:flex h-8 w-8 p-0 shrink-0"
+              onClick={() => setIsHistoryCollapsed(false)}
+              title="Show history"
+            >
+              <PanelRight className="h-4 w-4" />
+            </Button>
+          )}
 
           <div className="flex-1 min-w-0 overflow-hidden">
             <TopBar

@@ -154,7 +154,7 @@ export function ToolHistorySidebar({
 
       {/* Execution List */}
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
+        <div className="px-3 py-4 space-y-4">
           {Object.keys(groupedExecutions).length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -173,7 +173,7 @@ export function ToolHistorySidebar({
                   {dateExecutions.map((execution) => (
                     <div
                       key={execution.id}
-                      className={`group relative rounded-lg border p-3 cursor-pointer transition-colors hover:bg-accent/50 overflow-hidden ${
+                      className={`group relative rounded-lg border p-2.5 cursor-pointer transition-colors hover:bg-accent/50 ${
                         activeExecutionId === execution.id
                           ? "bg-accent border-accent-foreground/20"
                           : "bg-background"
@@ -220,8 +220,8 @@ export function ToolHistorySidebar({
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-start gap-2 min-w-0">
-                            <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-2 min-w-0 w-full">
+                            <div className="flex-1 min-w-0 overflow-hidden pr-1">
                               <h4 className="font-medium text-sm truncate" title={execution.title}>
                                 {execution.title}
                               </h4>
@@ -230,7 +230,7 @@ export function ToolHistorySidebar({
                                   {getPreviewText(execution)}
                                 </p>
                               )}
-                              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap text-xs text-muted-foreground max-w-full">
                                 <div className="flex items-center gap-1">
                                   <Clock className="h-3 w-3 shrink-0" />
                                   <span className="whitespace-nowrap">

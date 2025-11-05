@@ -347,7 +347,7 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <div className="h-dvh overflow-hidden flex flex-col sm:flex-row">
+    <div className="h-dvh overflow-x-hidden overflow-y-hidden flex flex-col sm:flex-row">
       {/* Tool History Sidebar */}
       <div className="sm:block hidden">
         <ToolHistorySidebar
@@ -379,7 +379,7 @@ export default function ChatPage() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setIsMobileSidebarOpen(false)}
           />
-          <div className="absolute left-0 top-0 h-full w-80 bg-background">
+          <div className="absolute left-0 top-0 h-full w-[85vw] max-w-sm bg-background overflow-x-hidden">
             <ToolHistorySidebar
               executions={toolHistory.executions}
               activeExecutionId={toolHistory.activeExecutionId}
@@ -409,20 +409,20 @@ export default function ChatPage() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0 w-full">
         {/* Top bar - fixed height */}
-        <div className="flex items-center h-16 border-b bg-background px-4">
+        <div className="flex items-center h-16 border-b bg-background px-2 sm:px-4 gap-2">
           {/* Mobile menu button */}
           <Button
             variant="ghost"
             size="sm"
-            className="sm:hidden mr-2"
+            className="sm:hidden h-8 w-8 p-0 shrink-0"
             onClick={() => setIsMobileSidebarOpen(true)}
           >
             <Menu className="h-4 w-4" />
           </Button>
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0 overflow-hidden">
             <TopBar
               title="AI Chat"
               selectedModel={selectedModel}
@@ -434,7 +434,7 @@ export default function ChatPage() {
         </div>
 
         {/* Main content area */}
-        <div className="h-[calc(100dvh-128px)] sm:h-[calc(100dvh-64px)] overflow-hidden">
+        <div className="flex-1 overflow-hidden">
           {!hasApiKey ? (
             <div className="h-full flex items-center justify-center p-6">
               <Card className="border-muted bg-muted/20 max-w-md">
@@ -447,31 +447,33 @@ export default function ChatPage() {
               </Card>
             </div>
           ) : (
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col min-w-0">
               {/* Chat actions - when present */}
               {messages.length > 0 && (
-                <div className="border-b bg-background px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                <div className="border-b bg-background px-3 sm:px-6 py-2.5 flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                     {messages.length} messages
                   </span>
-                  <div className="flex gap-2 flex-wrap">
+                  <div className="flex gap-1.5 sm:gap-2 flex-wrap">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={regenerateLastResponse}
                       disabled={status === "streaming" || messages.length === 0}
+                      className="h-8 text-xs"
                     >
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Regenerate
+                      <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                      <span className="hidden xs:inline">Regenerate</span>
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={clearChat}
                       disabled={status === "streaming"}
+                      className="h-8 text-xs"
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Clear
+                      <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                      <span className="hidden xs:inline">Clear</span>
                     </Button>
                   </div>
                 </div>
@@ -479,19 +481,20 @@ export default function ChatPage() {
 
               {/* Error banner with retry */}
               {errorMessage && (
-                <div className="px-4 sm:px-6 py-3">
+                <div className="px-3 sm:px-6 py-3">
                   <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="flex items-center justify-between gap-4">
-                      <span>{errorMessage}</span>
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <AlertDescription className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <span className="text-sm break-words min-w-0">{errorMessage}</span>
                       <div className="flex gap-2 shrink-0">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={retryLastRequest}
                           disabled={status === "streaming"}
+                          className="text-xs"
                         >
-                          <RotateCcw className="h-4 w-4 mr-2" />
+                          <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                           Retry
                         </Button>
                         <Button
@@ -502,6 +505,7 @@ export default function ChatPage() {
                             setLastFailedMessages(null);
                             setStatus(undefined);
                           }}
+                          className="h-8 w-8 p-0"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -626,7 +630,7 @@ export default function ChatPage() {
                         )}
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 shrink-0">
                         {status === "streaming" && (
                           <Button
                             type="button"
@@ -639,6 +643,7 @@ export default function ChatPage() {
                                 setStatus(undefined);
                               }
                             }}
+                            className="h-8 text-xs px-3"
                           >
                             Stop
                           </Button>
@@ -651,6 +656,7 @@ export default function ChatPage() {
                             !hasApiKey ||
                             status === "streaming"
                           }
+                          className="h-8 text-xs px-4"
                         >
                           {status === "streaming" ? "Sending..." : "Send"}
                         </Button>

@@ -101,7 +101,7 @@ export function ToolHistorySidebar({
   };
 
   return (
-    <div className="w-72 lg:w-80 border-r bg-muted/20 flex flex-col h-full overflow-hidden">
+    <div className="w-full max-w-[288px] lg:max-w-[320px] border-r bg-muted/20 flex flex-col h-full overflow-x-hidden overflow-y-hidden">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-3">

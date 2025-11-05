@@ -121,14 +121,14 @@ export function TopBar({
   };
 
   return (
-    <div className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-full items-center justify-between px-6">
-        <h1 className="text-xl font-semibold">{title}</h1>
+    <div className="h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-full items-center justify-between gap-2 sm:gap-3 overflow-hidden">
+        <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate min-w-0">{title}</h1>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0 flex-wrap">
           {selectedModel && onModelChange && (
             <Select value={selectedModel} onValueChange={onModelChange}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[140px] sm:w-[160px] md:w-[180px] text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -143,9 +143,9 @@ export function TopBar({
           {onTemperatureChange && (
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Thermometer className="h-4 w-4" />
-                  {temperature.toFixed(1)}
+                <Button variant="outline" size="sm" className="gap-1.5 px-2.5">
+                  <Thermometer className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{temperature.toFixed(1)}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80">
@@ -185,10 +185,10 @@ export function TopBar({
                 variant="outline"
                 size="sm"
                 onClick={handleOpenDialog}
-                className="gap-2"
+                className={`h-8 w-8 p-0 ${hasApiKey ? "text-green-600 border-green-600/30 bg-green-50 dark:bg-green-950" : ""}`}
+                title={hasApiKey ? "API key configured" : "Set API key"}
               >
                 <Key className="h-4 w-4" />
-                {hasApiKey ? getMaskedApiKey() : "Set API Key"}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">

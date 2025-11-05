@@ -1,36 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  MoreHorizontal,
-  Search,
-  Trash2,
-  Edit,
   Calendar,
-  Clock,
-  Plus,
-  MessageSquare,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  Edit,
+  MessageSquare,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Trash2,
 } from "lucide-react";
+
+import type { ToolExecution } from "@/lib/storage";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { ToolExecution } from "@/lib/storage";
 
 interface ToolHistorySidebarProps {
   executions: ToolExecution[];
@@ -184,6 +179,14 @@ export function ToolHistorySidebar({
                           : "bg-background"
                       }`}
                       onClick={() => onSelectExecution(execution.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelectExecution(execution.id);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                     >
                       {editingId === execution.id ? (
                         <div className="space-y-2">
@@ -217,13 +220,12 @@ export function ToolHistorySidebar({
                           </div>
                         </div>
                       ) : (
-                        <>
-                          <div className="flex items-start gap-2 min-w-0">
+                        <div className="flex items-start gap-2 min-w-0">
                             <div className="flex-1 min-w-0">
                               <h4 className="font-medium text-sm truncate" title={execution.title}>
                                 {execution.title}
                               </h4>
-                              {getPreviewText && getPreviewText(execution) && (
+                              {getPreviewText?.(execution) && (
                                 <p className="text-xs text-muted-foreground mt-1 line-clamp-2 break-words">
                                   {getPreviewText(execution)}
                                 </p>
@@ -235,7 +237,7 @@ export function ToolHistorySidebar({
                                     {formatTime(execution.timestamp)}
                                   </span>
                                 </div>
-                                {getMessageCount && getMessageCount(execution) !== undefined && (
+                                {getMessageCount?.(execution) !== undefined && (
                                   <div className="flex items-center gap-1">
                                     <MessageSquare className="h-3 w-3 shrink-0" />
                                     <span>{getMessageCount(execution)}</span>
@@ -260,30 +262,30 @@ export function ToolHistorySidebar({
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleStartEdit(execution);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Rename
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-destructive"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDeleteExecution(execution.id);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleStartEdit(execution);
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Rename
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onDeleteExecution(execution.id);
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                        </div>
                       )}
                     </div>
                   ))}

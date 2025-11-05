@@ -34,10 +34,25 @@ export default function ChatPage() {
   const [inputValue, setInputValue] = useState("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lastFailedMessages, setLastFailedMessages] = useState<ChatMessage[] | null>(null);
   const chatControllerRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-collapse history on smaller screens
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1280) {
+        // lg breakpoint
+        setIsHistoryCollapsed(true);
+      }
+    };
+
+    handleResize(); // Check on mount
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Load current execution data
   useEffect(() => {
@@ -369,6 +384,8 @@ export default function ChatPage() {
           toolName="Chat"
           getMessageCount={getMessageCount}
           getPreviewText={getPreviewText}
+          collapsed={isHistoryCollapsed}
+          onToggleCollapse={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
         />
       </div>
 
@@ -517,7 +534,7 @@ export default function ChatPage() {
 
               {/* Messages area - scrollable */}
               <Conversation className="flex-1">
-                <ConversationContent className="max-w-4xl mx-auto px-3 sm:px-6 md:px-8">
+                <ConversationContent className="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto px-3 sm:px-6 md:px-8">
                   {/* Welcome message */}
                   {messages.length === 0 && (
                     <Message from="assistant">
@@ -585,7 +602,7 @@ export default function ChatPage() {
 
               {/* Input area - fixed at bottom */}
               <div className="border-t bg-background p-3 sm:p-4 md:p-6">
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto">
                   <form
                     onSubmit={handleSubmit}
                     className="bg-muted/50 rounded-2xl border focus-within:border-primary/50 focus-within:bg-background transition-all"

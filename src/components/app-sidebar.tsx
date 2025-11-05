@@ -23,6 +23,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuAction,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { tools } from "@/lib/tools";
 import { cn } from "@/lib/utils";
@@ -91,12 +92,15 @@ export function AppSidebar() {
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
-        <Link href="/" className="flex items-center gap-2 px-4 py-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Search className="h-4 w-4" />
-          </div>
-          <span className="text-lg font-semibold">ConstellAI</span>
-        </Link>
+        <div className="flex items-center justify-between px-4 py-2">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Search className="h-4 w-4" />
+            </div>
+            <span className="text-lg font-semibold">ConstellAI</span>
+          </Link>
+          <SidebarTrigger />
+        </div>
       </SidebarHeader>
 
       <SidebarContent>

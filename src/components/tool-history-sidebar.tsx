@@ -12,6 +12,8 @@ import {
   Clock,
   Plus,
   MessageSquare,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -40,6 +42,8 @@ interface ToolHistorySidebarProps {
   toolName: string;
   getMessageCount?: (execution: ToolExecution) => number | undefined;
   getPreviewText?: (execution: ToolExecution) => string | undefined;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export function ToolHistorySidebar({
@@ -52,6 +56,8 @@ export function ToolHistorySidebar({
   toolName,
   getMessageCount,
   getPreviewText,
+  collapsed = false,
+  onToggleCollapse,
 }: ToolHistorySidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -100,16 +106,45 @@ export function ToolHistorySidebar({
     });
   };
 
+  if (collapsed) {
+    return (
+      <div className="w-12 border-r bg-muted/20 flex flex-col h-full items-center py-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleCollapse}
+          className="h-8 w-8 p-0"
+          title="Expand history"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-[288px] lg:max-w-[320px] border-r bg-muted/20 flex flex-col h-full overflow-x-hidden overflow-y-hidden">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-lg">{toolName} History</h2>
-          <Button size="sm" onClick={onNewExecution} className="gap-1">
-            <Plus className="h-4 w-4" />
-            New
-          </Button>
+          <h2 className="font-semibold text-lg truncate flex-1">{toolName} History</h2>
+          <div className="flex items-center gap-1 shrink-0">
+            <Button size="sm" onClick={onNewExecution} className="gap-1 h-8">
+              <Plus className="h-4 w-4" />
+              New
+            </Button>
+            {onToggleCollapse && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleCollapse}
+                className="h-8 w-8 p-0"
+                title="Collapse history"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -143,7 +178,7 @@ export function ToolHistorySidebar({
                   {dateExecutions.map((execution) => (
                     <div
                       key={execution.id}
-                      className={`group relative rounded-lg border p-3 cursor-pointer transition-colors hover:bg-accent/50 ${
+                      className={`group relative rounded-lg border p-3 cursor-pointer transition-colors hover:bg-accent/50 overflow-hidden ${
                         activeExecutionId === execution.id
                           ? "bg-accent border-accent-foreground/20"
                           : "bg-background"
@@ -213,17 +248,18 @@ export function ToolHistorySidebar({
                                 )}
                               </div>
                             </div>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 shrink-0"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
+                            <div className="shrink-0">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
                                   onClick={(e) => {

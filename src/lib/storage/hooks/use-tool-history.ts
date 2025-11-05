@@ -47,7 +47,8 @@ export default function useToolHistory(
   const createNewExecution = useCallback(
     async (
       inputs: Record<string, any> = {},
-      settings: Record<string, any> = {}
+      settings: Record<string, any> = {},
+      model?: string
     ) => {
       // Start with simple temp title
       const tempTitle = generateTempTitle(toolId);
@@ -60,6 +61,7 @@ export default function useToolHistory(
         inputs,
         outputs: {},
         settings,
+        model,
       };
 
       setExecutions((prev) => {
@@ -114,7 +116,7 @@ export default function useToolHistory(
   const updateCurrentExecution = useCallback(
     (
       updates: Partial<
-        Pick<ToolExecution, "inputs" | "outputs" | "settings" | "title">
+        Pick<ToolExecution, "inputs" | "outputs" | "settings" | "title" | "model">
       >
     ) => {
       if (!activeExecutionId) return;

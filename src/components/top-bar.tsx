@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import { Key, Settings, Thermometer } from "lucide-react";
+
+import { useApiKey } from "@/hooks/use-api-key";
+import { AI_MODELS } from "@/lib/models";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +14,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -18,14 +28,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useApiKey } from "@/hooks/use-api-key";
-import { AI_MODELS } from "@/lib/models";
-import { Key, Settings } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 interface TopBarProps {
   title: string;
   selectedModel?: string;
   onModelChange?: (model: string) => void;
+  temperature?: number;
+  onTemperatureChange?: (temperature: number) => void;
   actions?: React.ReactNode;
 }
 
@@ -33,6 +43,8 @@ export function TopBar({
   title,
   selectedModel,
   onModelChange,
+  temperature = 0.7,
+  onTemperatureChange,
   actions,
 }: TopBarProps) {
   const { apiKey, setApiKey, getMaskedApiKey, hasApiKey } = useApiKey();
@@ -41,6 +53,9 @@ export function TopBar({
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [validationSuccess, setValidationSuccess] = useState(false);
+
+  const temperatureId = useId();
+  const apiKeyId = useId();
 
   const validateApiKey = async (key: string) => {
     if (!key.trim()) {
@@ -77,7 +92,7 @@ export function TopBar({
       setValidationSuccess(true);
       setTimeout(() => setValidationSuccess(false), 2000);
       return true;
-    } catch (error) {
+    } catch {
       setValidationError("Network error: Unable to validate API key");
       return false;
     } finally {
@@ -125,6 +140,43 @@ export function TopBar({
               </SelectContent>
             </Select>
           )}
+          {onTemperatureChange && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Thermometer className="h-4 w-4" />
+                  {temperature.toFixed(1)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={temperatureId}>Temperature</Label>
+                      <span className="text-sm text-muted-foreground font-mono">
+                        {temperature.toFixed(2)}
+                      </span>
+                    </div>
+                    <Slider
+                      id={temperatureId}
+                      min={0}
+                      max={2}
+                      step={0.1}
+                      value={[temperature]}
+                      onValueChange={(value) =>
+                        onTemperatureChange(value[0])
+                      }
+                      className="w-full"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Lower values make output more focused and deterministic.
+                      Higher values increase creativity and randomness.
+                    </p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
           {actions}
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -148,9 +200,9 @@ export function TopBar({
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="api-key">API Key</Label>
+                  <Label htmlFor={apiKeyId}>API Key</Label>
                   <Input
-                    id="api-key"
+                    id={apiKeyId}
                     type="password"
                     placeholder="Enter your Vercel AI Gateway API key..."
                     value={tempApiKey}

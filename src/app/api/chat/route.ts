@@ -18,13 +18,13 @@ export async function POST(req: Request) {
     process.env.AI_GATEWAY_API_KEY = apiKey;
 
     const body = await req.json();
-    const { messages } = body;
+    const { messages, temperature = 0.7 } = body;
     const model = getModelFromRequest(body);
 
     const result = streamText({
       model,
       messages,
-      temperature: 0.7,
+      temperature,
     });
 
     return result.toTextStreamResponse();

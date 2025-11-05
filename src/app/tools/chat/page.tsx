@@ -6,11 +6,12 @@ import type { ChatStatus } from "ai";
 import { TopBar } from "@/components/top-bar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
 import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
 import type { ChatMessage } from "@/lib/storage/types";
-import { Trash2, Copy, RotateCcw, Menu } from "lucide-react";
+import { Trash2, Copy, RotateCcw, Menu, AlertCircle, X } from "lucide-react";
 import {
   Conversation,
   ConversationContent,
@@ -25,6 +26,7 @@ export default function ChatPage() {
   const { preferences } = usePreferences();
 
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
+  const [temperature, setTemperature] = useState(0.7);
   const [messages, setMessages] = useState<
     Array<ChatMessage & { id?: string }>
   >([]);
@@ -32,6 +34,8 @@ export default function ChatPage() {
   const [inputValue, setInputValue] = useState("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [lastFailedMessages, setLastFailedMessages] = useState<ChatMessage[] | null>(null);
   const chatControllerRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -42,8 +46,15 @@ export default function ChatPage() {
       if (execution.inputs?.messages) {
         setMessages(execution.inputs.messages);
       }
-      if (execution.settings?.selectedModel) {
-        setSelectedModel(execution.settings.selectedModel);
+      // Prefer execution.model field over settings.selectedModel
+      const executionModel =
+        execution.model || execution.settings?.selectedModel;
+      if (executionModel) {
+        setSelectedModel(executionModel);
+      }
+      // Load temperature from settings, default to 0.7
+      if (execution.settings?.temperature !== undefined) {
+        setTemperature(execution.settings.temperature);
       }
     }
   }, [toolHistory.isLoaded, toolHistory.currentExecution]);
@@ -60,17 +71,22 @@ export default function ChatPage() {
 
     const timeoutId = setTimeout(async () => {
       if (!toolHistory.currentExecution) {
-        await toolHistory.createNewExecution({ messages }, { selectedModel });
+        await toolHistory.createNewExecution(
+          { messages },
+          { selectedModel, temperature },
+          selectedModel
+        );
       } else {
         toolHistory.updateCurrentExecution({
           inputs: { messages },
-          settings: { selectedModel },
+          settings: { selectedModel, temperature },
+          model: selectedModel,
         });
       }
     }, 1000); // Longer debounce to avoid interference
 
     return () => clearTimeout(timeoutId);
-  }, [messages, selectedModel, status, toolHistory]);
+  }, [messages, selectedModel, temperature, status, toolHistory]);
 
   // Auto-resize textarea with strict max height
   // biome-ignore lint/correctness/useExhaustiveDependencies: inputValue is needed to trigger resize
@@ -128,6 +144,7 @@ export default function ChatPage() {
           body: JSON.stringify({
             messages: messagesToSend,
             model: selectedModel,
+            temperature: temperature,
           }),
           signal: controller.signal,
         });
@@ -227,12 +244,14 @@ export default function ChatPage() {
         if (!toolHistory.currentExecution) {
           await toolHistory.createNewExecution(
             { messages: finalMessages },
-            { selectedModel }
+            { selectedModel, temperature },
+            selectedModel
           );
         } else {
           toolHistory.updateCurrentExecution({
             inputs: { messages: finalMessages },
-            settings: { selectedModel },
+            settings: { selectedModel, temperature },
+            model: selectedModel,
           });
         }
       } catch (error) {
@@ -240,21 +259,29 @@ export default function ChatPage() {
         if (error instanceof Error && error.name === "AbortError") {
           // Request was cancelled, don't show error message
           setStatus(undefined);
+          setErrorMessage(null);
+          setLastFailedMessages(null);
         } else {
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content:
-                "Sorry, an error occurred while communicating with the assistant.",
-            },
-          ]);
+          // Store error and failed messages for retry
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "An error occurred while communicating with the assistant."
+          );
+          setLastFailedMessages(messagesToSend);
           setStatus("error");
         }
       }
     },
-    [hasApiKey, apiKey, selectedModel, status, toolHistory]
+    [hasApiKey, apiKey, selectedModel, temperature, status, toolHistory]
   );
+
+  const retryLastRequest = useCallback(() => {
+    if (!lastFailedMessages) return;
+    setErrorMessage(null);
+    setStatus(undefined);
+    handleSubmitWithMessage(lastFailedMessages);
+  }, [lastFailedMessages, handleSubmitWithMessage]);
 
   const regenerateLastResponse = useCallback(() => {
     if (status === "streaming" || messages.length === 0) return;
@@ -302,8 +329,25 @@ export default function ChatPage() {
     [hasApiKey, status, inputValue, messages, handleSubmitWithMessage]
   );
 
+  // Helper functions for history sidebar
+  const getMessageCount = useCallback((execution: any) => {
+    return execution.inputs?.messages?.length || 0;
+  }, []);
+
+  const getPreviewText = useCallback((execution: any) => {
+    const messages = execution.inputs?.messages || [];
+    if (messages.length === 0) return undefined;
+    // Get last assistant message or last user message
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage) {
+      // Truncate to 100 characters
+      return lastMessage.content.slice(0, 100);
+    }
+    return undefined;
+  }, []);
+
   return (
-    <div className="h-screen overflow-hidden flex flex-col sm:flex-row">
+    <div className="h-dvh overflow-hidden flex flex-col sm:flex-row">
       {/* Tool History Sidebar */}
       <div className="sm:block hidden">
         <ToolHistorySidebar
@@ -317,11 +361,14 @@ export default function ChatPage() {
               clearChat();
               await toolHistory.createNewExecution(
                 { messages: [] },
-                { selectedModel }
+                { selectedModel },
+                selectedModel
               );
             }
           }}
           toolName="Chat"
+          getMessageCount={getMessageCount}
+          getPreviewText={getPreviewText}
         />
       </div>
 
@@ -347,12 +394,15 @@ export default function ChatPage() {
                   clearChat();
                   await toolHistory.createNewExecution(
                     { messages: [] },
-                    { selectedModel }
+                    { selectedModel },
+                    selectedModel
                   );
                   setIsMobileSidebarOpen(false);
                 }
               }}
               toolName="Chat"
+              getMessageCount={getMessageCount}
+              getPreviewText={getPreviewText}
             />
           </div>
         </div>
@@ -377,12 +427,14 @@ export default function ChatPage() {
               title="AI Chat"
               selectedModel={selectedModel}
               onModelChange={setSelectedModel}
+              temperature={temperature}
+              onTemperatureChange={setTemperature}
             />
           </div>
         </div>
 
         {/* Main content area */}
-        <div className="h-[calc(100vh-128px)] sm:h-[calc(100vh-64px)] overflow-hidden">
+        <div className="h-[calc(100dvh-128px)] sm:h-[calc(100dvh-64px)] overflow-hidden">
           {!hasApiKey ? (
             <div className="h-full flex items-center justify-center p-6">
               <Card className="border-muted bg-muted/20 max-w-md">
@@ -422,6 +474,40 @@ export default function ChatPage() {
                       Clear
                     </Button>
                   </div>
+                </div>
+              )}
+
+              {/* Error banner with retry */}
+              {errorMessage && (
+                <div className="px-4 sm:px-6 py-3">
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="flex items-center justify-between gap-4">
+                      <span>{errorMessage}</span>
+                      <div className="flex gap-2 shrink-0">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={retryLastRequest}
+                          disabled={status === "streaming"}
+                        >
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          Retry
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setErrorMessage(null);
+                            setLastFailedMessages(null);
+                            setStatus(undefined);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
                 </div>
               )}
 

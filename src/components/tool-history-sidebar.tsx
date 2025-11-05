@@ -11,6 +11,7 @@ import {
   Calendar,
   Clock,
   Plus,
+  MessageSquare,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -37,6 +38,8 @@ interface ToolHistorySidebarProps {
   onRenameExecution: (executionId: string, newTitle: string) => void;
   onNewExecution: () => void;
   toolName: string;
+  getMessageCount?: (execution: ToolExecution) => number | undefined;
+  getPreviewText?: (execution: ToolExecution) => string | undefined;
 }
 
 export function ToolHistorySidebar({
@@ -47,6 +50,8 @@ export function ToolHistorySidebar({
   onRenameExecution,
   onNewExecution,
   toolName,
+  getMessageCount,
+  getPreviewText,
 }: ToolHistorySidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -183,11 +188,22 @@ export function ToolHistorySidebar({
                               <h4 className="font-medium text-sm truncate break-words" title={execution.title}>
                                 {execution.title}
                               </h4>
-                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              {getPreviewText && getPreviewText(execution) && (
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                  {getPreviewText(execution)}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                                 <Clock className="h-3 w-3 text-muted-foreground" />
                                 <span className="text-xs text-muted-foreground">
                                   {formatTime(execution.timestamp)}
                                 </span>
+                                {getMessageCount && getMessageCount(execution) !== undefined && (
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <MessageSquare className="h-3 w-3" />
+                                    <span>{getMessageCount(execution)}</span>
+                                  </div>
+                                )}
                                 {execution.model && (
                                   <Badge variant="outline" className="text-xs shrink-0">
                                     {execution.model.replace(/.*\//, "")}

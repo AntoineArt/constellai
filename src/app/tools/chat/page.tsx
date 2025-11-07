@@ -7,6 +7,7 @@ import {
   Copy,
   History,
   Menu,
+  PanelLeft,
   RotateCcw,
   Trash2,
   X,
@@ -41,6 +42,7 @@ import {
 import { Response } from "@/components/ai-elements/response";
 import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { TopBar } from "@/components/top-bar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
 import { AI_MODELS } from "@/lib/models";
 import { TOOL_IDS, usePreferences, useToolHistory } from "@/lib/storage";
@@ -420,15 +422,18 @@ export default function ChatPage() {
             <TopBar
               title="AI Chat"
               actions={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hidden sm:flex h-8 w-8 p-0 shrink-0"
-                  onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
-                  title={isHistoryCollapsed ? "Show history" : "Hide history"}
-                >
-                  <History className="h-4 w-4" />
-                </Button>
+                <>
+                  <SidebarTrigger className="h-8 w-8 p-0" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 shrink-0"
+                    onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+                    title={isHistoryCollapsed ? "Show history" : "Hide history"}
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                </>
               }
             />
           </div>
@@ -633,9 +638,6 @@ export default function ChatPage() {
                     </PromptInputBody>
                     <PromptInputFooter>
                       <PromptInputTools>
-                        <span className="text-xs text-muted-foreground px-2">
-                          Using {AI_MODELS.find(m => m.id === selectedModel)?.name || "GPT-OSS-20B"}
-                        </span>
                         <PromptInputModelSelect
                           value={selectedModel}
                           onValueChange={setSelectedModel}

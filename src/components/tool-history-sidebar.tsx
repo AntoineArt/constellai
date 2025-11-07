@@ -95,7 +95,7 @@ export function ToolHistorySidebar({
   };
 
   return (
-    <div className="w-[280px] border-r bg-background flex flex-col h-full">
+    <div className="w-[280px] border-r bg-background flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="p-3 border-b flex-shrink-0 space-y-2">
         <div className="flex items-center justify-between">
@@ -136,7 +136,7 @@ export function ToolHistorySidebar({
                     {dateExecutions.map((execution) => (
                       <div
                         key={execution.id}
-                        className={`group relative rounded-md px-2 py-2 cursor-pointer transition-all ${
+                        className={`group relative rounded-md px-2 py-2 cursor-pointer transition-all overflow-hidden ${
                           activeExecutionId === execution.id
                             ? "bg-accent"
                             : "hover:bg-accent/50"
@@ -183,8 +183,8 @@ export function ToolHistorySidebar({
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 w-full">
+                            <div className="flex-1 min-w-0 overflow-hidden">
                               <h4 className="font-medium text-sm truncate" title={execution.title}>
                                 {execution.title}
                               </h4>
@@ -205,7 +205,7 @@ export function ToolHistorySidebar({
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                                  className="h-6 w-6 p-0 shrink-0 opacity-0 group-hover:opacity-100"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <MoreHorizontal className="h-3.5 w-3.5" />

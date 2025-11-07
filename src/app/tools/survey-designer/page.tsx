@@ -259,8 +259,6 @@ export default function SurveyDesignerPage() {
         {/* Top bar */}
         <TopBar
           title="Survey Designer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

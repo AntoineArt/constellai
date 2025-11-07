@@ -284,8 +284,6 @@ export default function ProductDescriptionWriterPage() {
         {/* Top bar */}
         <TopBar
           title="Product Description Writer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

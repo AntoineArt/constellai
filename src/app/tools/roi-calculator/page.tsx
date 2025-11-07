@@ -277,8 +277,6 @@ export default function RoiCalculatorPage() {
         {/* Top bar */}
         <TopBar
           title="ROI Calculator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

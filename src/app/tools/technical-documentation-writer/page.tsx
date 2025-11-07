@@ -284,8 +284,6 @@ export default function TechnicalDocumentationWriterPage() {
         {/* Top bar */}
         <TopBar
           title="Technical Documentation Writer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

@@ -295,8 +295,6 @@ export default function ReadmeGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="README Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

@@ -260,8 +260,6 @@ export default function CompetitorAnalysisToolPage() {
         {/* Top bar */}
         <TopBar
           title="Competitor Analysis Tool"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

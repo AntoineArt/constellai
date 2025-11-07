@@ -251,8 +251,6 @@ export default function TypographyPairerPage() {
         {/* Top bar */}
         <TopBar
           title="Typography Pairer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

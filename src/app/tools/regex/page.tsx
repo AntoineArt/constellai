@@ -201,8 +201,6 @@ export default function RegexPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar
           title="Regex Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         <div className="flex-1 overflow-auto">

@@ -279,8 +279,6 @@ export default function MetaDescriptionGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Meta Description Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

@@ -258,8 +258,6 @@ export default function StyleGuideGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Style Guide Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

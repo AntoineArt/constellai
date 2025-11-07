@@ -247,8 +247,6 @@ export default function ErrorDecoderPage() {
         {/* Top bar */}
         <TopBar
           title="Error Message Decoder"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

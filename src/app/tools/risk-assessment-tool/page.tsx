@@ -252,8 +252,6 @@ export default function RiskAssessmentToolPage() {
         {/* Top bar */}
         <TopBar
           title="Risk Assessment Tool"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

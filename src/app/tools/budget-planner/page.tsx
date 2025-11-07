@@ -267,8 +267,6 @@ export default function BudgetPlannerPage() {
         {/* Top bar */}
         <TopBar
           title="Budget Planner"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

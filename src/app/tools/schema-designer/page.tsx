@@ -248,8 +248,6 @@ export default function SchemaDesignerPage() {
         {/* Top bar */}
         <TopBar
           title="Database Schema Designer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

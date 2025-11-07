@@ -257,8 +257,6 @@ export default function FinancialReportSummarizerPage() {
         {/* Top bar */}
         <TopBar
           title="Financial Report Summarizer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

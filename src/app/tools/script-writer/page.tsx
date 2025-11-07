@@ -274,8 +274,6 @@ export default function ScriptWriterPage() {
         {/* Top bar */}
         <TopBar
           title="Script Writer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

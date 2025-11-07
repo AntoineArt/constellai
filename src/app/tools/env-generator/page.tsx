@@ -248,8 +248,6 @@ export default function EnvGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Environment Config Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

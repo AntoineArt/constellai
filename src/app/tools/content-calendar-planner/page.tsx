@@ -301,8 +301,6 @@ export default function ContentCalendarPlannerPage() {
         {/* Top bar */}
         <TopBar
           title="Content Calendar Planner"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

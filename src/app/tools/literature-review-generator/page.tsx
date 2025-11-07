@@ -260,8 +260,6 @@ export default function LiteratureReviewGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Literature Review Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

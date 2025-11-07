@@ -256,8 +256,6 @@ export default function CustomerJourneyMapperPage() {
         {/* Top bar */}
         <TopBar
           title="Customer Journey Mapper"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

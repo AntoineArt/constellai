@@ -266,8 +266,6 @@ export default function UiUxCopyGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="UI/UX Copy Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

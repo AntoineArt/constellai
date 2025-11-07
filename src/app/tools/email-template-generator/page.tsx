@@ -263,8 +263,6 @@ export default function EmailTemplateGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Email Template Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

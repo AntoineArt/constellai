@@ -256,8 +256,6 @@ export default function SalesPitchGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Sales Pitch Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

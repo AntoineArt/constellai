@@ -255,8 +255,6 @@ export default function KpiDashboardDesignerPage() {
         {/* Top bar */}
         <TopBar
           title="KPI Dashboard Designer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

@@ -271,8 +271,6 @@ export default function PricingStrategyGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Pricing Strategy Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

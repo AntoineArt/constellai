@@ -40,7 +40,7 @@ export const AI_MODELS: AIModel[] = [
   },
   {
     id: "deepseek/deepseek-v3.2-exp",
-    name: "DeepSeek V3.1",
+    name: "DeepSeek V3.2",
   },
   {
     id: "meta/llama-4-scout",
@@ -68,4 +68,4 @@ export const getModelById = (id: string): AIModel | undefined => {
 export const DEFAULT_MODEL_ID = getDefaultModel().id;
 
 // Common model used in API routes for streaming
-export const DEFAULT_API_MODEL = "openai/gpt-4o";
+export const DEFAULT_API_MODEL = "openai/gpt-oss-120b";

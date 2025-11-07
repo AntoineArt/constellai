@@ -247,8 +247,6 @@ export default function ApiDocsGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="API Documentation Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

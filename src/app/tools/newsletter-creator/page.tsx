@@ -279,8 +279,6 @@ export default function NewsletterCreatorPage() {
         {/* Top bar */}
         <TopBar
           title="Newsletter Creator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

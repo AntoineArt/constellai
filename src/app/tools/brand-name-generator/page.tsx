@@ -266,8 +266,6 @@ export default function BrandNameGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Brand Name Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

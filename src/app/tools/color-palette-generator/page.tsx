@@ -266,8 +266,6 @@ export default function ColorPaletteGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Color Palette Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

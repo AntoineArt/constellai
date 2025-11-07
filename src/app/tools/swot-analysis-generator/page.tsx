@@ -255,8 +255,6 @@ export default function SwotAnalysisGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="SWOT Analysis Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

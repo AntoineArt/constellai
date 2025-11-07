@@ -258,8 +258,6 @@ export default function ArtPromptGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Art Prompt Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

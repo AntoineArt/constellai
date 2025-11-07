@@ -274,8 +274,6 @@ export default function StoryGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Story Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

@@ -302,8 +302,6 @@ export default function ContactCardGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Contact Card Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

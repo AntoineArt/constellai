@@ -271,8 +271,6 @@ export default function PressReleaseWriterPage() {
         {/* Top bar */}
         <TopBar
           title="Press Release Writer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

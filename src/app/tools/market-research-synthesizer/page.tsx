@@ -263,8 +263,6 @@ export default function MarketResearchSynthesizerPage() {
         {/* Top bar */}
         <TopBar
           title="Market Research Synthesizer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

@@ -260,8 +260,6 @@ export default function BlogPostGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Blog Post Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

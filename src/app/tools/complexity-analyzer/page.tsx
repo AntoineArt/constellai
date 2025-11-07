@@ -248,8 +248,6 @@ export default function ComplexityAnalyzerPage() {
         {/* Top bar */}
         <TopBar
           title="Code Complexity Analyzer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

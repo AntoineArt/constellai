@@ -236,8 +236,6 @@ export default function SqlGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="SQL Query Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

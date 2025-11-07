@@ -244,8 +244,6 @@ export default function PrMessageWriterPage() {
         {/* Top bar */}
         <TopBar
           title="Git PR Message Writer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

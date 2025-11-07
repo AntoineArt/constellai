@@ -308,8 +308,6 @@ export default function GrantProposalWriterPage() {
         {/* Top bar */}
         <TopBar
           title="Grant Proposal Writer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

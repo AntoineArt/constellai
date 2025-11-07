@@ -259,8 +259,6 @@ export default function PerformanceOptimizerPage() {
         {/* Top bar */}
         <TopBar
           title="Performance Optimizer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

@@ -265,8 +265,6 @@ export default function LogoConceptGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Logo Concept Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

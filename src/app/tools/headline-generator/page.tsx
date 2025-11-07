@@ -274,8 +274,6 @@ export default function HeadlineGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Headline Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

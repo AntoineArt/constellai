@@ -262,8 +262,6 @@ export default function SocialMediaPostGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Social Media Post Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

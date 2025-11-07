@@ -269,8 +269,6 @@ export default function BusinessPlanGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Business Plan Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

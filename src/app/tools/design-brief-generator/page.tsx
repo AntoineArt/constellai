@@ -266,8 +266,6 @@ export default function DesignBriefGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Design Brief Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

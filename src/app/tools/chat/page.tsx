@@ -5,8 +5,8 @@ import type { ChatStatus } from "ai";
 import {
   AlertCircle,
   Copy,
+  History,
   Menu,
-  PanelRight,
   RotateCcw,
   Trash2,
   X,
@@ -339,32 +339,32 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <div className="h-dvh overflow-x-hidden overflow-y-hidden flex flex-col sm:flex-row">
+    <div className="h-dvh overflow-hidden flex">
       {/* Tool History Sidebar */}
-      <div className="sm:block hidden">
-        <ToolHistorySidebar
-          executions={toolHistory.executions}
-          activeExecutionId={toolHistory.activeExecutionId}
-          onSelectExecution={toolHistory.switchToExecution}
-          onDeleteExecution={toolHistory.deleteExecution}
-          onRenameExecution={toolHistory.renameExecution}
-          onNewExecution={async () => {
-            if (status !== "streaming") {
-              clearChat();
-              await toolHistory.createNewExecution(
-                { messages: [] },
-                { selectedModel },
-                selectedModel
-              );
-            }
-          }}
-          toolName="Chat"
-          getMessageCount={getMessageCount}
-          getPreviewText={getPreviewText}
-          collapsed={isHistoryCollapsed}
-          onToggleCollapse={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
-        />
-      </div>
+      {!isHistoryCollapsed && (
+        <div className="sm:block hidden">
+          <ToolHistorySidebar
+            executions={toolHistory.executions}
+            activeExecutionId={toolHistory.activeExecutionId}
+            onSelectExecution={toolHistory.switchToExecution}
+            onDeleteExecution={toolHistory.deleteExecution}
+            onRenameExecution={toolHistory.renameExecution}
+            onNewExecution={async () => {
+              if (status !== "streaming") {
+                clearChat();
+                await toolHistory.createNewExecution(
+                  { messages: [] },
+                  { selectedModel },
+                  selectedModel
+                );
+              }
+            }}
+            toolName="Chat"
+            getMessageCount={getMessageCount}
+            getPreviewText={getPreviewText}
+          />
+        </div>
+      )}
 
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
@@ -416,26 +416,20 @@ export default function ChatPage() {
             <Menu className="h-4 w-4" />
           </Button>
 
-          {/* History toggle button (desktop only) */}
-          {isHistoryCollapsed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden sm:flex h-8 w-8 p-0 shrink-0"
-              onClick={() => setIsHistoryCollapsed(false)}
-              title="Show history"
-            >
-              <PanelRight className="h-4 w-4" />
-            </Button>
-          )}
-
           <div className="flex-1 min-w-0 overflow-hidden">
             <TopBar
               title="AI Chat"
-              selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
-              temperature={temperature}
-              onTemperatureChange={setTemperature}
+              actions={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hidden sm:flex h-8 w-8 p-0 shrink-0"
+                  onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+                  title={isHistoryCollapsed ? "Show history" : "Hide history"}
+                >
+                  <History className="h-4 w-4" />
+                </Button>
+              }
             />
           </div>
         </div>
@@ -639,6 +633,9 @@ export default function ChatPage() {
                     </PromptInputBody>
                     <PromptInputFooter>
                       <PromptInputTools>
+                        <span className="text-xs text-muted-foreground px-2">
+                          Using {AI_MODELS.find(m => m.id === selectedModel)?.name || "GPT-OSS-20B"}
+                        </span>
                         <PromptInputModelSelect
                           value={selectedModel}
                           onValueChange={setSelectedModel}

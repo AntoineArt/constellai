@@ -306,8 +306,6 @@ export default function CoverLetterGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Cover Letter Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

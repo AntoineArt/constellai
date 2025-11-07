@@ -266,8 +266,6 @@ export default function CreativeBriefWriterPage() {
         {/* Top bar */}
         <TopBar
           title="Creative Brief Writer"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

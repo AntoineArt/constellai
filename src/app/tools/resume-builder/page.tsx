@@ -296,8 +296,6 @@ export default function ResumeBuilderPage() {
         {/* Top bar */}
         <TopBar
           title="Resume Builder"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

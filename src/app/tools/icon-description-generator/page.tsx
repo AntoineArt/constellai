@@ -257,8 +257,6 @@ export default function IconDescriptionGeneratorPage() {
         {/* Top bar */}
         <TopBar
           title="Icon Description Generator"
-          selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
         />
 
         {/* Main content area */}

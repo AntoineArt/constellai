@@ -95,10 +95,10 @@ export function ToolHistorySidebar({
   };
 
   return (
-    <div className="w-[280px] border-r bg-background flex flex-col h-full overflow-hidden">
+    <div className="w-[280px] max-w-[280px] min-w-[280px] border-r bg-background flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="p-3 border-b flex-shrink-0 space-y-2">
-        <div className="flex items-center justify-between">
+      <div className="p-3 border-b flex-shrink-0 space-y-2 min-w-0 max-w-full">
+        <div className="flex items-center justify-between min-w-0">
           <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">History</h2>
           <Button size="sm" variant="default" onClick={onNewExecution} className="h-7 text-xs gap-1">
             <Plus className="h-3.5 w-3.5" />
@@ -117,8 +117,8 @@ export function ToolHistorySidebar({
       </div>
 
       {/* Execution List */}
-      <ScrollArea className="flex-1">
-        <div className="p-2">
+      <ScrollArea className="flex-1 min-w-0 max-w-full">
+        <div className="p-2 min-w-0 max-w-full">
           {Object.keys(groupedExecutions).length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-12 px-4">
               <Clock className="h-10 w-10 mb-3 opacity-40" />
@@ -126,17 +126,17 @@ export function ToolHistorySidebar({
               <p className="text-xs mt-1">Your conversations will appear here</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 min-w-0 max-w-full">
               {Object.entries(groupedExecutions).map(([date, dateExecutions]) => (
-                <div key={date}>
+                <div key={date} className="min-w-0 max-w-full">
                   <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1.5">
                     {date}
                   </h3>
-                  <div className="space-y-0.5">
+                  <div className="space-y-0.5 min-w-0 max-w-full">
                     {dateExecutions.map((execution) => (
                       <div
                         key={execution.id}
-                        className={`group relative rounded-md px-2 py-2 cursor-pointer transition-all overflow-hidden ${
+                        className={`group relative rounded-md px-2 py-2 cursor-pointer transition-all overflow-hidden min-w-0 max-w-full ${
                           activeExecutionId === execution.id
                             ? "bg-accent"
                             : "hover:bg-accent/50"
@@ -183,7 +183,7 @@ export function ToolHistorySidebar({
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 w-full">
+                          <div className="flex items-center gap-2 w-full min-w-0 max-w-full">
                             <div className="flex-1 min-w-0 overflow-hidden">
                               <h4 className="font-medium text-sm truncate" title={execution.title}>
                                 {execution.title}

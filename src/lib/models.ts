@@ -15,10 +15,6 @@ export const AI_MODELS: AIModel[] = [
     name: "GPT-OSS-120B",
   },
   {
-    id: "openai/gpt-5",
-    name: "GPT-5",
-  },
-  {
     id: "openai/gpt-5-mini",
     name: "GPT-5 Mini",
   },

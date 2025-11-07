@@ -419,24 +419,22 @@ export default function ChatPage() {
           </Button>
 
           <div className="flex-1 min-w-0 overflow-hidden">
-            <TopBar
-              title="AI Chat"
-              actions={
-                <>
-                  <SidebarTrigger className="h-8 w-8 p-0" />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 shrink-0"
-                    onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
-                    title={isHistoryCollapsed ? "Show history" : "Hide history"}
-                  >
-                    <History className="h-4 w-4" />
-                  </Button>
-                </>
-              }
-            />
+            <TopBar title="AI Chat" />
           </div>
+        </div>
+
+        {/* Floating toggle buttons */}
+        <div className="fixed top-4 right-4 z-50 flex gap-2">
+          <SidebarTrigger className="h-9 w-9 p-0 shadow-lg" />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-9 p-0 shrink-0 shadow-lg bg-background border"
+            onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+            title={isHistoryCollapsed ? "Show history" : "Hide history"}
+          >
+            <History className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Main content area */}

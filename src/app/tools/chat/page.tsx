@@ -1,32 +1,50 @@
 "use client";
 
-import { useCallback, useRef, useState, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatStatus } from "ai";
-
-import { TopBar } from "@/components/top-bar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
-import { useApiKey } from "@/hooks/use-api-key";
-import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
-import type { ChatMessage } from "@/lib/storage/types";
 import {
-  Trash2,
-  Copy,
-  RotateCcw,
-  Menu,
   AlertCircle,
-  X,
+  Copy,
+  Menu,
   PanelRight,
+  RotateCcw,
+  Trash2,
+  X,
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Conversation,
   ConversationContent,
+  ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  PromptInput,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputBody,
+  PromptInputFooter,
+  PromptInputHeader,
+  type PromptInputMessage,
+  PromptInputModelSelect,
+  PromptInputModelSelectContent,
+  PromptInputModelSelectItem,
+  PromptInputModelSelectTrigger,
+  PromptInputModelSelectValue,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputTools,
+} from "@/components/ai-elements/prompt-input";
 import { Response } from "@/components/ai-elements/response";
+import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
+import { TopBar } from "@/components/top-bar";
+import { useApiKey } from "@/hooks/use-api-key";
+import { AI_MODELS } from "@/lib/models";
+import { TOOL_IDS, usePreferences, useToolHistory } from "@/lib/storage";
+import type { ChatMessage } from "@/lib/storage/types";
 
 export default function ChatPage() {
   const { hasApiKey, apiKey } = useApiKey();
@@ -46,7 +64,6 @@ export default function ChatPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lastFailedMessages, setLastFailedMessages] = useState<ChatMessage[] | null>(null);
   const chatControllerRef = useRef<AbortController | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-collapse history on smaller screens
   useEffect(() => {
@@ -111,22 +128,6 @@ export default function ChatPage() {
     return () => clearTimeout(timeoutId);
   }, [messages, selectedModel, temperature, status, toolHistory]);
 
-  // Auto-resize textarea with strict max height
-  // biome-ignore lint/correctness/useExhaustiveDependencies: inputValue is needed to trigger resize
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 100)}px`;
-    }
-  }, [inputValue]);
-
-  // Auto-focus textarea when API key is available
-  useEffect(() => {
-    if (hasApiKey && textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, [hasApiKey]);
 
   const clearChat = useCallback(() => {
     if (status === "streaming") return;
@@ -252,13 +253,6 @@ export default function ChatPage() {
         chatControllerRef.current = null;
         setStatus(undefined);
 
-        // Refocus the input after streaming completes
-        setTimeout(() => {
-          if (textareaRef.current) {
-            textareaRef.current.focus();
-          }
-        }, 100);
-
         // Final save of the complete conversation
         const finalMessages = [
           ...messagesToSend,
@@ -326,31 +320,6 @@ export default function ChatPage() {
     }
   }, [messages, status, handleSubmitWithMessage]);
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!hasApiKey || status === "submitted" || status === "streaming")
-        return;
-
-      const prompt = inputValue.trim();
-      if (!prompt) return;
-
-      const newMessages: (ChatMessage & { id?: string })[] = [
-        ...messages,
-        { role: "user", content: prompt, id: `user-${Date.now()}` },
-      ];
-      setMessages(newMessages);
-      setInputValue("");
-
-      // Reset textarea height
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-      }
-
-      await handleSubmitWithMessage(newMessages);
-    },
-    [hasApiKey, status, inputValue, messages, handleSubmitWithMessage]
-  );
 
   // Helper functions for history sidebar
   const getMessageCount = useCallback((execution: any) => {
@@ -556,16 +525,17 @@ export default function ChatPage() {
               {/* Messages area - scrollable */}
               <Conversation className="flex-1">
                 <ConversationContent className="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto px-3 sm:px-6 md:px-8">
-                  {/* Welcome message */}
+                  {/* Empty state */}
                   {messages.length === 0 && (
-                    <Message from="assistant">
-                      <MessageContent>
-                        <Response>
-                          Hello! I'm your AI assistant. How can I help you
-                          today?
-                        </Response>
-                      </MessageContent>
-                    </Message>
+                    <ConversationEmptyState
+                      title="Start a conversation"
+                      description="Send a message to begin chatting with the AI assistant"
+                      icon={
+                        <div className="rounded-full bg-primary/10 p-3">
+                          <AlertCircle className="h-6 w-6 text-primary" />
+                        </div>
+                      }
+                    />
                   )}
 
                   {/* Chat messages */}
@@ -624,13 +594,37 @@ export default function ChatPage() {
               {/* Input area - fixed at bottom */}
               <div className="border-t bg-background p-3 sm:p-4 md:p-6">
                 <div className="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto">
-                  <form
-                    onSubmit={handleSubmit}
-                    className="bg-muted/50 rounded-2xl border focus-within:border-primary/50 focus-within:bg-background transition-all"
+                  <PromptInput
+                    multiple
+                    accept="image/*"
+                    onSubmit={async (message: PromptInputMessage, event) => {
+                      event.preventDefault();
+                      if (!hasApiKey || status === "submitted" || status === "streaming") return;
+
+                      const text = message.text?.trim();
+                      if (!text && !message.files?.length) return;
+
+                      const newMessages: (ChatMessage & { id?: string })[] = [
+                        ...messages,
+                        {
+                          role: "user",
+                          content: text || "[Sent with attachments]",
+                          id: `user-${Date.now()}`
+                        },
+                      ];
+                      setMessages(newMessages);
+                      setInputValue("");
+
+                      await handleSubmitWithMessage(newMessages);
+                    }}
                   >
-                    <div className="p-2 sm:p-4">
-                      <textarea
-                        ref={textareaRef}
+                    <PromptInputHeader>
+                      <PromptInputAttachments>
+                        {(attachment) => <PromptInputAttachment data={attachment} />}
+                      </PromptInputAttachments>
+                    </PromptInputHeader>
+                    <PromptInputBody>
+                      <PromptInputTextarea
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder={
@@ -640,67 +634,36 @@ export default function ChatPage() {
                               ? "Please wait for the response to complete..."
                               : "Type your message..."
                         }
-                        className="w-full resize-none bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none min-h-[60px] sm:min-h-[60px] max-h-[120px]"
                         disabled={!hasApiKey || status === "streaming"}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSubmit(e);
-                          }
-                          if (e.key === "Escape") {
-                            e.currentTarget.blur();
-                          }
-                        }}
                       />
-                    </div>
-
-                    <div className="flex items-center justify-between px-2 sm:px-4 pb-2 sm:pb-4 flex-wrap gap-2">
-                      <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
-                        <span className="hidden xs:inline">
-                          Press{" "}
-                          <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">
-                            ↵
-                          </kbd>{" "}
-                          to send
-                        </span>
-                        {inputValue.length > 0 && (
-                          <span className="text-[11px] sm:text-xs">{inputValue.length} characters</span>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2 shrink-0">
-                        {status === "streaming" && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (chatControllerRef.current) {
-                                chatControllerRef.current.abort();
-                                chatControllerRef.current = null;
-                                setStatus(undefined);
-                              }
-                            }}
-                            className="h-8 text-xs px-3"
-                          >
-                            Stop
-                          </Button>
-                        )}
-                        <Button
-                          type="submit"
-                          size="sm"
-                          disabled={
-                            !inputValue.trim() ||
-                            !hasApiKey ||
-                            status === "streaming"
-                          }
-                          className="h-8 text-xs px-4"
+                    </PromptInputBody>
+                    <PromptInputFooter>
+                      <PromptInputTools>
+                        <PromptInputModelSelect
+                          value={selectedModel}
+                          onValueChange={setSelectedModel}
                         >
-                          {status === "streaming" ? "Sending..." : "Send"}
-                        </Button>
-                      </div>
-                    </div>
-                  </form>
+                          <PromptInputModelSelectTrigger>
+                            <PromptInputModelSelectValue />
+                          </PromptInputModelSelectTrigger>
+                          <PromptInputModelSelectContent>
+                            {AI_MODELS.map((model) => (
+                              <PromptInputModelSelectItem
+                                key={model.id}
+                                value={model.id}
+                              >
+                                {model.name}
+                              </PromptInputModelSelectItem>
+                            ))}
+                          </PromptInputModelSelectContent>
+                        </PromptInputModelSelect>
+                      </PromptInputTools>
+                      <PromptInputSubmit
+                        disabled={!inputValue.trim() || !hasApiKey || status === "streaming"}
+                        status={status}
+                      />
+                    </PromptInputFooter>
+                  </PromptInput>
                 </div>
               </div>
             </div>

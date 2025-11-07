@@ -86,6 +86,15 @@ export const tools: Tool[] = [
     href: "/tools/chat",
   },
   {
+    id: "ai-elements-showcase",
+    name: "AI Elements Showcase",
+    description:
+      "Interactive demo of all AI Elements components with variants, attachments, and features.",
+    icon: Sparkles,
+    category: "General",
+    href: "/tools/ai-elements-showcase",
+  },
+  {
     id: "regex",
     name: "Regex Generator",
     description: "Generate and test regular expressions with explanations.",

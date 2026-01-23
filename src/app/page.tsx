@@ -303,19 +303,6 @@ function ChatPageContent() {
     []
   );
 
-  if (!hasApiKey) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold">API Key Required</h2>
-          <p className="text-muted-foreground">
-            Please add your API key to start chatting
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-screen flex-col">
       {/* Top Bar */}
@@ -396,10 +383,21 @@ function ChatPageContent() {
             {messages.length === 0 ? (
               <ConversationEmptyState>
                 <div className="text-center space-y-4">
-                  <h2 className="text-2xl font-bold">Start a conversation</h2>
-                  <p className="text-muted-foreground">
-                    Choose a model and type your message below
-                  </p>
+                  {!hasApiKey ? (
+                    <>
+                      <h2 className="text-2xl font-bold">API Key Required</h2>
+                      <p className="text-muted-foreground">
+                        Click on "Configure API Key" in the sidebar to add your API key
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-2xl font-bold">Start a conversation</h2>
+                      <p className="text-muted-foreground">
+                        Choose a model and type your message below
+                      </p>
+                    </>
+                  )}
                 </div>
               </ConversationEmptyState>
             ) : (
@@ -425,8 +423,9 @@ function ChatPageContent() {
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={hasApiKey ? "Type your message..." : "Configure your API key first..."}
                 className="min-h-[60px] resize-none"
+                disabled={!hasApiKey}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -448,6 +447,7 @@ function ChatPageContent() {
                 variant="ghost"
                 size="icon"
                 onClick={() => fileInputRef.current?.click()}
+                disabled={!hasApiKey}
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
@@ -458,6 +458,7 @@ function ChatPageContent() {
                   size="icon"
                   onClick={toggleRecording}
                   className={isRecording ? "text-red-500" : ""}
+                  disabled={!hasApiKey}
                 >
                   {isRecording ? (
                     <MicOff className="h-4 w-4" />
@@ -466,7 +467,7 @@ function ChatPageContent() {
                   )}
                 </Button>
               )}
-              <Button type="submit" disabled={isLoading || !input.trim()}>
+              <Button type="submit" disabled={!hasApiKey || isLoading || !input.trim()}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>

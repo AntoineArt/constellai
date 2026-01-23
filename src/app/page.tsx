@@ -5,6 +5,8 @@ import { nanoid } from "nanoid";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+export const dynamic = "force-dynamic";
+
 import {
   Conversation,
   ConversationContent,

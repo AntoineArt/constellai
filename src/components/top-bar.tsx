@@ -1,11 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
 import { Key, Settings } from "lucide-react";
-
-import { useApiKey } from "@/hooks/use-api-key";
-import { AI_MODELS } from "@/lib/models";
-
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,16 +12,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useApiKey } from "@/hooks/use-api-key";
+import { AI_MODELS } from "@/lib/models";
 
 interface TopBarProps {
   title: string;
   actions?: React.ReactNode;
 }
 
-export function TopBar({
-  title,
-  actions,
-}: TopBarProps) {
+export function TopBar({ title, actions }: TopBarProps) {
   const { apiKey, setApiKey, hasApiKey } = useApiKey();
   const [tempApiKey, setTempApiKey] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -101,7 +96,9 @@ export function TopBar({
   return (
     <div className="h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-full items-center justify-between gap-2 sm:gap-3 overflow-hidden">
-        <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate min-w-0">{title}</h1>
+        <h1 className="text-base sm:text-lg md:text-xl font-semibold truncate min-w-0">
+          {title}
+        </h1>
 
         <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0 flex-wrap">
           {actions}

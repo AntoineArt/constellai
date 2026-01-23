@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
 import { TopBar } from "@/components/top-bar";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { tools } from "@/lib/tools";
 
 export default function Hub() {

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { UserPreferences } from "../types";
+import { useCallback, useEffect, useState } from "react";
 import { getUserPreferences, saveUserPreferences } from "../storage-utils";
+import type { UserPreferences } from "../types";
 
 export default function usePreferences() {
   const [preferences, setPreferences] = useState<UserPreferences>(

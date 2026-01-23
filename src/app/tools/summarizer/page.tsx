@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { FileText, Sparkles, Copy, CheckCircle2 } from "lucide-react";
-
-import { TopBar } from "@/components/top-bar";
+import { CheckCircle2, Copy, FileText, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Response } from "@/components/ai-elements/response";
 import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
+import { TopBar } from "@/components/top-bar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -22,10 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 import { useApiKey } from "@/hooks/use-api-key";
-import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
-import { Response } from "@/components/ai-elements/response";
+import { TOOL_IDS, usePreferences, useToolHistory } from "@/lib/storage";
 
 const summaryTypes = [
   {
@@ -110,7 +109,18 @@ export default function SummarizerPage() {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [debouncedInputs.text, debouncedInputs.summaryType, selectedModel]);
+  }, [
+    debouncedInputs.text,
+    debouncedInputs.summaryType,
+    selectedModel,
+    debouncedInputs,
+    inputText,
+    summaryType,
+    toolHistory.createNewExecution,
+    toolHistory.currentExecution,
+    toolHistory.isLoaded,
+    toolHistory.updateCurrentExecution,
+  ]);
 
   const handleSummarize = async () => {
     if (!inputText.trim() || !hasApiKey) return;
@@ -172,9 +182,9 @@ export default function SummarizerPage() {
     }
   };
 
-  const generateMockSummary = (text: string, type: string): string => {
+  const _generateMockSummary = (text: string, type: string): string => {
     const wordCount = text.split(/\s+/).length;
-    const selectedSummaryType = summaryTypes.find((t) => t.id === type);
+    const _selectedSummaryType = summaryTypes.find((t) => t.id === type);
 
     switch (type) {
       case "brief":
@@ -205,7 +215,7 @@ export default function SummarizerPage() {
     .filter((word) => word.length > 0).length;
   const charCount = inputText.length;
 
-  const toolActions = (
+  const _toolActions = (
     <div className="flex items-center gap-2">
       <Select value={selectedModel} onValueChange={setSelectedModel}>
         <SelectTrigger className="w-[160px]">
@@ -259,9 +269,7 @@ export default function SummarizerPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar
-          title="Text Summarizer"
-        />
+        <TopBar title="Text Summarizer" />
 
         <div className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">

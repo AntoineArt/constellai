@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   getPinnedTools,
+  isToolPinned,
   pinTool,
   unpinTool,
-  isToolPinned,
 } from "../storage-utils";
 
 export default function usePinnedTools() {

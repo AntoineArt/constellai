@@ -1,5 +1,5 @@
-import type { UserData, UserPreferences, ToolExecution } from "./types";
-import { STORAGE_KEYS, DEFAULT_PREFERENCES } from "./storage-keys";
+import { DEFAULT_PREFERENCES, STORAGE_KEYS } from "./storage-keys";
+import type { ToolExecution, UserPreferences } from "./types";
 
 // Safe localStorage operations with fallback to memory
 class SafeStorage {
@@ -204,7 +204,7 @@ export async function generateExecutionTitle(
   // Fallback function for when AI generation fails or no API key
   const getFallbackTitle = () => {
     switch (toolId) {
-      case "chat":
+      case "chat": {
         const messages = inputs.messages as any[];
         const firstUserMessage = messages?.find(
           (m) => m.role === "user"
@@ -216,18 +216,21 @@ export async function generateExecutionTitle(
           );
         }
         return `Chat ${timestamp}`;
+      }
 
-      case "regex":
+      case "regex": {
         const description = inputs.description as string;
         return (
           description?.slice(0, 50) + (description?.length > 50 ? "..." : "") ||
           `Regex ${timestamp}`
         );
+      }
 
-      case "summarizer":
+      case "summarizer": {
         const text = inputs.text as string;
         const preview = text?.slice(0, 30) + (text?.length > 30 ? "..." : "");
         return `Summary: ${preview}` || `Summary ${timestamp}`;
+      }
 
       default:
         return `${toolId} ${timestamp}`;
@@ -286,22 +289,25 @@ export function hasContentForAITitle(
   outputs?: Record<string, any>
 ): boolean {
   switch (toolId) {
-    case "chat":
+    case "chat": {
       const messages = inputs.messages as any[];
       return (
         messages &&
         messages.length > 0 &&
         messages.some((m) => m.role === "user" && m.content?.trim())
       );
-    case "regex":
+    }
+    case "regex": {
       const description = inputs.description as string;
       return !!(description && description.trim().length > 0);
-    case "summarizer":
+    }
+    case "summarizer": {
       const text = inputs.text as string;
       return (
         (text && text.trim().length > 0) ||
         (outputs?.summary && outputs.summary.length > 0)
       );
+    }
     default:
       return Object.keys(inputs).some(
         (key) =>
@@ -320,7 +326,7 @@ export function generateExecutionTitleSync(
   const timestamp = new Date().toLocaleString();
 
   switch (toolId) {
-    case "chat":
+    case "chat": {
       const messages = inputs.messages as any[];
       const firstUserMessage = messages?.find(
         (m) => m.role === "user"
@@ -332,18 +338,21 @@ export function generateExecutionTitleSync(
         );
       }
       return `Chat ${timestamp}`;
+    }
 
-    case "regex":
+    case "regex": {
       const description = inputs.description as string;
       return (
         description?.slice(0, 50) + (description?.length > 50 ? "..." : "") ||
         `Regex ${timestamp}`
       );
+    }
 
-    case "summarizer":
+    case "summarizer": {
       const text = inputs.text as string;
       const preview = text?.slice(0, 30) + (text?.length > 30 ? "..." : "");
       return `Summary: ${preview}` || `Summary ${timestamp}`;
+    }
 
     default:
       return `${toolId} ${timestamp}`;

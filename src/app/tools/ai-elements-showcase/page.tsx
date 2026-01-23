@@ -1,40 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import type { ChatStatus } from "ai";
 import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-  ConversationEmptyState,
-} from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageAvatar,
-} from "@/components/ai-elements/message";
-import { Response } from "@/components/ai-elements/response";
-import {
-  PromptInput,
-  PromptInputBody,
-  PromptInputTextarea,
-  PromptInputFooter,
-  PromptInputTools,
-  PromptInputSubmit,
-  PromptInputButton,
-  PromptInputModelSelect,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputHeader,
-  PromptInputAttachments,
-  PromptInputAttachment,
-  PromptInputActionMenu,
-  PromptInputActionMenuTrigger,
-  PromptInputActionMenuContent,
-  PromptInputActionAddAttachments,
-  type PromptInputMessage,
-} from "@/components/ai-elements/prompt-input";
+  Code,
+  Image as ImageIcon,
+  MessageSquare,
+  Sparkles,
+} from "lucide-react";
+import { nanoid } from "nanoid";
+import { useCallback, useState } from "react";
 import {
   Branch,
   BranchMessages,
@@ -43,29 +17,59 @@ import {
   BranchPrevious,
   BranchSelector,
 } from "@/components/ai-elements/branch";
+import { CodeBlock } from "@/components/ai-elements/code-block";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import { Loader } from "@/components/ai-elements/loader";
+import {
+  Message,
+  MessageAvatar,
+  MessageContent,
+} from "@/components/ai-elements/message";
+import {
+  PromptInput,
+  PromptInputActionAddAttachments,
+  PromptInputActionMenu,
+  PromptInputActionMenuContent,
+  PromptInputActionMenuTrigger,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputBody,
+  PromptInputFooter,
+  PromptInputHeader,
+  type PromptInputMessage,
+  PromptInputModelSelect,
+  PromptInputModelSelectContent,
+  PromptInputModelSelectItem,
+  PromptInputModelSelectTrigger,
+  PromptInputModelSelectValue,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputTools,
+} from "@/components/ai-elements/prompt-input";
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
+import { Response } from "@/components/ai-elements/response";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import {
+  Source,
   Sources,
   SourcesContent,
   SourcesTrigger,
-  Source,
 } from "@/components/ai-elements/sources";
-import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
-import { Loader } from "@/components/ai-elements/loader";
-import { CodeBlock } from "@/components/ai-elements/code-block";
-import { Shimmer } from "@/components/ai-elements/shimmer";
-import { AI_MODELS } from "@/lib/models";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sparkles, MessageSquare, Code, Image as ImageIcon } from "lucide-react";
-import type { ChatStatus } from "ai";
-import { nanoid } from "nanoid";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AI_MODELS } from "@/lib/models";
 
 interface MessageType {
   id: string;
@@ -285,10 +289,7 @@ Try switching between versions using the controls!`,
                   )}
 
                   {messages.map((message) => (
-                    <Branch
-                      key={message.id}
-                      defaultBranch={0}
-                    >
+                    <Branch key={message.id} defaultBranch={0}>
                       <BranchMessages>
                         {message.versions ? (
                           message.versions.map((version) => (
@@ -486,7 +487,10 @@ Try switching between versions using the controls!`,
                     <p className="text-muted-foreground text-sm mb-3">
                       Beautiful code blocks with language detection
                     </p>
-                    <CodeBlock code="const hello = 'world';" language="typescript" />
+                    <CodeBlock
+                      code="const hello = 'world';"
+                      language="typescript"
+                    />
                   </CardContent>
                 </Card>
 
@@ -538,7 +542,9 @@ Try switching between versions using the controls!`,
                     <h2 className="font-semibold text-2xl">Message Variants</h2>
                     <div className="flex gap-2">
                       <Button
-                        variant={variant === "contained" ? "default" : "outline"}
+                        variant={
+                          variant === "contained" ? "default" : "outline"
+                        }
                         onClick={() => setVariant("contained")}
                         size="sm"
                       >

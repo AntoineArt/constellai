@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  Home,
-  Search,
-  Pin,
-  PinOff,
   ChevronDown,
   ChevronRight,
+  Home,
+  Pin,
+  PinOff,
+  Search,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,14 +20,14 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuAction,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { usePinnedTools } from "@/lib/storage";
 import { tools } from "@/lib/tools";
 import { cn } from "@/lib/utils";
-import { usePinnedTools } from "@/lib/storage";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -38,7 +38,7 @@ export function AppSidebar() {
 
   // Get current tool from pathname
   const getCurrentToolId = () => {
-    const match = pathname.match(/^\/tools\/([^\/]+)/);
+    const match = pathname.match(/^\/tools\/([^/]+)/);
     return match?.[1] || null;
   };
 

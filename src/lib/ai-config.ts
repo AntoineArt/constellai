@@ -1,3 +1,4 @@
+import { createGateway } from "@ai-sdk/gateway";
 import { DEFAULT_API_MODEL, getModelById } from "./models";
 
 export function getApiKeyFromHeaders(headers: Headers): string | null {
@@ -21,4 +22,12 @@ export function getModelFromRequest(
   }
 
   return fallback;
+}
+
+export function createGatewayModel(modelId: string, apiKey: string) {
+  const gateway = createGateway({
+    apiKey,
+  });
+
+  return gateway.languageModel(modelId);
 }

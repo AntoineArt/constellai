@@ -1,9 +1,10 @@
 "use client";
 
+import { DefaultChatTransport } from "ai";
+import { useChat } from "@ai-sdk/react";
 import { Mic, MicOff, Paperclip, Send, Settings, Trash2 } from "lucide-react";
-import { nanoid } from "nanoid";
-import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import {
   Conversation,
@@ -27,10 +28,11 @@ import { useApiKey } from "@/hooks/use-api-key";
 import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
 
-interface ChatMessage {
-  id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
+function getTextContent(message: any): string {
+  return message.parts
+    ?.filter((part: any) => part.type === "text")
+    .map((part: any) => part.text)
+    .join("") || "";
 }
 
 function ChatPageContent() {
@@ -44,7 +46,7 @@ function ChatPageContent() {
     createConversation,
     loadConversation,
     updateConversation,
-    addMessage,
+    addMessage: addMessageToStorage,
   } = useConversations(preferences.defaultModel);
 
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
@@ -52,11 +54,47 @@ function ChatPageContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const {
+    messages,
+    sendMessage,
+    status,
+    setMessages,
+  } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
+      body: {
+        model: selectedModel,
+        temperature,
+      },
+    }),
+    onFinish: ({ message }) => {
+      if (activeConversation) {
+        const textContent = getTextContent(message);
+
+        addMessageToStorage(activeConversation.id, {
+          role: message.role as "user" | "assistant",
+          content: textContent,
+          createdAt: Date.now(),
+        });
+
+        // Generate title if first message
+        if (activeConversation.messages.length === 0) {
+          generateTitle(activeConversation.id, textContent);
+        }
+      }
+    },
+    onError: (err) => {
+      console.error("Chat API error:", err);
+    },
+  });
+
+  const isLoading = status === "streaming" || status === "submitted";
 
   // Load conversation from URL
   useEffect(() => {
@@ -70,11 +108,12 @@ function ChatPageContent() {
             id: m.id,
             role: m.role,
             content: m.content,
+            parts: [{ type: "text" as const, text: m.content }],
           }))
         );
       }
     }
-  }, [conversationId, conversations, loadConversation]);
+  }, [conversationId, conversations, loadConversation, setMessages]);
 
   // Create conversation if none exists
   useEffect(() => {
@@ -114,119 +153,16 @@ function ChatPageContent() {
   };
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!input.trim() || !activeConversation || isLoading) return;
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
+      if (!input.trim() || !hasApiKey || isLoading) return;
 
-      const userMessage: ChatMessage = {
-        id: nanoid(),
-        role: "user",
-        content: input,
-      };
-
-      // Add user message to UI
-      setMessages((prev) => [...prev, userMessage]);
+      const userMessage = input.trim();
       setInput("");
-      setIsLoading(true);
 
-      // Save user message to conversation
-      addMessage(activeConversation.id, {
-        role: "user",
-        content: input,
-        createdAt: Date.now(),
-      });
-
-      try {
-        abortControllerRef.current = new AbortController();
-
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": apiKey || "",
-          },
-          body: JSON.stringify({
-            messages: [...messages, userMessage].map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-            model: selectedModel,
-            temperature,
-          }),
-          signal: abortControllerRef.current.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to get response");
-        }
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        let assistantContent = "";
-        const assistantMessageId = nanoid();
-
-        // Add empty assistant message
-        setMessages((prev) => [
-          ...prev,
-          { id: assistantMessageId, role: "assistant", content: "" },
-        ]);
-
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value);
-            const lines = chunk.split("\n");
-
-            for (const line of lines) {
-              if (line.startsWith("0:")) {
-                const text = line.substring(2);
-                assistantContent += text;
-
-                // Update assistant message in UI
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMessageId
-                      ? { ...m, content: assistantContent }
-                      : m
-                  )
-                );
-              }
-            }
-          }
-        }
-
-        // Save assistant message to conversation
-        addMessage(activeConversation.id, {
-          role: "assistant",
-          content: assistantContent,
-          createdAt: Date.now(),
-        });
-
-        // Generate title if first message
-        if (activeConversation.messages.length === 0) {
-          generateTitle(activeConversation.id, assistantContent);
-        }
-      } catch (error: any) {
-        if (error.name !== "AbortError") {
-          console.error("Chat error:", error);
-        }
-      } finally {
-        setIsLoading(false);
-        abortControllerRef.current = null;
-      }
+      await sendMessage({ text: userMessage });
     },
-    [
-      input,
-      activeConversation,
-      isLoading,
-      messages,
-      apiKey,
-      selectedModel,
-      temperature,
-      addMessage,
-    ]
+    [input, hasApiKey, isLoading, sendMessage]
   );
 
   const handleClearChat = useCallback(() => {
@@ -238,7 +174,7 @@ function ChatPageContent() {
       setMessages([]);
     }
     window.location.href = "/";
-  }, [activeConversation, updateConversation]);
+  }, [activeConversation, updateConversation, setMessages]);
 
   // Voice input setup
   useEffect(() => {
@@ -387,12 +323,15 @@ function ChatPageContent() {
                     <>
                       <h2 className="text-2xl font-bold">API Key Required</h2>
                       <p className="text-muted-foreground">
-                        Click on "Configure API Key" in the sidebar to add your API key
+                        Click on "Configure API Key" in the sidebar to add your
+                        API key
                       </p>
                     </>
                   ) : (
                     <>
-                      <h2 className="text-2xl font-bold">Start a conversation</h2>
+                      <h2 className="text-2xl font-bold">
+                        Start a conversation
+                      </h2>
                       <p className="text-muted-foreground">
                         Choose a model and type your message below
                       </p>
@@ -404,9 +343,9 @@ function ChatPageContent() {
               messages.map((message) => (
                 <Message key={message.id} from={message.role}>
                   {message.role === "assistant" ? (
-                    <Response>{message.content}</Response>
+                    <Response>{getTextContent(message)}</Response>
                   ) : (
-                    <MessageContent>{message.content}</MessageContent>
+                    <MessageContent>{getTextContent(message)}</MessageContent>
                   )}
                 </Message>
               ))
@@ -423,13 +362,17 @@ function ChatPageContent() {
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={hasApiKey ? "Type your message..." : "Configure your API key first..."}
+                placeholder={
+                  hasApiKey
+                    ? "Type your message..."
+                    : "Configure your API key first..."
+                }
                 className="min-h-[60px] resize-none"
                 disabled={!hasApiKey}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    handleSubmit(e);
+                    handleSubmit();
                   }
                 }}
               />
@@ -467,7 +410,10 @@ function ChatPageContent() {
                   )}
                 </Button>
               )}
-              <Button type="submit" disabled={!hasApiKey || isLoading || !input.trim()}>
+              <Button
+                type="submit"
+                disabled={!hasApiKey || isLoading || !input.trim()}
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
@@ -480,7 +426,13 @@ function ChatPageContent() {
 
 export default function ChatPage() {
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
       <ChatPageContent />
     </Suspense>
   );

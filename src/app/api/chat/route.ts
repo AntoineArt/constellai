@@ -1,5 +1,9 @@
 import { streamText } from "ai";
-import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
+import {
+  createGatewayModel,
+  getApiKeyFromHeaders,
+  getModelFromRequest,
+} from "@/lib/ai-config";
 
 export const maxDuration = 30;
 
@@ -14,12 +18,11 @@ export async function POST(req: Request) {
       });
     }
 
-    // Set the API key as environment variable for this request
-    process.env.AI_GATEWAY_API_KEY = apiKey;
-
     const body = await req.json();
     const { messages, temperature = 0.7 } = body;
-    const model = getModelFromRequest(body);
+    const modelId = getModelFromRequest(body);
+
+    const model = createGatewayModel(modelId, apiKey);
 
     const result = streamText({
       model,

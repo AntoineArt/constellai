@@ -1,6 +1,5 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
 import { Mic, MicOff, Paperclip, Send, Settings, Trash2 } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useSearchParams } from "next/navigation";
@@ -12,23 +11,6 @@ import {
   ConversationEmptyState,
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
-import {
-  PromptInput,
-  PromptInputAttachment,
-  PromptInputAttachments,
-  PromptInputBody,
-  PromptInputFooter,
-  PromptInputHeader,
-  type PromptInputMessage,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
-  PromptInputSubmit,
-  PromptInputTextarea,
-  PromptInputTools,
-} from "@/components/ai-elements/prompt-input";
 import { Response } from "@/components/ai-elements/response";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,9 +21,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { useApiKey } from "@/hooks/use-api-key";
-import { AI_MODELS, getModelsByProvider, getProviders } from "@/lib/models";
+import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
+
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+}
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
@@ -59,12 +48,14 @@ export default function ChatPage() {
 
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
   const [temperature, setTemperature] = useState(0.7);
-  const [attachments, setAttachments] = useState<PromptInputMessage[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState("");
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Load conversation from URL
   useEffect(() => {
@@ -73,6 +64,13 @@ export default function ChatPage() {
       if (conv) {
         loadConversation(conversationId);
         setSelectedModel(conv.model);
+        setMessages(
+          conv.messages.map((m) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+          }))
+        );
       }
     }
   }, [conversationId, conversations, loadConversation]);
@@ -89,33 +87,6 @@ export default function ChatPage() {
     createConversation,
     selectedModel,
   ]);
-
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: "/api/chat",
-      headers: {
-        "x-api-key": apiKey || "",
-      },
-      body: {
-        model: selectedModel,
-        temperature,
-      },
-      onFinish: (message) => {
-        if (activeConversation) {
-          // Save assistant message
-          addMessage(activeConversation.id, {
-            role: "assistant",
-            content: message.content,
-            createdAt: Date.now(),
-          });
-
-          // Generate title if first message
-          if (activeConversation.messages.length === 0) {
-            generateTitle(activeConversation.id, message.content);
-          }
-        }
-      },
-    });
 
   const generateTitle = async (convId: string, content: string) => {
     try {
@@ -141,21 +112,120 @@ export default function ChatPage() {
     }
   };
 
-  const handleFormSubmit = useCallback(
-    (e: React.FormEvent) => {
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!input.trim() || !activeConversation) return;
+      if (!input.trim() || !activeConversation || isLoading) return;
 
-      // Save user message
+      const userMessage: ChatMessage = {
+        id: nanoid(),
+        role: "user",
+        content: input,
+      };
+
+      // Add user message to UI
+      setMessages((prev) => [...prev, userMessage]);
+      setInput("");
+      setIsLoading(true);
+
+      // Save user message to conversation
       addMessage(activeConversation.id, {
         role: "user",
         content: input,
         createdAt: Date.now(),
       });
 
-      handleSubmit(e);
+      try {
+        abortControllerRef.current = new AbortController();
+
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey || "",
+          },
+          body: JSON.stringify({
+            messages: [...messages, userMessage].map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            model: selectedModel,
+            temperature,
+          }),
+          signal: abortControllerRef.current.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to get response");
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let assistantContent = "";
+        const assistantMessageId = nanoid();
+
+        // Add empty assistant message
+        setMessages((prev) => [
+          ...prev,
+          { id: assistantMessageId, role: "assistant", content: "" },
+        ]);
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split("\n");
+
+            for (const line of lines) {
+              if (line.startsWith("0:")) {
+                const text = line.substring(2);
+                assistantContent += text;
+
+                // Update assistant message in UI
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantMessageId
+                      ? { ...m, content: assistantContent }
+                      : m
+                  )
+                );
+              }
+            }
+          }
+        }
+
+        // Save assistant message to conversation
+        addMessage(activeConversation.id, {
+          role: "assistant",
+          content: assistantContent,
+          createdAt: Date.now(),
+        });
+
+        // Generate title if first message
+        if (activeConversation.messages.length === 0) {
+          generateTitle(activeConversation.id, assistantContent);
+        }
+      } catch (error: any) {
+        if (error.name !== "AbortError") {
+          console.error("Chat error:", error);
+        }
+      } finally {
+        setIsLoading(false);
+        abortControllerRef.current = null;
+      }
     },
-    [input, activeConversation, addMessage, handleSubmit]
+    [
+      input,
+      activeConversation,
+      isLoading,
+      messages,
+      apiKey,
+      selectedModel,
+      temperature,
+      addMessage,
+    ]
   );
 
   const handleClearChat = useCallback(() => {
@@ -164,6 +234,7 @@ export default function ChatPage() {
         messages: [],
         title: "New Conversation",
       });
+      setMessages([]);
     }
     window.location.href = "/";
   }, [activeConversation, updateConversation]);
@@ -182,23 +253,17 @@ export default function ChatPage() {
         recognitionRef.current.lang = preferences.voiceLanguage || "en-US";
 
         recognitionRef.current.onresult = (event: any) => {
-          let _interimTranscript = "";
           let finalTranscript = "";
 
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
               finalTranscript += `${transcript} `;
-            } else {
-              _interimTranscript += transcript;
             }
           }
 
           if (finalTranscript) {
-            setTranscript((prev) => prev + finalTranscript);
-            handleInputChange({
-              target: { value: transcript + finalTranscript },
-            } as any);
+            setInput((prev) => prev + finalTranscript);
           }
         };
 
@@ -214,12 +279,7 @@ export default function ChatPage() {
         recognitionRef.current.stop();
       }
     };
-  }, [
-    preferences.voiceEnabled,
-    preferences.voiceLanguage,
-    handleInputChange,
-    transcript,
-  ]);
+  }, [preferences.voiceEnabled, preferences.voiceLanguage]);
 
   const toggleRecording = useCallback(() => {
     if (!recognitionRef.current) return;
@@ -228,7 +288,6 @@ export default function ChatPage() {
       recognitionRef.current.stop();
       setIsRecording(false);
     } else {
-      setTranscript("");
       recognitionRef.current.start();
       setIsRecording(true);
     }
@@ -237,26 +296,11 @@ export default function ChatPage() {
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []);
-      const newAttachments: PromptInputMessage[] = files.map((file) => ({
-        id: nanoid(),
-        role: "user" as const,
-        content: [
-          {
-            type: "file" as const,
-            data: URL.createObjectURL(file),
-            mimeType: file.type,
-          },
-        ],
-      }));
-
-      setAttachments((prev) => [...prev, ...newAttachments]);
+      console.log("Files selected:", files);
+      // TODO: Implement file attachment handling
     },
     []
   );
-
-  const removeAttachment = useCallback((id: string) => {
-    setAttachments((prev) => prev.filter((a) => a.id !== id));
-  }, []);
 
   if (!hasApiKey) {
     return (
@@ -358,7 +402,7 @@ export default function ChatPage() {
               </ConversationEmptyState>
             ) : (
               messages.map((message) => (
-                <Message key={message.id} role={message.role}>
+                <Message key={message.id} from={message.role}>
                   {message.role === "assistant" ? (
                     <Response>{message.content}</Response>
                   ) : (
@@ -373,86 +417,58 @@ export default function ChatPage() {
 
       {/* Input Area */}
       <div className="border-t bg-background p-4">
-        <form onSubmit={handleFormSubmit}>
-          <PromptInput>
-            <PromptInputHeader>
-              <PromptInputModelSelect value={selectedModel}>
-                <PromptInputModelSelectTrigger>
-                  <PromptInputModelSelectValue />
-                </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  {AI_MODELS.map((model) => (
-                    <PromptInputModelSelectItem
-                      key={model.id}
-                      value={model.id}
-                      onClick={() => setSelectedModel(model.id)}
-                    >
-                      {model.name}
-                    </PromptInputModelSelectItem>
-                  ))}
-                </PromptInputModelSelectContent>
-              </PromptInputModelSelect>
-            </PromptInputHeader>
-
-            {attachments.length > 0 && (
-              <PromptInputAttachments>
-                {attachments.map((attachment) => (
-                  <PromptInputAttachment
-                    key={attachment.id}
-                    onRemove={() => removeAttachment(attachment.id)}
-                  >
-                    {attachment.content[0].type}
-                  </PromptInputAttachment>
-                ))}
-              </PromptInputAttachments>
-            )}
-
-            <PromptInputBody>
-              <PromptInputTextarea
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <Textarea
                 value={input}
-                onChange={handleInputChange}
+                onChange={(e) => setInput(e.target.value)}
                 placeholder="Type your message..."
+                className="min-h-[60px] resize-none"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
               />
-            </PromptInputBody>
-
-            <PromptInputFooter>
-              <PromptInputTools>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
+            </div>
+            <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              {preferences.voiceEnabled && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={toggleRecording}
+                  className={isRecording ? "text-red-500" : ""}
                 >
-                  <Paperclip className="h-4 w-4" />
+                  {isRecording ? (
+                    <MicOff className="h-4 w-4" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
                 </Button>
-                {preferences.voiceEnabled && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleRecording}
-                    className={isRecording ? "text-red-500" : ""}
-                  >
-                    {isRecording ? (
-                      <MicOff className="h-4 w-4" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                  </Button>
-                )}
-              </PromptInputTools>
-              <PromptInputSubmit disabled={isLoading || !input.trim()}>
+              )}
+              <Button type="submit" disabled={isLoading || !input.trim()}>
                 <Send className="h-4 w-4" />
-              </PromptInputSubmit>
-            </PromptInputFooter>
-          </PromptInput>
+              </Button>
+            </div>
+          </div>
         </form>
       </div>
     </div>

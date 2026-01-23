@@ -25,29 +25,9 @@ export default function usePreferences() {
     [preferences]
   );
 
-  const updateToolSettings = useCallback(
-    (toolId: string, settings: Record<string, any>) => {
-      const newToolSettings = {
-        ...preferences.toolSettings,
-        [toolId]: settings,
-      };
-      updatePreferences({ toolSettings: newToolSettings });
-    },
-    [preferences.toolSettings, updatePreferences]
-  );
-
-  const getToolSettings = useCallback(
-    (toolId: string) => {
-      return preferences.toolSettings[toolId] || {};
-    },
-    [preferences.toolSettings]
-  );
-
   return {
     preferences,
     updatePreferences,
-    updateToolSettings,
-    getToolSettings,
     isLoaded,
   };
 }

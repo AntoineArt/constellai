@@ -114,9 +114,7 @@ export function useConversations(
     (id: string, updates: Partial<Omit<Conversation, "id">>) => {
       setConversations((prev) =>
         prev.map((c) =>
-          c.id === id
-            ? { ...c, ...updates, updatedAt: Date.now() }
-            : c
+          c.id === id ? { ...c, ...updates, updatedAt: Date.now() } : c
         )
       );
     },

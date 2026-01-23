@@ -12,7 +12,14 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Sidebar,
   SidebarContent,
@@ -26,14 +33,6 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { useConversations } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
@@ -117,9 +116,7 @@ export function AppSidebar() {
                       loadConversation(conversation.id);
                       router.push(`/?id=${conversation.id}`);
                     }}
-                    onPin={(pinned) =>
-                      pinConversation(conversation.id, pinned)
-                    }
+                    onPin={(pinned) => pinConversation(conversation.id, pinned)}
                     onDelete={() => deleteConversation(conversation.id)}
                   />
                 ))}
@@ -146,9 +143,7 @@ export function AppSidebar() {
                       loadConversation(conversation.id);
                       router.push(`/?id=${conversation.id}`);
                     }}
-                    onPin={(pinned) =>
-                      pinConversation(conversation.id, pinned)
-                    }
+                    onPin={(pinned) => pinConversation(conversation.id, pinned)}
                     onDelete={() => deleteConversation(conversation.id)}
                   />
                 ))

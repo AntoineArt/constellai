@@ -42,7 +42,6 @@ import { Slider } from "@/components/ui/slider";
 import { useApiKey } from "@/hooks/use-api-key";
 import { AI_MODELS, getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
-import type { Attachment as StorageAttachment } from "@/lib/storage/types";
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
@@ -83,9 +82,15 @@ export default function ChatPage() {
     if (!activeConversation && !conversationId && hasApiKey) {
       createConversation(selectedModel);
     }
-  }, [activeConversation, conversationId, hasApiKey, createConversation, selectedModel]);
+  }, [
+    activeConversation,
+    conversationId,
+    hasApiKey,
+    createConversation,
+    selectedModel,
+  ]);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, stop } =
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
       api: "/api/chat",
       headers: {
@@ -177,15 +182,15 @@ export default function ChatPage() {
         recognitionRef.current.lang = preferences.voiceLanguage || "en-US";
 
         recognitionRef.current.onresult = (event: any) => {
-          let interimTranscript = "";
+          let _interimTranscript = "";
           let finalTranscript = "";
 
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              finalTranscript += transcript + " ";
+              finalTranscript += `${transcript} `;
             } else {
-              interimTranscript += transcript;
+              _interimTranscript += transcript;
             }
           }
 
@@ -209,7 +214,12 @@ export default function ChatPage() {
         recognitionRef.current.stop();
       }
     };
-  }, [preferences.voiceEnabled, preferences.voiceLanguage, handleInputChange]);
+  }, [
+    preferences.voiceEnabled,
+    preferences.voiceLanguage,
+    handleInputChange,
+    transcript,
+  ]);
 
   const toggleRecording = useCallback(() => {
     if (!recognitionRef.current) return;
@@ -304,16 +314,15 @@ export default function ChatPage() {
         {showSettings && (
           <div className="border-t p-4 space-y-4">
             <div>
-              <label className="text-sm font-medium">
+              <div className="text-sm font-medium mb-2">
                 Temperature: {temperature}
-              </label>
+              </div>
               <Slider
                 value={[temperature]}
                 onValueChange={([value]) => setTemperature(value)}
                 min={0}
                 max={2}
                 step={0.1}
-                className="mt-2"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -348,8 +357,8 @@ export default function ChatPage() {
                 </div>
               </ConversationEmptyState>
             ) : (
-              messages.map((message, index) => (
-                <Message key={index} role={message.role}>
+              messages.map((message) => (
+                <Message key={message.id} role={message.role}>
                   {message.role === "assistant" ? (
                     <Response>{message.content}</Response>
                   ) : (

@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  Key,
   MessageSquare,
   MoreVertical,
   Pin,
   PinOff,
   Plus,
   Search,
+  Settings,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
@@ -14,15 +16,26 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -33,6 +46,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useApiKey } from "@/hooks/use-api-key";
 import { useConversations } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
@@ -46,11 +60,25 @@ export function AppSidebar() {
     deleteConversation,
     pinConversation,
   } = useConversations();
+  const { apiKey, setApiKey, getMaskedApiKey, hasApiKey } = useApiKey();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState("");
 
   const handleNewChat = () => {
     const newConv = createConversation();
     router.push(`/?id=${newConv.id}`);
+  };
+
+  const handleSaveApiKey = () => {
+    setApiKey(apiKeyInput);
+    setShowApiKeyDialog(false);
+    setApiKeyInput("");
+  };
+
+  const handleOpenApiKeyDialog = () => {
+    setApiKeyInput("");
+    setShowApiKeyDialog(true);
   };
 
   const filteredConversations = conversations.filter(
@@ -152,6 +180,72 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+              <DialogTrigger asChild>
+                <SidebarMenuButton onClick={handleOpenApiKeyDialog}>
+                  {hasApiKey ? (
+                    <>
+                      <Key className="h-4 w-4" />
+                      <span className="truncate">API Key: {getMaskedApiKey()}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Settings className="h-4 w-4" />
+                      <span>Configure API Key</span>
+                    </>
+                  )}
+                </SidebarMenuButton>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>API Key Configuration</DialogTitle>
+                  <DialogDescription>
+                    Enter your AI Gateway API key to use ConstellAI. Your key is
+                    stored locally in your browser.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="api-key">API Key</Label>
+                    <Input
+                      id="api-key"
+                      type="password"
+                      placeholder="Enter your API key"
+                      value={apiKeyInput}
+                      onChange={(e) => setApiKeyInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSaveApiKey();
+                        }
+                      }}
+                    />
+                  </div>
+                  {hasApiKey && (
+                    <div className="text-sm text-muted-foreground">
+                      Current key: {getMaskedApiKey()}
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowApiKeyDialog(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveApiKey} disabled={!apiKeyInput}>
+                    Save API Key
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

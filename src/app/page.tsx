@@ -3,9 +3,7 @@
 import { Mic, MicOff, Paperclip, Send, Settings, Trash2 } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-
-export const dynamic = "force-dynamic";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import {
   Conversation,
@@ -34,7 +32,7 @@ interface ChatMessage {
   content: string;
 }
 
-export default function ChatPage() {
+function ChatPageContent() {
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("id");
   const { hasApiKey, apiKey } = useApiKey();
@@ -474,5 +472,13 @@ export default function ChatPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <ChatPageContent />
+    </Suspense>
   );
 }

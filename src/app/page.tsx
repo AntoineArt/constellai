@@ -27,12 +27,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useApiKey } from "@/hooks/use-api-key";
 import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
+import type { ChatMessage, MessagePart } from "@/types/chat";
 
-function getTextContent(message: any): string {
-  return message.parts
-    ?.filter((part: any) => part.type === "text")
-    .map((part: any) => part.text)
-    .join("") || "";
+function getTextContent(message: ChatMessage): string {
+  return (
+    message.parts
+      ?.filter((part: MessagePart) => part.type === "text")
+      .map((part: MessagePart) => part.text)
+      .join("") || ""
+  );
 }
 
 function ChatPageContent() {

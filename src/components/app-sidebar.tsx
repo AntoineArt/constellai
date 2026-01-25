@@ -49,6 +49,7 @@ import {
 import { useApiKey } from "@/hooks/use-api-key";
 import { useConversations } from "@/lib/storage";
 import { cn } from "@/lib/utils";
+import type { ConversationItem } from "@/types/chat";
 
 export function AppSidebar() {
   const router = useRouter();
@@ -251,7 +252,7 @@ export function AppSidebar() {
 }
 
 interface ConversationItemProps {
-  conversation: any;
+  conversation: ConversationItem;
   isActive: boolean;
   onSelect: () => void;
   onPin: (pinned: boolean) => void;

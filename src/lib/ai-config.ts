@@ -1,6 +1,12 @@
 import { createGateway } from "@ai-sdk/gateway";
 import { DEFAULT_API_MODEL, getModelById } from "./models";
 
+interface RequestBody {
+  model?: string;
+  selectedModel?: string;
+  [key: string]: unknown;
+}
+
 export function getApiKeyFromHeaders(headers: Headers): string | null {
   return (
     headers.get("x-api-key") ||
@@ -10,7 +16,7 @@ export function getApiKeyFromHeaders(headers: Headers): string | null {
 }
 
 export function getModelFromRequest(
-  body: any,
+  body: RequestBody,
   toolSpecificDefault?: string
 ): string {
   // Priority: 1) user selection, 2) tool-specific default, 3) global default

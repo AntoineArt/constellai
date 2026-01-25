@@ -16,9 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body
-        className="font-sans antialiased h-full overflow-hidden"
-      >
+      <body className="font-sans antialiased h-full overflow-hidden">
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset className="overflow-hidden">{children}</SidebarInset>

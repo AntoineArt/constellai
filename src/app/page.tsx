@@ -60,12 +60,7 @@ function ChatPageContent() {
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const {
-    messages,
-    sendMessage,
-    status,
-    setMessages,
-  } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       headers: {

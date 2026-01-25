@@ -191,7 +191,9 @@ export function AppSidebar() {
                   {hasApiKey ? (
                     <>
                       <Key className="h-4 w-4" />
-                      <span className="truncate">API Key: {getMaskedApiKey()}</span>
+                      <span className="truncate">
+                        API Key: {getMaskedApiKey()}
+                      </span>
                     </>
                   ) : (
                     <>

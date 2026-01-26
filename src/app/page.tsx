@@ -30,12 +30,13 @@ import { useConversations, usePreferences } from "@/lib/storage";
 import type { ChatMessage, MessagePart } from "@/types/chat";
 
 function getTextContent(message: ChatMessage): string {
-  return (
-    message.parts
-      ?.filter((part: MessagePart) => part.type === "text")
-      .map((part: MessagePart) => part.text)
-      .join("") || ""
-  );
+  console.log("Getting text content from message:", message);
+  const text = message.parts
+    ?.filter((part: MessagePart) => part.type === "text")
+    .map((part: MessagePart) => part.text)
+    .join("") || "";
+  console.log("Extracted text:", text);
+  return text;
 }
 
 function ChatPageContent() {

@@ -8,12 +8,27 @@ export interface AIModel {
 }
 
 export const AI_MODELS: AIModel[] = [
+  // OpenAI GPT OSS
+  {
+    id: "openai/gpt-oss-120b",
+    name: "GPT-OSS-120B",
+    provider: "OpenAI",
+    isDefault: true,
+    contextWindow: 128000,
+    features: ["open-source", "large-context", "cost-effective"],
+  },
+  {
+    id: "openai/gpt-oss-20b",
+    name: "GPT-OSS-20B",
+    provider: "OpenAI",
+    contextWindow: 128000,
+    features: ["open-source", "fast", "cost-effective"],
+  },
   // Claude (Anthropic)
   {
     id: "anthropic/claude-opus-4.5",
     name: "Claude Opus 4.5",
     provider: "Anthropic",
-    isDefault: true,
     contextWindow: 200000,
     features: ["vision", "reasoning", "extended-context"],
   },

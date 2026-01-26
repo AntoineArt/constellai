@@ -77,9 +77,10 @@ function ChatPageContent() {
   }, [preferences.defaultModel]);
 
   // Create unique chat ID based on conversation to maintain state
+  // Include hasApiKey to force recreation when API key is added
   const chatId = useMemo(
-    () => conversationId || `chat-${Date.now()}`,
-    [conversationId]
+    () => conversationId || `chat-${hasApiKey ? 'authed' : 'noauth'}-${Date.now()}`,
+    [conversationId, hasApiKey]
   );
 
   // Recreate transport when API key or model changes

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { UserPreferences } from "../types";
+import { useCallback, useEffect, useState } from "react";
 import { getUserPreferences, saveUserPreferences } from "../storage-utils";
+import type { UserPreferences } from "../types";
 
 export default function usePreferences() {
   const [preferences, setPreferences] = useState<UserPreferences>(
@@ -25,29 +25,9 @@ export default function usePreferences() {
     [preferences]
   );
 
-  const updateToolSettings = useCallback(
-    (toolId: string, settings: Record<string, any>) => {
-      const newToolSettings = {
-        ...preferences.toolSettings,
-        [toolId]: settings,
-      };
-      updatePreferences({ toolSettings: newToolSettings });
-    },
-    [preferences.toolSettings, updatePreferences]
-  );
-
-  const getToolSettings = useCallback(
-    (toolId: string) => {
-      return preferences.toolSettings[toolId] || {};
-    },
-    [preferences.toolSettings]
-  );
-
   return {
     preferences,
     updatePreferences,
-    updateToolSettings,
-    getToolSettings,
     isLoaded,
   };
 }

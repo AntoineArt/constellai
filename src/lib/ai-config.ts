@@ -1,4 +1,11 @@
+import { createGateway } from "@ai-sdk/gateway";
 import { DEFAULT_API_MODEL, getModelById } from "./models";
+
+interface RequestBody {
+  model?: string;
+  selectedModel?: string;
+  [key: string]: unknown;
+}
 
 export function getApiKeyFromHeaders(headers: Headers): string | null {
   return (
@@ -9,7 +16,7 @@ export function getApiKeyFromHeaders(headers: Headers): string | null {
 }
 
 export function getModelFromRequest(
-  body: any,
+  body: RequestBody,
   toolSpecificDefault?: string
 ): string {
   // Priority: 1) user selection, 2) tool-specific default, 3) global default
@@ -21,4 +28,12 @@ export function getModelFromRequest(
   }
 
   return fallback;
+}
+
+export function createGatewayModel(modelId: string, apiKey: string) {
+  const gateway = createGateway({
+    apiKey,
+  });
+
+  return gateway.languageModel(modelId);
 }

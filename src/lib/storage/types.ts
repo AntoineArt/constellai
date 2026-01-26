@@ -1,27 +1,37 @@
-export interface ToolExecution {
+export interface Message {
   id: string;
-  toolId: string;
-  timestamp: number;
-  title: string; // Auto-generated or user-set
-  inputs: Record<string, any>;
-  outputs: Record<string, any>;
-  settings: Record<string, any>;
-  model?: string;
-  duration?: number;
+  role: "user" | "assistant" | "system";
+  content: string;
+  attachments?: Attachment[];
+  createdAt: number;
+}
+
+export interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url?: string;
+  data?: string; // base64 or data URL
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  messages: Message[];
+  model: string;
+  createdAt: number;
+  updatedAt: number;
+  pinned?: boolean;
 }
 
 export interface UserPreferences {
   defaultModel: string;
   theme: "light" | "dark" | "system";
   sidebarCollapsed: boolean;
-  toolSettings: Record<string, any>;
-}
-
-export interface UserData {
-  apiKey: string;
-  preferences: UserPreferences;
-  toolExecutions: ToolExecution[];
-  activeExecutions: Record<string, string>; // toolId -> executionId
+  voiceEnabled: boolean;
+  voiceLanguage: string;
+  autoSpeak: boolean;
 }
 
 export interface StorageHook<T> {
@@ -29,43 +39,4 @@ export interface StorageHook<T> {
   updateData: (updater: (prev: T) => T) => void;
   resetData: () => void;
   isLoaded: boolean;
-}
-
-// Tool-specific data structures
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  timestamp?: number;
-}
-
-export interface ChatExecution extends ToolExecution {
-  inputs: {
-    messages: ChatMessage[];
-  };
-  outputs: {
-    messages: ChatMessage[];
-  };
-}
-
-export interface RegexExecution extends ToolExecution {
-  inputs: {
-    description: string;
-    testText?: string;
-  };
-  outputs: {
-    javascript: string;
-    pcre: string;
-    explanation: string;
-    matches?: string[];
-  };
-}
-
-export interface SummaryExecution extends ToolExecution {
-  inputs: {
-    text: string;
-    summaryType: string;
-  };
-  outputs: {
-    summary: string;
-  };
 }

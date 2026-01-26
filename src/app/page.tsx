@@ -1,5 +1,6 @@
 "use client";
 
+import type { Message as AIMessage } from "ai";
 import { useChat } from "ai/react";
 import { Send, Settings, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -26,6 +27,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { useApiKey } from "@/hooks/use-api-key";
 import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
+import type { Message as StorageMessage } from "@/lib/storage/types";
+
+// Convert AI SDK message to storage message
+function toStorageMessage(msg: AIMessage): StorageMessage {
+  return {
+    id: msg.id,
+    role: msg.role as "user" | "assistant" | "system",
+    content: msg.content,
+    createdAt: Date.now(),
+  };
+}
+
+// Convert storage message to AI SDK message
+function toAIMessage(msg: StorageMessage): AIMessage {
+  return {
+    id: msg.id,
+    role: msg.role,
+    content: msg.content,
+  };
+}
 
 function ChatPageContent() {
   const searchParams = useSearchParams();
@@ -63,15 +84,7 @@ function ChatPageContent() {
     onFinish: (message) => {
       // Auto-save conversation after each response
       if (activeConversation) {
-        const allMessages = [
-          ...messages,
-          {
-            id: message.id,
-            role: "assistant" as const,
-            content: message.content,
-            createdAt: Date.now(),
-          },
-        ];
+        const allMessages = messages.map(toStorageMessage);
         updateConversation(activeConversation.id, {
           messages: allMessages,
           updatedAt: Date.now(),
@@ -94,7 +107,7 @@ function ChatPageContent() {
       if (conv) {
         loadConversation(conversationId);
         setSelectedModel(conv.model);
-        setMessages(conv.messages as any);
+        setMessages(conv.messages.map(toAIMessage));
       }
     }
   }, [conversationId, conversations, loadConversation, setMessages]);
@@ -120,13 +133,14 @@ function ChatPageContent() {
 
       // Save user message before sending
       if (activeConversation) {
-        const userMessage = {
+        const storageMessages = messages.map(toStorageMessage);
+        const userMessage: StorageMessage = {
           id: `user-${Date.now()}`,
-          role: "user" as const,
+          role: "user",
           content: input,
           createdAt: Date.now(),
         };
-        const updatedMessages = [...messages, userMessage];
+        const updatedMessages = [...storageMessages, userMessage];
         updateConversation(activeConversation.id, {
           messages: updatedMessages,
           updatedAt: Date.now(),
@@ -287,7 +301,9 @@ function ChatPageContent() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                handleSubmit(e as any);
+                if (hasApiKey && input.trim() && !isLoading) {
+                  handleChatSubmit(e as React.FormEvent<HTMLTextAreaElement>);
+                }
               }
             }}
           />

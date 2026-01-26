@@ -3,7 +3,7 @@
 import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { Mic, MicOff, Paperclip, Send, Settings, Trash2 } from "lucide-react";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import {
@@ -60,18 +60,33 @@ function ChatPageContent() {
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, sendMessage, status, setMessages } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      headers: {
-        "x-api-key": apiKey || "",
-      },
-      body: {
-        model: selectedModel,
-        temperature,
-      },
-    }),
+  // Create unique chat ID based on conversation to maintain state
+  const chatId = useMemo(
+    () => conversationId || `chat-${Date.now()}`,
+    [conversationId]
+  );
+
+  // Recreate transport when API key or model changes
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        headers: {
+          "x-api-key": apiKey || "",
+        },
+        body: {
+          model: selectedModel,
+          temperature,
+        },
+      }),
+    [apiKey, selectedModel, temperature]
+  );
+
+  const { messages, sendMessage, status, setMessages, error } = useChat({
+    id: chatId,
+    transport,
     onFinish: ({ message }) => {
+      console.log("Message finished:", message);
       if (activeConversation) {
         const textContent = getTextContent(message);
 
@@ -156,11 +171,12 @@ function ChatPageContent() {
       if (!input.trim() || !hasApiKey || isLoading) return;
 
       const userMessage = input.trim();
+      console.log("Sending message:", userMessage, "with model:", selectedModel);
       setInput("");
 
       await sendMessage({ text: userMessage });
     },
-    [input, hasApiKey, isLoading, sendMessage]
+    [input, hasApiKey, isLoading, sendMessage, selectedModel]
   );
 
   const handleClearChat = useCallback(() => {
@@ -314,6 +330,12 @@ function ChatPageContent() {
       <div className="flex-1 overflow-hidden">
         <Conversation className="h-full">
           <ConversationContent>
+            {error && (
+              <div className="mx-4 my-2 rounded-lg bg-destructive/10 p-4 text-destructive">
+                <p className="font-semibold">Error</p>
+                <p className="text-sm">{error.message}</p>
+              </div>
+            )}
             {messages.length === 0 ? (
               <ConversationEmptyState>
                 <div className="text-center space-y-4">

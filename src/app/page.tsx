@@ -4,7 +4,7 @@ import type { Message as AIMessage } from "ai";
 import { useChat } from "ai/react";
 import { Send, Settings, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import {
   Conversation,
@@ -64,6 +64,7 @@ function ChatPageContent() {
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
   const [temperature, setTemperature] = useState(0.7);
   const [showSettings, setShowSettings] = useState(false);
+  const isLoadingConversation = useRef(false);
 
   // Use Vercel AI SDK's useChat hook - much simpler!
   const {
@@ -81,17 +82,22 @@ function ChatPageContent() {
       model: selectedModel,
       temperature,
     },
-    onFinish: (message) => {
-      // Auto-save conversation after each response
-      if (activeConversation) {
-        const allMessages = messages.map(toStorageMessage);
-        updateConversation(activeConversation.id, {
-          messages: allMessages,
-          updatedAt: Date.now(),
-        });
-      }
-    },
   });
+
+  // Auto-save messages when they change (but not while loading a conversation)
+  useEffect(() => {
+    if (
+      activeConversation &&
+      messages.length > 0 &&
+      !isLoadingConversation.current
+    ) {
+      const storageMessages = messages.map(toStorageMessage);
+      updateConversation(activeConversation.id, {
+        messages: storageMessages,
+        updatedAt: Date.now(),
+      });
+    }
+  }, [messages, activeConversation, updateConversation]);
 
   // Update selected model when preferences change
   useEffect(() => {
@@ -105,9 +111,14 @@ function ChatPageContent() {
     if (conversationId && conversations.length > 0) {
       const conv = conversations.find((c) => c.id === conversationId);
       if (conv) {
+        isLoadingConversation.current = true;
         loadConversation(conversationId);
         setSelectedModel(conv.model);
         setMessages(conv.messages.map(toAIMessage));
+        // Reset flag after a short delay to allow React to update
+        setTimeout(() => {
+          isLoadingConversation.current = false;
+        }, 100);
       }
     }
   }, [conversationId, conversations, loadConversation, setMessages]);
@@ -127,37 +138,16 @@ function ChatPageContent() {
   ]);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    (e: React.FormEvent) => {
       e.preventDefault();
       if (!hasApiKey || !input.trim() || isLoading) return;
 
-      // Save user message before sending
-      if (activeConversation) {
-        const storageMessages = messages.map(toStorageMessage);
-        const userMessage: StorageMessage = {
-          id: `user-${Date.now()}`,
-          role: "user",
-          content: input,
-          createdAt: Date.now(),
-        };
-        const updatedMessages = [...storageMessages, userMessage];
-        updateConversation(activeConversation.id, {
-          messages: updatedMessages,
-          updatedAt: Date.now(),
-        });
-      }
-
+      // The useChat hook will handle the message, we just call it
       handleChatSubmit(e);
+
+      // Save happens in onFinish callback automatically
     },
-    [
-      hasApiKey,
-      input,
-      isLoading,
-      activeConversation,
-      messages,
-      updateConversation,
-      handleChatSubmit,
-    ]
+    [hasApiKey, input, isLoading, handleChatSubmit]
   );
 
   const handleClearChat = useCallback(() => {

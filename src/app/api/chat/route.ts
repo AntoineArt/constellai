@@ -32,7 +32,33 @@ export async function POST(req: Request) {
       temperature,
     });
 
-    return result.toTextStreamResponse();
+    // Log the full text to debug
+    const encoder = new TextEncoder();
+    let fullText = "";
+
+    const transformedStream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of result.textStream) {
+            fullText += chunk;
+            controller.enqueue(encoder.encode(chunk));
+          }
+          console.log("FULL RESPONSE TEXT:", fullText);
+          controller.close();
+        } catch (error) {
+          console.error("Stream error:", error);
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(transformedStream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
   } catch (error) {
     console.error("Chat API error:", error);
     return new Response(

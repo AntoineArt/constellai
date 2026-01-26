@@ -1,6 +1,5 @@
 "use client";
 
-import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { Mic, MicOff, Paperclip, Send, Settings, Trash2 } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -28,24 +27,6 @@ import { useApiKey } from "@/hooks/use-api-key";
 import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
 import type { ChatMessage, MessagePart } from "@/types/chat";
-
-function getTextContent(message: ChatMessage): string {
-  console.log("Getting text content from message:", message);
-  console.log("Parts:", JSON.stringify(message.parts, null, 2));
-
-  // Try different possible text fields
-  const text = message.parts
-    ?.map((part: any) => {
-      if (part.type === "text") {
-        return part.text || part.content || "";
-      }
-      return "";
-    })
-    .join("") || "";
-
-  console.log("Extracted text:", text);
-  return text;
-}
 
 function ChatPageContent() {
   const searchParams = useSearchParams();
@@ -76,55 +57,87 @@ function ChatPageContent() {
     }
   }, [preferences.defaultModel]);
 
-  // Create unique chat ID based on conversation to maintain state
-  // Include hasApiKey to force recreation when API key is added
-  const chatId = useMemo(
-    () => conversationId || `chat-${hasApiKey ? 'authed' : 'noauth'}-${Date.now()}`,
-    [conversationId, hasApiKey]
-  );
+  // Track messages manually without useChat for debugging
+  const [messages, setMessagesState] = useState<any[]>([]);
+  const [status, setStatus] = useState<"idle" | "streaming">("idle");
 
-  // Create transport with API key
-  const transport = useMemo(
-    () =>
-      new DefaultChatTransport({
-        api: "/api/chat",
+  const sendMessage = useCallback(async (content: string) => {
+    if (!apiKey) return;
+
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      role: "user" as const,
+      content,
+      parts: [{ type: "text", text: content }],
+    };
+
+    setMessagesState(prev => [...prev, userMessage]);
+    setStatus("streaming");
+
+    const assistantMessage = {
+      id: `assistant-${Date.now()}`,
+      role: "assistant" as const,
+      content: "",
+      parts: [{ type: "text", text: "" }],
+    };
+
+    setMessagesState(prev => [...prev, assistantMessage]);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
         headers: {
-          "x-api-key": apiKey || "",
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
         },
-        body: {
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
           model: selectedModel,
           temperature,
-        },
-      }),
-    [apiKey, selectedModel, temperature]
-  );
+        }),
+      });
 
-  const { messages, sendMessage, status, setMessages, error } = useChat({
-    id: chatId,
-    transport,
-    onFinish: ({ message }) => {
-      console.log("Message finished:", message);
-      if (activeConversation) {
-        const textContent = getTextContent(message);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        addMessageToStorage(activeConversation.id, {
-          role: message.role as "user" | "assistant",
-          content: textContent,
-          createdAt: Date.now(),
-        });
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
 
-        // Generate title if first message
-        if (activeConversation.messages.length === 0) {
-          generateTitle(activeConversation.id, textContent);
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          fullText += chunk;
+          console.log("Received chunk:", chunk);
+
+          setMessagesState(prev => {
+            const updated = [...prev];
+            const lastMsg = updated[updated.length - 1];
+            if (lastMsg.role === "assistant") {
+              lastMsg.content = fullText;
+              lastMsg.parts = [{ type: "text", text: fullText }];
+            }
+            return updated;
+          });
         }
       }
-    },
-    onError: (err) => {
-      console.error("Chat API error:", err);
-    },
-  });
 
-  const isLoading = status === "streaming" || status === "submitted";
+      console.log("Final text:", fullText);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setStatus("idle");
+    }
+  }, [apiKey, messages, selectedModel, temperature]);
+
+  const isLoading = status === "streaming";
 
   // Load conversation from URL
   useEffect(() => {
@@ -133,7 +146,7 @@ function ChatPageContent() {
       if (conv) {
         loadConversation(conversationId);
         setSelectedModel(conv.model);
-        setMessages(
+        setMessagesState(
           conv.messages.map((m) => ({
             id: m.id,
             role: m.role,
@@ -143,7 +156,7 @@ function ChatPageContent() {
         );
       }
     }
-  }, [conversationId, conversations, loadConversation, setMessages]);
+  }, [conversationId, conversations, loadConversation]);
 
   // Create conversation if none exists
   useEffect(() => {
@@ -191,7 +204,7 @@ function ChatPageContent() {
       console.log("Sending message:", userMessage, "with model:", selectedModel);
       setInput("");
 
-      await sendMessage({ text: userMessage });
+      await sendMessage(userMessage);
     },
     [input, hasApiKey, isLoading, sendMessage, selectedModel]
   );
@@ -202,10 +215,10 @@ function ChatPageContent() {
         messages: [],
         title: "New Conversation",
       });
-      setMessages([]);
+      setMessagesState([]);
     }
     window.location.href = "/";
-  }, [activeConversation, updateConversation, setMessages]);
+  }, [activeConversation, updateConversation]);
 
   // Voice input setup
   useEffect(() => {
@@ -347,12 +360,6 @@ function ChatPageContent() {
       <div className="flex-1 overflow-hidden">
         <Conversation className="h-full">
           <ConversationContent>
-            {error && (
-              <div className="mx-4 my-2 rounded-lg bg-destructive/10 p-4 text-destructive">
-                <p className="font-semibold">Error</p>
-                <p className="text-sm">{error.message}</p>
-              </div>
-            )}
             {messages.length === 0 ? (
               <ConversationEmptyState>
                 <div className="text-center space-y-4">
@@ -380,9 +387,9 @@ function ChatPageContent() {
               messages.map((message) => (
                 <Message key={message.id} from={message.role}>
                   {message.role === "assistant" ? (
-                    <Response>{getTextContent(message)}</Response>
+                    <Response>{message.content}</Response>
                   ) : (
-                    <MessageContent>{getTextContent(message)}</MessageContent>
+                    <MessageContent>{message.content}</MessageContent>
                   )}
                 </Message>
               ))

@@ -31,10 +31,18 @@ import type { ChatMessage, MessagePart } from "@/types/chat";
 
 function getTextContent(message: ChatMessage): string {
   console.log("Getting text content from message:", message);
+  console.log("Parts:", JSON.stringify(message.parts, null, 2));
+
+  // Try different possible text fields
   const text = message.parts
-    ?.filter((part: MessagePart) => part.type === "text")
-    .map((part: MessagePart) => part.text)
+    ?.map((part: any) => {
+      if (part.type === "text") {
+        return part.text || part.content || "";
+      }
+      return "";
+    })
     .join("") || "";
+
   console.log("Extracted text:", text);
   return text;
 }
@@ -60,6 +68,13 @@ function ChatPageContent() {
   const [input, setInput] = useState("");
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Update selected model when preferences change
+  useEffect(() => {
+    if (preferences.defaultModel) {
+      setSelectedModel(preferences.defaultModel);
+    }
+  }, [preferences.defaultModel]);
 
   // Create unique chat ID based on conversation to maintain state
   const chatId = useMemo(

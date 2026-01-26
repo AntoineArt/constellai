@@ -186,4 +186,4 @@ export const getProviders = (): string[] => {
 export const DEFAULT_MODEL_ID = getDefaultModel().id;
 
 // Common model used in API routes for streaming
-export const DEFAULT_API_MODEL = "anthropic/claude-sonnet-4.5";
+export const DEFAULT_API_MODEL = "openai/gpt-oss-120b";

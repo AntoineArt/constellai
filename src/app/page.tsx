@@ -85,8 +85,9 @@ function ChatPageContent() {
 
   // Recreate transport when API key or model changes
   const transport = useMemo(
-    () =>
-      new TextStreamChatTransport({
+    () => {
+      console.log("Creating transport with apiKey:", apiKey ? "present" : "missing");
+      return new TextStreamChatTransport({
         api: "/api/chat",
         headers: {
           "x-api-key": apiKey || "",
@@ -95,7 +96,8 @@ function ChatPageContent() {
           model: selectedModel,
           temperature,
         },
-      }),
+      });
+    },
     [apiKey, selectedModel, temperature]
   );
 

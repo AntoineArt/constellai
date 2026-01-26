@@ -1,9 +1,8 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
 import { Mic, MicOff, Paperclip, Send, Settings, Trash2 } from "lucide-react";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import {
   Conversation,
@@ -20,13 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { useApiKey } from "@/hooks/use-api-key";
 import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
-import type { ChatMessage, MessagePart } from "@/types/chat";
 
 function ChatPageContent() {
   const searchParams = useSearchParams();
@@ -39,7 +37,6 @@ function ChatPageContent() {
     createConversation,
     loadConversation,
     updateConversation,
-    addMessage: addMessageToStorage,
   } = useConversations(preferences.defaultModel);
 
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
@@ -61,81 +58,84 @@ function ChatPageContent() {
   const [messages, setMessagesState] = useState<any[]>([]);
   const [status, setStatus] = useState<"idle" | "streaming">("idle");
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!apiKey) return;
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!apiKey) return;
 
-    const userMessage = {
-      id: `user-${Date.now()}`,
-      role: "user" as const,
-      content,
-      parts: [{ type: "text", text: content }],
-    };
+      const userMessage = {
+        id: `user-${Date.now()}`,
+        role: "user" as const,
+        content,
+        parts: [{ type: "text", text: content }],
+      };
 
-    setMessagesState(prev => [...prev, userMessage]);
-    setStatus("streaming");
+      setMessagesState((prev) => [...prev, userMessage]);
+      setStatus("streaming");
 
-    const assistantMessage = {
-      id: `assistant-${Date.now()}`,
-      role: "assistant" as const,
-      content: "",
-      parts: [{ type: "text", text: "" }],
-    };
+      const assistantMessage = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant" as const,
+        content: "",
+        parts: [{ type: "text", text: "" }],
+      };
 
-    setMessagesState(prev => [...prev, assistantMessage]);
+      setMessagesState((prev) => [...prev, assistantMessage]);
 
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          messages: [...messages, userMessage].map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
-          model: selectedModel,
-          temperature,
-        }),
-      });
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+          },
+          body: JSON.stringify({
+            messages: [...messages, userMessage].map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            model: selectedModel,
+            temperature,
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullText = "";
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
-          fullText += chunk;
-          console.log("Received chunk:", chunk);
-
-          setMessagesState(prev => {
-            const updated = [...prev];
-            const lastMsg = updated[updated.length - 1];
-            if (lastMsg.role === "assistant") {
-              lastMsg.content = fullText;
-              lastMsg.parts = [{ type: "text", text: fullText }];
-            }
-            return updated;
-          });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      }
 
-      console.log("Final text:", fullText);
-    } catch (err) {
-      console.error("Error:", err);
-    } finally {
-      setStatus("idle");
-    }
-  }, [apiKey, messages, selectedModel, temperature]);
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullText = "";
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            fullText += chunk;
+            console.log("Received chunk:", chunk);
+
+            setMessagesState((prev) => {
+              const updated = [...prev];
+              const lastMsg = updated[updated.length - 1];
+              if (lastMsg.role === "assistant") {
+                lastMsg.content = fullText;
+                lastMsg.parts = [{ type: "text", text: fullText }];
+              }
+              return updated;
+            });
+          }
+        }
+
+        console.log("Final text:", fullText);
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setStatus("idle");
+      }
+    },
+    [apiKey, messages, selectedModel, temperature]
+  );
 
   const isLoading = status === "streaming";
 
@@ -171,37 +171,18 @@ function ChatPageContent() {
     selectedModel,
   ]);
 
-  const generateTitle = async (convId: string, content: string) => {
-    try {
-      const response = await fetch("/api/generate-title", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey || "",
-        },
-        body: JSON.stringify({
-          messages: [{ role: "assistant", content }],
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.title) {
-          updateConversation(convId, { title: data.title });
-        }
-      }
-    } catch (error) {
-      console.error("Failed to generate title:", error);
-    }
-  };
-
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();
       if (!input.trim() || !hasApiKey || isLoading) return;
 
       const userMessage = input.trim();
-      console.log("Sending message:", userMessage, "with model:", selectedModel);
+      console.log(
+        "Sending message:",
+        userMessage,
+        "with model:",
+        selectedModel
+      );
       setInput("");
 
       await sendMessage(userMessage);

@@ -1,6 +1,6 @@
 "use client";
 
-import { DefaultChatTransport } from "ai";
+import { TextStreamChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { Mic, MicOff, Paperclip, Send, Settings, Trash2 } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -69,7 +69,7 @@ function ChatPageContent() {
   // Recreate transport when API key or model changes
   const transport = useMemo(
     () =>
-      new DefaultChatTransport({
+      new TextStreamChatTransport({
         api: "/api/chat",
         headers: {
           "x-api-key": apiKey || "",

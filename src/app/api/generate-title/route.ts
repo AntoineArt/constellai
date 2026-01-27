@@ -1,5 +1,8 @@
 import { generateText } from "ai";
-import { getApiKeyFromHeaders } from "@/lib/ai-config";
+import {
+  createGatewayModel,
+  getApiKeyFromHeaders,
+} from "@/lib/ai-config";
 
 export const maxDuration = 10;
 
@@ -13,8 +16,6 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json" },
       });
     }
-
-    process.env.AI_GATEWAY_API_KEY = apiKey;
 
     const body = await req.json();
     const { toolId, inputs } = body;
@@ -48,8 +49,10 @@ export async function POST(req: Request) {
         prompt = `Generate a short, descriptive title (max 6 words) for this ${toolId} tool usage with inputs: ${JSON.stringify(inputs).slice(0, 200)}`;
     }
 
+    const model = createGatewayModel("openai/gpt-oss-20b", apiKey);
+
     const { text } = await generateText({
-      model: "openai/gpt-oss-20b",
+      model,
       system:
         "You are a helpful assistant that generates concise, descriptive titles. Always respond with just the title, no quotes, no explanations, maximum 6 words.",
       prompt,

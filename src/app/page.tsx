@@ -1,7 +1,6 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import type { Message } from "@ai-sdk/react";
 import { Send, Settings, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
@@ -29,21 +28,28 @@ import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
 import type { Message as StorageMessage } from "@/lib/storage/types";
 
+// Type for messages from useChat hook
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+}
+
 // Convert AI SDK message to storage message
-function toStorageMessage(msg: Message): StorageMessage {
+function toStorageMessage(msg: ChatMessage): StorageMessage {
   return {
     id: msg.id,
-    role: msg.role as "user" | "assistant" | "system",
-    content: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content),
+    role: msg.role,
+    content: msg.content,
     createdAt: Date.now(),
   };
 }
 
 // Convert storage message to AI SDK message
-function toAIMessage(msg: StorageMessage): Message {
+function toAIMessage(msg: StorageMessage): ChatMessage {
   return {
     id: msg.id,
-    role: msg.role as "user" | "assistant" | "system",
+    role: msg.role,
     content: msg.content,
   };
 }

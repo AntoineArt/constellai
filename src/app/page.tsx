@@ -1,7 +1,7 @@
 "use client";
 
-import type { Message as AIMessage } from "ai";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
+import type { Message as AIMessage } from "@ai-sdk/react";
 import { Send, Settings, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";

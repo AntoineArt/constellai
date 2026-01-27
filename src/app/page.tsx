@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import type { Message as AIMessage } from "@ai-sdk/react";
+import type { Message } from "@ai-sdk/react";
 import { Send, Settings, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
@@ -11,7 +11,7 @@ import {
   ConversationContent,
   ConversationEmptyState,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import { Message as MessageComponent, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,20 +30,20 @@ import { useConversations, usePreferences } from "@/lib/storage";
 import type { Message as StorageMessage } from "@/lib/storage/types";
 
 // Convert AI SDK message to storage message
-function toStorageMessage(msg: AIMessage): StorageMessage {
+function toStorageMessage(msg: Message): StorageMessage {
   return {
     id: msg.id,
     role: msg.role as "user" | "assistant" | "system",
-    content: msg.content,
+    content: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content),
     createdAt: Date.now(),
   };
 }
 
 // Convert storage message to AI SDK message
-function toAIMessage(msg: StorageMessage): AIMessage {
+function toAIMessage(msg: StorageMessage): Message {
   return {
     id: msg.id,
-    role: msg.role,
+    role: msg.role as "user" | "assistant" | "system",
     content: msg.content,
   };
 }
@@ -257,13 +257,21 @@ function ChatPageContent() {
               </ConversationEmptyState>
             ) : (
               messages.map((message) => (
-                <Message key={message.id} from={message.role}>
+                <MessageComponent key={message.id} from={message.role}>
                   {message.role === "assistant" ? (
-                    <Response>{message.content}</Response>
+                    <Response>
+                      {typeof message.content === "string"
+                        ? message.content
+                        : JSON.stringify(message.content)}
+                    </Response>
                   ) : (
-                    <MessageContent>{message.content}</MessageContent>
+                    <MessageContent>
+                      {typeof message.content === "string"
+                        ? message.content
+                        : JSON.stringify(message.content)}
+                    </MessageContent>
                   )}
-                </Message>
+                </MessageComponent>
               ))
             )}
             {error && (

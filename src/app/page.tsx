@@ -159,7 +159,8 @@ function ChatPageContent() {
       const messageText = input.trim();
       setInput(""); // Clear input immediately
       
-      // Send the message using sendMessage with API options
+      // Send the message with model and temperature
+      // The body option should merge with the default body that includes messages
       await sendMessage(
         {
           text: messageText,
@@ -172,8 +173,6 @@ function ChatPageContent() {
           },
         }
       );
-
-      // Save happens in onFinish callback automatically
     },
     [hasApiKey, input, isLoading, sendMessage, apiKey, selectedModel, temperature]
   );

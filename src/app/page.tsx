@@ -47,6 +47,26 @@ function toAIMessage(msg: StorageMessage): any {
   };
 }
 
+// Extract text content from UIMessage parts
+function getMessageText(message: any): string {
+  if (message.content) {
+    return typeof message.content === "string" 
+      ? message.content 
+      : String(message.content);
+  }
+  if (message.parts && Array.isArray(message.parts)) {
+    return message.parts
+      .map((part: any) => {
+        if (part.type === "text") {
+          return part.text || "";
+        }
+        return "";
+      })
+      .join("");
+  }
+  return "";
+}
+
 function ChatPageContent() {
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("id");
@@ -63,25 +83,20 @@ function ChatPageContent() {
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
   const [temperature, setTemperature] = useState(0.7);
   const [showSettings, setShowSettings] = useState(false);
+  const [input, setInput] = useState("");
   const isLoadingConversation = useRef(false);
 
   // Use Vercel AI SDK's useChat hook - much simpler!
+  // Default endpoint is /api/chat
   const {
     messages,
-    input,
-    setInput,
-    handleSubmit: handleChatSubmit,
-    isLoading,
+    sendMessage,
+    status,
     setMessages,
     error,
-  } = useChat({
-    api: "/api/chat",
-    headers: apiKey ? { "x-api-key": apiKey } : {},
-    body: {
-      model: selectedModel,
-      temperature,
-    },
-  });
+  } = useChat();
+
+  const isLoading = status === "submitted" || status === "streaming";
 
   // Auto-save messages when they change (but not while loading a conversation)
   useEffect(() => {
@@ -137,16 +152,55 @@ function ChatPageContent() {
   ]);
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       if (!hasApiKey || !input.trim() || isLoading) return;
 
-      // The useChat hook will handle the message, we just call it
-      handleChatSubmit(e);
+      const messageText = input.trim();
+      setInput(""); // Clear input immediately
+      
+      // Send the message using sendMessage with API options
+      await sendMessage(
+        {
+          text: messageText,
+        },
+        {
+          headers: apiKey ? { "x-api-key": apiKey } : {},
+          body: {
+            model: selectedModel,
+            temperature,
+          },
+        }
+      );
 
       // Save happens in onFinish callback automatically
     },
-    [hasApiKey, input, isLoading, handleChatSubmit]
+    [hasApiKey, input, isLoading, sendMessage, apiKey, selectedModel, temperature]
+  );
+
+  const handleKeyDown = useCallback(
+    async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (hasApiKey && input.trim() && !isLoading) {
+          const messageText = input.trim();
+          setInput(""); // Clear input immediately
+          await sendMessage(
+            {
+              text: messageText,
+            },
+            {
+              headers: apiKey ? { "x-api-key": apiKey } : {},
+              body: {
+                model: selectedModel,
+                temperature,
+              },
+            }
+          );
+        }
+      }
+    },
+    [hasApiKey, input, isLoading, sendMessage, apiKey, selectedModel, temperature]
   );
 
   const handleClearChat = useCallback(() => {
@@ -258,17 +312,9 @@ function ChatPageContent() {
               messages.map((message) => (
                 <MessageComponent key={message.id} from={message.role}>
                   {message.role === "assistant" ? (
-                    <Response>
-                      {typeof message.content === "string"
-                        ? message.content
-                        : JSON.stringify(message.content)}
-                    </Response>
+                    <Response>{getMessageText(message)}</Response>
                   ) : (
-                    <MessageContent>
-                      {typeof message.content === "string"
-                        ? message.content
-                        : JSON.stringify(message.content)}
-                    </MessageContent>
+                    <MessageContent>{getMessageText(message)}</MessageContent>
                   )}
                 </MessageComponent>
               ))
@@ -295,14 +341,7 @@ function ChatPageContent() {
             }
             className="min-h-[60px] resize-none flex-1"
             disabled={!hasApiKey}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                if (hasApiKey && input.trim() && !isLoading) {
-                  handleChatSubmit(e as React.FormEvent<HTMLTextAreaElement>);
-                }
-              }
-            }}
+            onKeyDown={handleKeyDown}
           />
           <Button
             type="submit"

@@ -80,6 +80,9 @@ function ChatPageContent() {
     updateConversation,
   } = useConversations(preferences.defaultModel);
 
+  // Track if component has mounted to prevent hydration mismatches
+  const [mounted, setMounted] = useState(false);
+
   // Initialize with a safe default, update when preferences load
   const [selectedModel, setSelectedModel] = useState(
     preferences.defaultModel || DEFAULT_MODEL_ID
@@ -88,6 +91,11 @@ function ChatPageContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [input, setInput] = useState("");
   const isLoadingConversation = useRef(false);
+
+  // Mark component as mounted after hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Use Vercel AI SDK's useChat hook - much simpler!
   // Default endpoint is /api/chat
@@ -216,7 +224,8 @@ function ChatPageContent() {
     window.location.href = "/";
   }, [activeConversation, updateConversation, setMessages]);
 
-  if (!apiKeyLoaded) {
+  // Show loading state until mounted and API key is loaded to prevent hydration mismatch
+  if (!mounted || !apiKeyLoaded) {
     return (
       <div className="flex h-screen items-center justify-center">
         Loading...

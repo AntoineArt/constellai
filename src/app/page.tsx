@@ -24,7 +24,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { useApiKey } from "@/hooks/use-api-key";
-import { getModelsByProvider, getProviders } from "@/lib/models";
+import { DEFAULT_MODEL_ID, getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
 import type { Message as StorageMessage } from "@/lib/storage/types";
 
@@ -80,7 +80,10 @@ function ChatPageContent() {
     updateConversation,
   } = useConversations(preferences.defaultModel);
 
-  const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
+  // Initialize with a safe default, update when preferences load
+  const [selectedModel, setSelectedModel] = useState(
+    preferences.defaultModel || DEFAULT_MODEL_ID
+  );
   const [temperature, setTemperature] = useState(0.7);
   const [showSettings, setShowSettings] = useState(false);
   const [input, setInput] = useState("");

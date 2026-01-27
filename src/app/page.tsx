@@ -1,6 +1,7 @@
 "use client";
 
-import { Mic, MicOff, Paperclip, Send, Settings, Trash2 } from "lucide-react";
+import { useChat } from "@ai-sdk/react";
+import { Send, Settings, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
@@ -9,7 +10,7 @@ import {
   ConversationContent,
   ConversationEmptyState,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import { Message as MessageComponent, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,12 +26,52 @@ import { Textarea } from "@/components/ui/textarea";
 import { useApiKey } from "@/hooks/use-api-key";
 import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
+import type { Message as StorageMessage } from "@/lib/storage/types";
+
+// Convert AI SDK message to storage message
+function toStorageMessage(msg: any): StorageMessage {
+  return {
+    id: msg.id,
+    role: msg.role as "user" | "assistant" | "system",
+    content: typeof msg.content === "string" ? msg.content : String(msg.content),
+    createdAt: Date.now(),
+  };
+}
+
+// Convert storage message to AI SDK message
+function toAIMessage(msg: StorageMessage): any {
+  return {
+    id: msg.id,
+    role: msg.role,
+    content: msg.content,
+  };
+}
+
+// Extract text content from UIMessage parts
+function getMessageText(message: any): string {
+  if (message.content) {
+    return typeof message.content === "string" 
+      ? message.content 
+      : String(message.content);
+  }
+  if (message.parts && Array.isArray(message.parts)) {
+    return message.parts
+      .map((part: any) => {
+        if (part.type === "text") {
+          return part.text || "";
+        }
+        return "";
+      })
+      .join("");
+  }
+  return "";
+}
 
 function ChatPageContent() {
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("id");
-  const { hasApiKey, apiKey } = useApiKey();
-  const { preferences, updatePreferences } = usePreferences();
+  const { hasApiKey, apiKey, isLoaded: apiKeyLoaded } = useApiKey();
+  const { preferences } = usePreferences();
   const {
     conversations,
     activeConversation,
@@ -42,10 +83,35 @@ function ChatPageContent() {
   const [selectedModel, setSelectedModel] = useState(preferences.defaultModel);
   const [temperature, setTemperature] = useState(0.7);
   const [showSettings, setShowSettings] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [input, setInput] = useState("");
-  const recognitionRef = useRef<any>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isLoadingConversation = useRef(false);
+
+  // Use Vercel AI SDK's useChat hook - much simpler!
+  // Default endpoint is /api/chat
+  const {
+    messages,
+    sendMessage,
+    status,
+    setMessages,
+    error,
+  } = useChat();
+
+  const isLoading = status === "submitted" || status === "streaming";
+
+  // Auto-save messages when they change (but not while loading a conversation)
+  useEffect(() => {
+    if (
+      activeConversation &&
+      messages.length > 0 &&
+      !isLoadingConversation.current
+    ) {
+      const storageMessages = messages.map(toStorageMessage);
+      updateConversation(activeConversation.id, {
+        messages: storageMessages,
+        updatedAt: Date.now(),
+      });
+    }
+  }, [messages, activeConversation, updateConversation]);
 
   // Update selected model when preferences change
   useEffect(() => {
@@ -54,140 +120,87 @@ function ChatPageContent() {
     }
   }, [preferences.defaultModel]);
 
-  // Track messages manually without useChat for debugging
-  const [messages, setMessagesState] = useState<any[]>([]);
-  const [status, setStatus] = useState<"idle" | "streaming">("idle");
-
-  const sendMessage = useCallback(
-    async (content: string) => {
-      if (!apiKey) return;
-
-      const userMessage = {
-        id: `user-${Date.now()}`,
-        role: "user" as const,
-        content,
-        parts: [{ type: "text", text: content }],
-      };
-
-      setMessagesState((prev) => [...prev, userMessage]);
-      setStatus("streaming");
-
-      const assistantMessage = {
-        id: `assistant-${Date.now()}`,
-        role: "assistant" as const,
-        content: "",
-        parts: [{ type: "text", text: "" }],
-      };
-
-      setMessagesState((prev) => [...prev, assistantMessage]);
-
-      try {
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": apiKey,
-          },
-          body: JSON.stringify({
-            messages: [...messages, userMessage].map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-            model: selectedModel,
-            temperature,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        let fullText = "";
-
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value, { stream: true });
-            fullText += chunk;
-            console.log("Received chunk:", chunk);
-
-            setMessagesState((prev) => {
-              const updated = [...prev];
-              const lastMsg = updated[updated.length - 1];
-              if (lastMsg.role === "assistant") {
-                lastMsg.content = fullText;
-                lastMsg.parts = [{ type: "text", text: fullText }];
-              }
-              return updated;
-            });
-          }
-        }
-
-        console.log("Final text:", fullText);
-      } catch (err) {
-        console.error("Error:", err);
-      } finally {
-        setStatus("idle");
-      }
-    },
-    [apiKey, messages, selectedModel, temperature]
-  );
-
-  const isLoading = status === "streaming";
-
   // Load conversation from URL
   useEffect(() => {
     if (conversationId && conversations.length > 0) {
       const conv = conversations.find((c) => c.id === conversationId);
       if (conv) {
+        isLoadingConversation.current = true;
         loadConversation(conversationId);
         setSelectedModel(conv.model);
-        setMessagesState(
-          conv.messages.map((m) => ({
-            id: m.id,
-            role: m.role,
-            content: m.content,
-            parts: [{ type: "text" as const, text: m.content }],
-          }))
-        );
+        setMessages(conv.messages.map(toAIMessage));
+        // Reset flag after a short delay to allow React to update
+        setTimeout(() => {
+          isLoadingConversation.current = false;
+        }, 100);
       }
     }
-  }, [conversationId, conversations, loadConversation]);
+  }, [conversationId, conversations, loadConversation, setMessages]);
 
-  // Create conversation if none exists
+  // Create conversation if none exists and API key is set
   useEffect(() => {
-    if (!activeConversation && !conversationId && hasApiKey) {
+    if (!activeConversation && !conversationId && hasApiKey && apiKeyLoaded) {
       createConversation(selectedModel);
     }
   }, [
     activeConversation,
     conversationId,
     hasApiKey,
+    apiKeyLoaded,
     createConversation,
     selectedModel,
   ]);
 
   const handleSubmit = useCallback(
-    async (e?: React.FormEvent) => {
-      e?.preventDefault();
-      if (!input.trim() || !hasApiKey || isLoading) return;
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!hasApiKey || !input.trim() || isLoading) return;
 
-      const userMessage = input.trim();
-      console.log(
-        "Sending message:",
-        userMessage,
-        "with model:",
-        selectedModel
+      const messageText = input.trim();
+      setInput(""); // Clear input immediately
+      
+      // Send the message using sendMessage with API options
+      await sendMessage(
+        {
+          text: messageText,
+        },
+        {
+          headers: apiKey ? { "x-api-key": apiKey } : {},
+          body: {
+            model: selectedModel,
+            temperature,
+          },
+        }
       );
-      setInput("");
 
-      await sendMessage(userMessage);
+      // Save happens in onFinish callback automatically
     },
-    [input, hasApiKey, isLoading, sendMessage, selectedModel]
+    [hasApiKey, input, isLoading, sendMessage, apiKey, selectedModel, temperature]
+  );
+
+  const handleKeyDown = useCallback(
+    async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (hasApiKey && input.trim() && !isLoading) {
+          const messageText = input.trim();
+          setInput(""); // Clear input immediately
+          await sendMessage(
+            {
+              text: messageText,
+            },
+            {
+              headers: apiKey ? { "x-api-key": apiKey } : {},
+              body: {
+                model: selectedModel,
+                temperature,
+              },
+            }
+          );
+        }
+      }
+    },
+    [hasApiKey, input, isLoading, sendMessage, apiKey, selectedModel, temperature]
   );
 
   const handleClearChat = useCallback(() => {
@@ -196,73 +209,18 @@ function ChatPageContent() {
         messages: [],
         title: "New Conversation",
       });
-      setMessagesState([]);
+      setMessages([]);
     }
     window.location.href = "/";
-  }, [activeConversation, updateConversation]);
+  }, [activeConversation, updateConversation, setMessages]);
 
-  // Voice input setup
-  useEffect(() => {
-    if (typeof window !== "undefined" && preferences.voiceEnabled) {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
-
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = true;
-        recognitionRef.current.interimResults = true;
-        recognitionRef.current.lang = preferences.voiceLanguage || "en-US";
-
-        recognitionRef.current.onresult = (event: any) => {
-          let finalTranscript = "";
-
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-              finalTranscript += `${transcript} `;
-            }
-          }
-
-          if (finalTranscript) {
-            setInput((prev) => prev + finalTranscript);
-          }
-        };
-
-        recognitionRef.current.onerror = (event: any) => {
-          console.error("Speech recognition error:", event.error);
-          setIsRecording(false);
-        };
-      }
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-    };
-  }, [preferences.voiceEnabled, preferences.voiceLanguage]);
-
-  const toggleRecording = useCallback(() => {
-    if (!recognitionRef.current) return;
-
-    if (isRecording) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
-    } else {
-      recognitionRef.current.start();
-      setIsRecording(true);
-    }
-  }, [isRecording]);
-
-  const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      console.log("Files selected:", files);
-      // TODO: Implement file attachment handling
-    },
-    []
-  );
+  if (!apiKeyLoaded) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen flex-col">
@@ -319,20 +277,6 @@ function ChatPageContent() {
                 step={0.1}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="voice-enabled"
-                checked={preferences.voiceEnabled}
-                onChange={(e) =>
-                  updatePreferences({ voiceEnabled: e.target.checked })
-                }
-                className="rounded"
-              />
-              <label htmlFor="voice-enabled" className="text-sm">
-                Enable voice input
-              </label>
-            </div>
           </div>
         )}
       </div>
@@ -366,14 +310,19 @@ function ChatPageContent() {
               </ConversationEmptyState>
             ) : (
               messages.map((message) => (
-                <Message key={message.id} from={message.role}>
+                <MessageComponent key={message.id} from={message.role}>
                   {message.role === "assistant" ? (
-                    <Response>{message.content}</Response>
+                    <Response>{getMessageText(message)}</Response>
                   ) : (
-                    <MessageContent>{message.content}</MessageContent>
+                    <MessageContent>{getMessageText(message)}</MessageContent>
                   )}
-                </Message>
+                </MessageComponent>
               ))
+            )}
+            {error && (
+              <div className="p-4 text-center text-sm text-destructive">
+                Error: {error.message}
+              </div>
             )}
           </ConversationContent>
         </Conversation>
@@ -381,68 +330,26 @@ function ChatPageContent() {
 
       {/* Input Area */}
       <div className="border-t bg-background p-4">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-          <div className="flex items-end gap-2">
-            <div className="flex-1">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={
-                  hasApiKey
-                    ? "Type your message..."
-                    : "Configure your API key first..."
-                }
-                className="min-h-[60px] resize-none"
-                disabled={!hasApiKey}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit();
-                  }
-                }}
-              />
-            </div>
-            <div className="flex gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={!hasApiKey}
-              >
-                <Paperclip className="h-4 w-4" />
-              </Button>
-              {preferences.voiceEnabled && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleRecording}
-                  className={isRecording ? "text-red-500" : ""}
-                  disabled={!hasApiKey}
-                >
-                  {isRecording ? (
-                    <MicOff className="h-4 w-4" />
-                  ) : (
-                    <Mic className="h-4 w-4" />
-                  )}
-                </Button>
-              )}
-              <Button
-                type="submit"
-                disabled={!hasApiKey || isLoading || !input.trim()}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+        <form onSubmit={handleSubmit} className="flex items-end gap-2">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={
+              hasApiKey
+                ? "Type your message..."
+                : "Configure your API key first..."
+            }
+            className="min-h-[60px] resize-none flex-1"
+            disabled={!hasApiKey}
+            onKeyDown={handleKeyDown}
+          />
+          <Button
+            type="submit"
+            size="icon"
+            disabled={!hasApiKey || isLoading || !input.trim()}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
         </form>
       </div>
     </div>

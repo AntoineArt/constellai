@@ -28,25 +28,18 @@ import { getModelsByProvider, getProviders } from "@/lib/models";
 import { useConversations, usePreferences } from "@/lib/storage";
 import type { Message as StorageMessage } from "@/lib/storage/types";
 
-// Type for messages from useChat hook
-interface ChatMessage {
-  id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-}
-
 // Convert AI SDK message to storage message
-function toStorageMessage(msg: ChatMessage): StorageMessage {
+function toStorageMessage(msg: any): StorageMessage {
   return {
     id: msg.id,
-    role: msg.role,
-    content: msg.content,
+    role: msg.role as "user" | "assistant" | "system",
+    content: typeof msg.content === "string" ? msg.content : String(msg.content),
     createdAt: Date.now(),
   };
 }
 
 // Convert storage message to AI SDK message
-function toAIMessage(msg: StorageMessage): ChatMessage {
+function toAIMessage(msg: StorageMessage): any {
   return {
     id: msg.id,
     role: msg.role,

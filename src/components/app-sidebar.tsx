@@ -36,7 +36,6 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
 import { usePinnedTools } from "@/lib/storage";
@@ -172,7 +171,6 @@ export function AppSidebar() {
             </div>
             <span className="text-lg font-semibold">ConstellAI</span>
           </Link>
-          <SidebarTrigger />
         </div>
       </SidebarHeader>
 

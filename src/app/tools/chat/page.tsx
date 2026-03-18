@@ -5,7 +5,6 @@ import {
   AlertCircle,
   Copy,
   History,
-  Menu,
   RotateCcw,
   Trash2,
   X,
@@ -41,7 +40,6 @@ import { TopBar } from "@/components/top-bar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
 import { AI_MODELS } from "@/lib/models";
 import { TOOL_IDS, usePreferences, useToolHistory } from "@/lib/storage";
@@ -60,7 +58,6 @@ export default function ChatPage() {
   const [status, setStatus] = useState<ChatStatus | undefined>(undefined);
   const [inputValue, setInputValue] = useState("");
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lastFailedMessages, setLastFailedMessages] = useState<
@@ -367,73 +364,24 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Mobile Sidebar Overlay */}
-      {isMobileSidebarOpen && (
-        <div className="fixed inset-0 z-50 sm:hidden">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setIsMobileSidebarOpen(false)}
-          />
-          <div className="absolute left-0 top-0 h-full w-[85vw] max-w-sm bg-background overflow-x-hidden">
-            <ToolHistorySidebar
-              executions={toolHistory.executions}
-              activeExecutionId={toolHistory.activeExecutionId}
-              onSelectExecution={(id) => {
-                toolHistory.switchToExecution(id);
-                setIsMobileSidebarOpen(false);
-              }}
-              onDeleteExecution={toolHistory.deleteExecution}
-              onRenameExecution={toolHistory.renameExecution}
-              onNewExecution={async () => {
-                if (status !== "streaming") {
-                  clearChat();
-                  await toolHistory.createNewExecution(
-                    { messages: [] },
-                    { selectedModel },
-                    selectedModel
-                  );
-                  setIsMobileSidebarOpen(false);
-                }
-              }}
-              toolName="Chat"
-              getMessageCount={getMessageCount}
-              getPreviewText={getPreviewText}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0 w-full">
-        {/* Top bar - fixed height */}
-        <div className="flex items-center h-16 border-b bg-background px-2 sm:px-4 gap-2">
-          {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="sm:hidden h-8 w-8 p-0 shrink-0"
-            onClick={() => setIsMobileSidebarOpen(true)}
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-
-          <div className="flex-1 min-w-0 overflow-hidden">
-            <TopBar title="AI Chat" />
-          </div>
-        </div>
-
-        {/* Floating toggle buttons */}
-        <div className="fixed top-4 right-4 z-50 flex gap-2">
-          <SidebarTrigger className="h-9 w-9 p-0 shadow-lg" />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 w-9 p-0 shrink-0 shadow-lg bg-background border"
-            onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
-            title={isHistoryCollapsed ? "Show history" : "Hide history"}
-          >
-            <History className="h-4 w-4" />
-          </Button>
+        {/* Top bar */}
+        <div className="border-b bg-background">
+          <TopBar
+            title="AI Chat"
+            leftActions={
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+                title={isHistoryCollapsed ? "Show history" : "Hide history"}
+              >
+                <History className="h-4 w-4" />
+              </Button>
+            }
+          />
         </div>
 
         {/* Main content area */}

@@ -4,280 +4,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Development Commands
 
-### Package Management
-- `pnpm install` - Install dependencies
 - `pnpm dev` - Start Next.js development server with Turbopack
-- `pnpm build` - Build application for production with Turbopack
-- `pnpm start` - Start production server
-
-### Code Quality
-- `pnpm format` - Format code with Biome
+- `pnpm build` - Build for production (also runs TypeScript check)
 - `pnpm lint` - Run Biome linter
+- `pnpm format` - Format code with Biome
 - `pnpm check` - Run both linter and formatter checks
+- `npx tsc --noEmit` - Type-check without building
 
-### Convex Backend
-- `pnpm convex:dev` - Start Convex development mode (run in separate terminal)
-- `pnpm convex:deploy` - Deploy Convex functions to production
+Never run servers — the user handles all server processes.
 
 ## Architecture Overview
 
 ### Tech Stack
-- **Next.js 15** with App Router and Turbopack
-- **Convex** for backend-as-a-service with real-time database
-- **Tailwind CSS v4** for styling
-- **Biome** for linting and formatting
-- **TypeScript** with strict configuration
-- **Vercel AI SDK** with Gateway for AI model access
-- **shadcn/ui** with Radix UI primitives for components
-- **AI Elements** for chat UI components
+- **Next.js 16** with App Router and Turbopack
+- **Tailwind CSS v4** with Geist fonts
+- **Biome** for linting and formatting (2-space indent, double quotes, ES5 trailing commas, 80 char line width)
+- **TypeScript** strict mode (`noExplicitAny` disabled in Biome, but avoid it)
+- **Vercel AI SDK v6** with `@ai-sdk/gateway` for multi-model access
+- **shadcn/ui** + Radix UI for components (`src/components/ui/`)
+- **AI Elements** (`src/components/ai-elements/`) for all chat/AI UI — never build custom AI UI components
 
-### Implementation Status
-- ✅ 80+ AI tools with unified storage pattern
-- ✅ Client-side localStorage for all user data
-- ✅ Multi-model support via Vercel AI Gateway
-- ✅ Tool registry and categorization
-- ✅ Streaming responses with proper error handling
-- 🚧 Clerk authentication (planned - see docs/concept.md)
-- 🚧 Credit-based billing via Polar (planned - see docs/concept.md)
-- 🚧 UploadThing attachments (planned - see docs/concept.md)
+### How a Tool Works (end-to-end)
 
-### Project Structure
-- `src/app/` - Next.js App Router pages and layouts
-  - `api/` - API routes for 80+ AI tools (chat, regex, content generation, analysis, etc.)
-  - `tools/` - Tool-specific pages matching API routes
-- `src/components/` - React components
-  - `ai-elements/` - AI-specific components (conversation, message, etc.)
-  - `ui/` - shadcn/ui component library
-- `src/hooks/` - Custom React hooks
-- `src/lib/` - Utility functions and configurations
-  - `storage/` - Client-side localStorage utilities
-  - `tools.ts` - Tool registry with metadata and icons
-- `convex/` - Convex backend functions and schema
-- `docs/` - Product specifications and concepts
-- Root contains config files (biome.json, tsconfig.json, etc.)
+Each of the 80+ tools follows a strict three-part pattern:
 
-### Convex Backend Architecture
-- **Schema**: Defined in `convex/schema.ts` using `defineSchema` and `defineTable`
-- **Functions**: Use new Convex syntax with explicit args/returns validation
-- **Types**: Auto-generated in `convex/_generated/` - never edit manually
-- **Pattern**: Export `query` and `mutation` functions with proper validation
+1. **API route** at `src/app/api/[tool-name]/route.ts` — POST handler that streams AI responses
+2. **Page** at `src/app/tools/[tool-name]/page.tsx` — React client component
+3. **Registry entry** in `src/lib/tools.ts` — metadata (id, name, description, icon, category, href)
 
-Example Convex function pattern:
-```typescript
-export const createUser = mutation({
-  args: {
-    name: v.string(),
-    email: v.string(),
-  },
-  returns: v.id("users"),
-  handler: async (ctx, args) => {
-    return await ctx.db.insert("users", {
-      name: args.name,
-      email: args.email,
-      createdAt: Date.now(),
-    });
-  },
-});
-```
+The page uses `useToolHistory(toolId)` to auto-save every interaction to localStorage, and renders a secondary sidebar with execution history via `<ToolHistorySidebar>`.
 
-### Frontend Architecture
-- **Providers**: Convex client wrapped in `src/app/providers.tsx`
-- **Layout**: Root layout includes font loading and provider wrapping with sidebar
-- **Styling**: Tailwind utilities with Geist fonts (sans and mono variants)
-- **Client Components**: Use "use client" directive when needed for Convex hooks
-- **Sidebar Navigation**: Uses shadcn/ui sidebar with collapsible primary navigation
-- **AI Integration**: API routes handle AI model requests with API key authentication
-- **Client-Side Storage**: Unified localStorage system for all user data and tool history
+### AI Configuration (`src/lib/ai-config.ts`)
 
-### AI Model Configuration
-Models are centrally defined in `src/lib/models.ts` with the `AIModel` interface. Current models include:
+All API routes use two shared utilities:
 
-- **GPT-OSS-20B** (default) - Fast, cost-effective model
-- **GPT-OSS-120B** - Larger context and capabilities
-- **GPT-5** and **GPT-5 Mini** - Latest generation models
-- **GPT-4o** - Optimized for general use
-- **Mistral Small/Medium** - European alternatives
-- **Gemini 2.5 Flash** - Google's fast model
-- **DeepSeek V3.2** - Open-weights alternative
-- **Meta Llama 4 Scout** - Meta's latest
-- **Grok 4 Fast** (Reasoning/Non-Reasoning) - xAI models
+- **`getApiKeyFromHeaders(headers)`** — checks `x-api-key` then `authorization: Bearer ...`; returns `null` if absent
+- **`getModelFromRequest(body, fallback?)`** — resolves model from `body.model` or `body.selectedModel`, validates via `getModelById()`, falls back to `DEFAULT_API_MODEL`
 
-Utility functions:
-- `getDefaultModel()` - Returns the model marked with `isDefault: true`
-- `getModelById(id)` - Looks up a model by its ID
-- `DEFAULT_API_MODEL` - Common fallback for API routes (currently "openai/gpt-4o")
+API key is injected into `process.env.AI_GATEWAY_API_KEY` at request time — it comes from the user's browser, not a server env var.
 
-### Client-Side Storage Architecture
-All user data is stored client-side using localStorage with plans for future database sync:
+### Models (`src/lib/models.ts`)
 
-- **Storage Location**: `src/lib/storage/` - centralized storage utilities
-- **Universal Tool Pattern**: All tools (chat, regex, summarizer, etc.) follow the same storage pattern
-- **Tool Executions**: Each tool interaction is stored as a `ToolExecution` with inputs, outputs, and metadata
-- **Tool History**: Every tool has a secondary sidebar showing execution history
-- **Preferences**: User settings, default models, and tool-specific configurations
-- **Auto-Save**: Tool state is automatically saved as users interact
+14 models across OpenAI, Anthropic, Google, Meta, Mistral, DeepSeek. Default is `openai/gpt-oss-120b`. `DEFAULT_API_MODEL` is used as the fallback in all API routes.
 
-#### Storage Structure
+### Client-Side Storage (`src/lib/storage/`)
+
+All user data lives in localStorage — no backend database. Key hooks exported from `src/lib/storage/`:
+
+- **`useToolHistory(toolId)`** — `executions`, `activeExecution`, `updateCurrentExecution({inputs?, outputs?, settings?})`, `clearActiveExecution()`, `loadExecution(id)`, `deleteExecution(id)`
+- **`usePreferences()`** — `preferences` (defaultModel, theme, sidebarCollapsed, toolSettings), `updatePreferences(updates)`, `isLoaded`
+- **`usePinnedTools()`** — pinned tools state for the primary sidebar
+
 ```typescript
 interface ToolExecution {
   id: string;
-  toolId: string; 
+  toolId: string;
   timestamp: number;
-  title: string; // Auto-generated or user-set
+  title: string;
   inputs: Record<string, any>;
   outputs: Record<string, any>;
   settings: Record<string, any>;
 }
 ```
 
-#### Key Storage Hooks
-Exported from `src/lib/storage/`:
+### Layout
 
-- **`useToolHistory(toolId)`** - Returns:
-  - `executions` - Array of all executions for this tool
-  - `activeExecution` - Currently active execution object
-  - `updateCurrentExecution({ inputs?, outputs?, settings? })` - Update current execution
-  - `clearActiveExecution()` - Start fresh session
-  - `loadExecution(id)` - Switch to a previous execution
-  - `deleteExecution(id)` - Remove an execution from history
+Root layout (`src/app/layout.tsx`) wraps everything in `<Providers>` → `<SidebarProvider>` → `<AppSidebar>` + `<SidebarInset>`. The primary sidebar is collapsible; each tool page renders its own secondary history sidebar.
 
-- **`usePreferences()`** - Returns:
-  - `preferences` - User settings (defaultModel, theme, sidebarCollapsed, toolSettings)
-  - `updatePreferences(updates)` - Merge updates into preferences
-  - `isLoaded` - Loading state boolean
+## Adding a New AI Tool
 
-- **`usePinnedTools()`** - Manages pinned tool state in primary sidebar
+1. **API route** `src/app/api/[tool-name]/route.ts`:
 
-#### Key UI Components
-- Secondary sidebar component for each tool showing execution history
-- "New" button in TopBar to start fresh tool sessions via `clearActiveExecution()`
-
-### Product Vision (from docs/concept.md)
-ConstellAI is designed as a bold, fast web app offering AI tools with credit-based usage.
-
-**Current features:**
-- 80+ specialized AI tools (chat, regex, content generation, analysis, productivity, etc.)
-- Primary sidebar (left) with secondary sidebar for tool history
-- Client-side storage with localStorage
-- Multi-model support via Vercel AI Gateway
-
-**Planned features (see docs/concept.md for details):**
-- Clerk authentication with App Router
-- Credit-based billing system via Polar (prepaid/postpaid)
-- UploadThing integration for file attachments
-- Usage tracking and billing reconciliation
-- Referral system and welcome credits
-
-## Development Guidelines
-
-### Convex Development
-- Always update `convex/schema.ts` when adding new tables
-- Use proper validation with `v` validators for all function args and returns
-- Index frequently queried fields in schema definitions
-- Functions auto-generate TypeScript types - import from `convex/_generated/api`
-
-### Code Standards
-- Follow existing Biome configuration (2-space indentation, double quotes, trailing commas, semicolons)
-- Use `import type` for type-only imports
-- Prefer server components over client components when possible
-- `noExplicitAny` is disabled but avoid `any` type when possible (explicitly disabled in Biome config and enforced in project rules)
-- Use `const` over `let` (enforced by Biome)
-- Use `for of` loops over `forEach` where possible
-- Strings use double quotes consistently with ES5 trailing commas
-- Line width limit: 80 characters
-- Maintain consistent error handling in API routes with proper status codes
-- Use `// biome-ignore` comments when dependency warnings are incorrect but necessary
-- All unused variables throw errors
-- Follow React 19 patterns with proper error boundaries and suspense
-- **AI UI Components**: Always use AI Elements from `src/components/ai-elements/` for chat interfaces, messages, conversations, and AI-related UI - never build custom AI UI components
-
-### Environment Setup
-- Convex requires `NEXT_PUBLIC_CONVEX_URL` environment variable
-- Run `npx convex dev --once --configure=new` if env setup needed
-- Development requires both `pnpm dev` and `pnpm convex:dev` running concurrently (user runs these)
-- AI integration requires API keys passed via headers (`x-api-key` or `authorization` with Bearer token)
-- Never run servers - user handles all server processes
-
-### AI Configuration Utilities
-Centralized in `src/lib/ai-config.ts`:
-
-- **`getApiKeyFromHeaders(headers)`** - Extracts API key from request headers
-  - Checks `x-api-key` header first
-  - Falls back to `authorization` header (strips "Bearer " prefix)
-  - Returns `null` if no key found
-  - Always validate with this function in API routes
-
-- **`getModelFromRequest(body, toolSpecificDefault?)`** - Resolves model selection
-  - Priority: 1) User selection from request, 2) Tool-specific default, 3) Global default
-  - Checks `body.model` or `body.selectedModel`
-  - Validates model exists via `getModelById()`
-  - Returns validated model ID or fallback
-
-## File Patterns
-
-### Adding New Convex Functions
-1. Create/edit file in `convex/` directory
-2. Export functions using new Convex syntax with validation
-3. Update `convex/schema.ts` if new tables needed
-4. Import and use in React components with `useQuery`/`useMutation`
-
-### Adding New Pages
-1. Create files in `src/app/` following App Router conventions
-2. Use TypeScript and proper metadata exports
-3. Wrap client-side Convex usage in "use client" components
-4. Follow existing layout and styling patterns
-
-### Adding New AI Tools
-1. Create API route in `src/app/api/[tool-name]/route.ts`
-2. Implement POST handler with proper API key validation using `getApiKeyFromHeaders`
-3. Use Vercel AI SDK for model integration
-4. Add tool page in `src/app/tools/[tool-name]/page.tsx`
-5. Integrate `useToolHistory(toolId)` hook for execution storage and history
-6. Add tool to `src/lib/tools.ts` registry
-7. Follow existing patterns for error handling and streaming responses
-
-### Universal Tool Implementation Pattern
-Every tool should follow this consistent pattern:
-
-1. **Use storage hooks**:
-   ```typescript
-   const toolHistory = useToolHistory("tool-name");
-   const { preferences } = usePreferences();
-   ```
-
-2. **TopBar integration**:
-   - Include "New" button to start fresh (`toolHistory.clearActiveExecution()`)
-   - Support model selection with default from preferences
-   
-3. **Auto-save inputs/outputs**:
-   ```typescript
-   // Save as user types
-   toolHistory.updateCurrentExecution({ 
-     inputs: { userInput: value } 
-   });
-   
-   // Save results after API call
-   toolHistory.updateCurrentExecution({ 
-     outputs: { result: apiResponse } 
-   });
-   ```
-
-4. **Secondary sidebar**: Show tool execution history with ability to switch between executions
-
-5. **Streaming considerations**:
-   - Prevent auto-save during streaming (`status === "streaming"`) to avoid race conditions
-   - Save final conversation state after streaming completes
-   - Handle `AbortError` gracefully without showing error messages to users
-   - Use proper cleanup in `AbortController` for cancelled requests
-   - Always use try-catch around streaming operations
-   - Check for error types before displaying error UI (ignore user-initiated cancellations)
-
-### Tool Registry
-- All tools are registered in `src/lib/tools.ts` with metadata (id, name, description, icon, category, href)
-- Tools are organized by categories: General, Development, Text Processing, Communication, Marketing, etc.
-- Each tool has a consistent URL pattern: `/tools/[tool-name]/page.tsx`
-
-### API Route Pattern
 ```typescript
 import { streamText } from "ai";
 import { getApiKeyFromHeaders, getModelFromRequest } from "@/lib/ai-config";
@@ -293,18 +90,10 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json" },
       });
     }
-
     process.env.AI_GATEWAY_API_KEY = apiKey;
-
     const body = await req.json();
-    const model = getModelFromRequest(body); // Optional: pass tool-specific default
-
-    const result = streamText({
-      model,
-      messages: body.messages,
-      // Additional options...
-    });
-
+    const model = getModelFromRequest(body);
+    const result = streamText({ model, messages: body.messages });
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("API error:", error);
@@ -315,3 +104,12 @@ export async function POST(req: Request) {
   }
 }
 ```
+
+2. **Page** `src/app/tools/[tool-name]/page.tsx` — use `useToolHistory`, auto-save inputs on change and outputs after streaming, include TopBar "New" button via `clearActiveExecution()`, render `<ToolHistorySidebar>`.
+
+3. **Register** in `src/lib/tools.ts`.
+
+### Streaming Considerations
+- Prevent auto-save during streaming (`status === "streaming"`) to avoid race conditions
+- Handle `AbortError` silently — don't show error UI for user-initiated cancellations
+- Save final state after streaming completes

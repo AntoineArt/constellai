@@ -58,8 +58,7 @@ export async function POST(req: Request) {
       temperature,
     });
 
-    // Use data stream format for useChat compatibility
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error("Chat API error:", error);
     return new Response(

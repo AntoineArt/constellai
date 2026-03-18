@@ -332,7 +332,7 @@ function ChatPageContent() {
             )}
             {error && (
               <div className="p-4 text-center text-sm text-destructive">
-                Error: {error.message}
+                Error: {error.message || "An unexpected error occurred"}
               </div>
             )}
           </ConversationContent>

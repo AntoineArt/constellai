@@ -58,8 +58,8 @@ export async function POST(req: Request) {
       temperature,
     });
 
-    // Use standard Vercel AI SDK response format for useChat compatibility
-    return result.toTextStreamResponse();
+    // Use data stream format for useChat compatibility
+    return result.toDataStreamResponse();
   } catch (error) {
     console.error("Chat API error:", error);
     return new Response(

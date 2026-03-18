@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Zap, Copy, CheckCircle2, Play } from "lucide-react";
-
-import { TopBar } from "@/components/top-bar";
+import { CheckCircle2, Copy, Zap } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Response } from "@/components/ai-elements/response";
 import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
+import { TopBar } from "@/components/top-bar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -15,11 +14,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { useApiKey } from "@/hooks/use-api-key";
-import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
-import { Response } from "@/components/ai-elements/response";
+import { TOOL_IDS, usePreferences, useToolHistory } from "@/lib/storage";
 
 export default function RegexPage() {
   const { hasApiKey, apiKey } = useApiKey();
@@ -85,7 +84,18 @@ export default function RegexPage() {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [debouncedInputs.description, debouncedInputs.testText, selectedModel]);
+  }, [
+    debouncedInputs.description,
+    debouncedInputs.testText,
+    selectedModel,
+    debouncedInputs,
+    description,
+    testText,
+    toolHistory.createNewExecution,
+    toolHistory.currentExecution,
+    toolHistory.isLoaded,
+    toolHistory.updateCurrentExecution,
+  ]);
 
   const handleGenerate = async () => {
     if (!description.trim() || !hasApiKey) return;
@@ -146,7 +156,7 @@ export default function RegexPage() {
       const foundMatches = text.match(regex) || [];
       setMatches(foundMatches);
       return foundMatches;
-    } catch (error) {
+    } catch (_error) {
       setMatches([]);
       return [];
     }
@@ -158,7 +168,7 @@ export default function RegexPage() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const toolActions = (
+  const _toolActions = (
     <Button
       onClick={handleGenerate}
       disabled={!description.trim() || !hasApiKey || isGenerating}
@@ -199,9 +209,7 @@ export default function RegexPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar
-          title="Regex Generator"
-        />
+        <TopBar title="Regex Generator" />
 
         <div className="flex-1 overflow-auto">
           <div className="container mx-auto p-6">

@@ -1,20 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatStatus } from "ai";
 import {
   AlertCircle,
   Copy,
   History,
   Menu,
-  PanelLeft,
   RotateCcw,
   Trash2,
   X,
 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -42,6 +38,9 @@ import {
 import { Response } from "@/components/ai-elements/response";
 import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
 import { TopBar } from "@/components/top-bar";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useApiKey } from "@/hooks/use-api-key";
 import { AI_MODELS } from "@/lib/models";
@@ -64,7 +63,9 @@ export default function ChatPage() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [lastFailedMessages, setLastFailedMessages] = useState<ChatMessage[] | null>(null);
+  const [lastFailedMessages, setLastFailedMessages] = useState<
+    ChatMessage[] | null
+  >(null);
   const chatControllerRef = useRef<AbortController | null>(null);
 
   // Auto-collapse history on smaller screens
@@ -129,7 +130,6 @@ export default function ChatPage() {
 
     return () => clearTimeout(timeoutId);
   }, [messages, selectedModel, temperature, status, toolHistory]);
-
 
   const clearChat = useCallback(() => {
     if (status === "streaming") return;
@@ -322,7 +322,6 @@ export default function ChatPage() {
     }
   }, [messages, status, handleSubmitWithMessage]);
 
-
   // Helper functions for history sidebar
   const getMessageCount = useCallback((execution: any) => {
     return execution.inputs?.messages?.length || 0;
@@ -489,7 +488,9 @@ export default function ChatPage() {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <AlertDescription className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                      <span className="text-sm break-words min-w-0">{errorMessage}</span>
+                      <span className="text-sm break-words min-w-0">
+                        {errorMessage}
+                      </span>
                       <div className="flex gap-2 shrink-0">
                         <Button
                           size="sm"
@@ -596,7 +597,12 @@ export default function ChatPage() {
                     accept="image/*"
                     onSubmit={async (message: PromptInputMessage, event) => {
                       event.preventDefault();
-                      if (!hasApiKey || status === "submitted" || status === "streaming") return;
+                      if (
+                        !hasApiKey ||
+                        status === "submitted" ||
+                        status === "streaming"
+                      )
+                        return;
 
                       const text = message.text?.trim();
                       if (!text && !message.files?.length) return;
@@ -606,7 +612,7 @@ export default function ChatPage() {
                         {
                           role: "user",
                           content: text || "[Sent with attachments]",
-                          id: `user-${Date.now()}`
+                          id: `user-${Date.now()}`,
                         },
                       ];
                       setMessages(newMessages);
@@ -617,7 +623,9 @@ export default function ChatPage() {
                   >
                     <PromptInputHeader>
                       <PromptInputAttachments>
-                        {(attachment) => <PromptInputAttachment data={attachment} />}
+                        {(attachment) => (
+                          <PromptInputAttachment data={attachment} />
+                        )}
                       </PromptInputAttachments>
                     </PromptInputHeader>
                     <PromptInputBody>
@@ -656,7 +664,11 @@ export default function ChatPage() {
                         </PromptInputModelSelect>
                       </PromptInputTools>
                       <PromptInputSubmit
-                        disabled={!inputValue.trim() || !hasApiKey || status === "streaming"}
+                        disabled={
+                          !inputValue.trim() ||
+                          !hasApiKey ||
+                          status === "streaming"
+                        }
                         status={status}
                       />
                     </PromptInputFooter>

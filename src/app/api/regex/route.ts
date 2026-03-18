@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     try {
       const result = JSON.parse(text);
       return Response.json(result);
-    } catch (parseError) {
+    } catch (_parseError) {
       // Fallback if AI doesn't return valid JSON
       return Response.json({
         javascript: "/pattern/g",

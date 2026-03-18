@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, useId } from "react";
+import { Check, Copy, Loader2, Send, Table } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Response } from "@/components/ai-elements/response";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,9 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -19,11 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Table, Loader2, Send, Copy, Check } from "lucide-react";
-import { Response } from "@/components/ai-elements/response";
-import { useToolHistory } from "@/lib/hooks/use-tool-history";
+import { Textarea } from "@/components/ui/textarea";
 import { usePreferences } from "@/lib/hooks/use-preferences";
+import { useToolHistory } from "@/lib/hooks/use-tool-history";
 import { TOOL_IDS } from "@/lib/storage/storage-keys";
 import { cn } from "@/lib/utils";
 

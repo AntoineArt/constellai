@@ -1,27 +1,19 @@
 "use client";
 
-import { useCallback, useRef, useState, useEffect, useId } from "react";
 import type { ChatStatus } from "ai";
-
-import { TopBar } from "@/components/top-bar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
-import { useApiKey } from "@/hooks/use-api-key";
-import { useToolHistory, usePreferences, TOOL_IDS } from "@/lib/storage";
 import { Copy, RotateCcw, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Response } from "@/components/ai-elements/response";
+import { ToolHistorySidebar } from "@/components/tool-history-sidebar";
+import { TopBar } from "@/components/top-bar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useApiKey } from "@/hooks/use-api-key";
+import { TOOL_IDS, usePreferences, useToolHistory } from "@/lib/storage";
 
 export default function CompetitorAnalysisToolPage() {
   const { hasApiKey, apiKey } = useApiKey();
@@ -258,9 +250,7 @@ export default function CompetitorAnalysisToolPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <TopBar
-          title="Competitor Analysis Tool"
-        />
+        <TopBar title="Competitor Analysis Tool" />
 
         {/* Main content area */}
         <div className="flex-1 overflow-hidden p-6">

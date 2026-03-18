@@ -1,12 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import {
   CheckCircleIcon,
@@ -17,6 +10,13 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 import { CodeBlock } from "./code-block";
 
 export type ToolProps = ComponentProps<typeof Collapsible>;
@@ -35,24 +35,30 @@ export type ToolHeaderProps = {
 };
 
 const getStatusBadge = (status: ToolUIPart["state"]) => {
-  const labels = {
+  const labels: Record<string, string> = {
     "input-streaming": "Pending",
     "input-available": "Running",
     "output-available": "Completed",
     "output-error": "Error",
-  } as const;
+    "approval-requested": "Approval",
+    "approval-responded": "Approved",
+    "output-denied": "Denied",
+  };
 
-  const icons = {
+  const icons: Record<string, ReactNode> = {
     "input-streaming": <CircleIcon className="size-4" />,
     "input-available": <ClockIcon className="size-4 animate-pulse" />,
     "output-available": <CheckCircleIcon className="size-4 text-green-600" />,
     "output-error": <XCircleIcon className="size-4 text-red-600" />,
-  } as const;
+    "approval-requested": <ClockIcon className="size-4 animate-pulse" />,
+    "approval-responded": <CheckCircleIcon className="size-4 text-blue-600" />,
+    "output-denied": <XCircleIcon className="size-4 text-orange-600" />,
+  };
 
   return (
     <Badge className="rounded-full text-xs" variant="secondary">
-      {icons[status]}
-      {labels[status]}
+      {icons[status] ?? <CircleIcon className="size-4" />}
+      {labels[status] ?? status}
     </Badge>
   );
 };

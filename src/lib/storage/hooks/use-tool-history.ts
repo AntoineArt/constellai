@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { ToolExecution } from "../types";
+import { useCallback, useEffect, useState } from "react";
 import {
-  getToolExecutions,
-  saveToolExecution,
   deleteToolExecution,
-  getActiveExecutionId,
-  setActiveExecutionId,
-  generateId,
   generateExecutionTitle,
+  generateId,
   generateTempTitle,
+  getActiveExecutionId,
+  getToolExecutions,
   hasContentForAITitle,
+  saveToolExecution,
+  setActiveExecutionId,
 } from "../storage-utils";
+import type { ToolExecution } from "../types";
 
 interface UseToolHistoryOptions {
   apiKey?: string;
@@ -116,7 +116,10 @@ export default function useToolHistory(
   const updateCurrentExecution = useCallback(
     (
       updates: Partial<
-        Pick<ToolExecution, "inputs" | "outputs" | "settings" | "title" | "model">
+        Pick<
+          ToolExecution,
+          "inputs" | "outputs" | "settings" | "title" | "model"
+        >
       >
     ) => {
       if (!activeExecutionId) return;

@@ -110,19 +110,20 @@ function ChatPageContent() {
   const isLoading = status === "submitted" || status === "streaming";
 
   // Auto-save messages when they change (but not while loading a conversation)
+  const activeConversationId = activeConversation?.id;
   useEffect(() => {
     if (
-      activeConversation &&
+      activeConversationId &&
       messages.length > 0 &&
       !isLoadingConversation.current
     ) {
       const storageMessages = messages.map(toStorageMessage);
-      updateConversation(activeConversation.id, {
+      updateConversation(activeConversationId, {
         messages: storageMessages,
         updatedAt: Date.now(),
       });
     }
-  }, [messages, activeConversation, updateConversation]);
+  }, [messages, activeConversationId, updateConversation]);
 
   // Update selected model when preferences change
   useEffect(() => {

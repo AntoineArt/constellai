@@ -65,20 +65,6 @@ export default function ChatPage() {
   >(null);
   const chatControllerRef = useRef<AbortController | null>(null);
 
-  // Auto-collapse history on smaller screens
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1280) {
-        // lg breakpoint
-        setIsHistoryCollapsed(true);
-      }
-    };
-
-    handleResize(); // Check on mount
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   // Load current execution data
   useEffect(() => {
     if (toolHistory.isLoaded && toolHistory.currentExecution) {

@@ -5,50 +5,68 @@ export interface AIModel {
 }
 
 export const AI_MODELS: AIModel[] = [
-  {
-    id: "openai/gpt-oss-20b",
-    name: "GPT-OSS-20B",
-    isDefault: true,
-  },
+  // OpenAI
   {
     id: "openai/gpt-oss-120b",
     name: "GPT-OSS-120B",
+    isDefault: true,
   },
   {
     id: "openai/gpt-5-mini",
     name: "GPT-5 Mini",
   },
   {
-    id: "openai/gpt-4o",
-    name: "GPT-4o",
+    id: "openai/gpt-5",
+    name: "GPT-5",
+  },
+  // Anthropic
+  {
+    id: "anthropic/claude-haiku-4.5",
+    name: "Claude Haiku 4.5",
   },
   {
-    id: "mistral/mistral-small",
-    name: "Mistral small",
+    id: "anthropic/claude-sonnet-4.6",
+    name: "Claude Sonnet 4.6",
   },
   {
-    id: "mistral/mistral-medium",
-    name: "Mistral medium",
+    id: "anthropic/claude-opus-4.6",
+    name: "Claude Opus 4.6",
   },
+  // Google
   {
     id: "google/gemini-2.5-flash",
     name: "Gemini 2.5 Flash",
   },
   {
-    id: "deepseek/deepseek-v3.2-exp",
+    id: "google/gemini-2.5-pro",
+    name: "Gemini 2.5 Pro",
+  },
+  // Meta
+  {
+    id: "meta/llama-4-scout",
+    name: "Llama 4 Scout",
+  },
+  {
+    id: "meta/llama-4-maverick",
+    name: "Llama 4 Maverick",
+  },
+  // Mistral
+  {
+    id: "mistral/mistral-small",
+    name: "Mistral Small",
+  },
+  {
+    id: "mistral/mistral-large-3",
+    name: "Mistral Large 3",
+  },
+  // DeepSeek
+  {
+    id: "deepseek/deepseek-v3.2",
     name: "DeepSeek V3.2",
   },
   {
-    id: "meta/llama-4-scout",
-    name: "Meta Llama 4 Scout",
-  },
-  {
-    id: "xai/grok-4-fast-reasoning",
-    name: "Grok 4 Fast Reasoning",
-  },
-  {
-    id: "xai/grok-4-fast-non-reasoning",
-    name: "Grok 4 Fast Non-Reasoning",
+    id: "deepseek/deepseek-r1",
+    name: "DeepSeek R1",
   },
 ];
 
